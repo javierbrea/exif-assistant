@@ -16,6 +16,9 @@
   "license": "MIT",
   "repository": "https://github.com/javierbrea/exif-assistant",
   "main": "src/index.js",
+  "bin": {
+    "exif-assistant": "./bin/exif-assistant"
+  },
   "scripts": {
     "lint": "eslint src *.js test",
     "lint-staged": "lint-staged",
@@ -23,7 +26,9 @@
     "test:unit": "npm run test",
     "prepare": "is-ci || husky install"
   },
-  "dependencies": {},
+  "dependencies": {
+    "winston": "^3.3.3"
+  },
   "devDependencies": {
     "eslint": "8.3.0",
     "eslint-config-prettier": "8.3.0",
