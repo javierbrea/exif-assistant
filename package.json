@@ -1,0 +1,46 @@
+{
+  "name": "exif-assistant",
+  "version": "0.0.1-beta.1",
+  "description": "CLI tool for adding missing EXIF metadata",
+  "keywords": [
+    "exif",
+    "wizard",
+    "cli",
+    "tool",
+    "photo",
+    "images",
+    "organizer",
+    "assistant"
+  ],
+  "author": "Javier Brea",
+  "license": "MIT",
+  "repository": "https://github.com/javierbrea/exif-assistant",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint src *.js test",
+    "lint-staged": "lint-staged",
+    "test": "jest",
+    "test:unit": "npm run test",
+    "prepare": "is-ci || husky install"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "8.3.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-jest": "25.3.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "husky": "7.0.4",
+    "is-ci": "3.0.1",
+    "jest": "27.3.1",
+    "lint-staged": "12.1.2",
+    "prettier": "2.4.1"
+  },
+  "lint-staged": {
+    "test/**/*.js": "eslint",
+    "src/**/*.js": "eslint",
+    "*.js": "eslint"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
