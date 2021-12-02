@@ -27,13 +27,16 @@
     "prepare": "is-ci || husky install"
   },
   "dependencies": {
-    "winston": "^3.3.3"
+    "exif-reader": "1.0.3",
+    "sharp": "0.29.3",
+    "winston": "3.3.3"
   },
   "devDependencies": {
     "eslint": "8.3.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-jest": "25.3.0",
     "eslint-plugin-prettier": "4.0.0",
+    "fs-extra": "^10.0.0",
     "husky": "7.0.4",
     "is-ci": "3.0.1",
     "jest": "27.3.1",
