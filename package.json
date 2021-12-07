@@ -27,8 +27,8 @@
     "prepare": "is-ci || husky install"
   },
   "dependencies": {
-    "exif-reader": "1.0.3",
-    "sharp": "0.29.3",
+    "deepmerge": "4.2.2",
+    "piexifjs": "1.0.6",
     "winston": "3.3.3"
   },
   "devDependencies": {
