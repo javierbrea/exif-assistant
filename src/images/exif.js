@@ -17,7 +17,7 @@ function transformExif(exif) {
   const newExif = {};
   for (const ifd in exif) {
     if (ifd == "thumbnail") {
-      newExif[ifd] = exif[ifd] === null ? "null" : exif[ifd];
+      newExif[ifd] = exif[ifd];
     } else {
       for (const tag in exif[ifd]) {
         newExif[ifd] = newExif[ifd] || {};

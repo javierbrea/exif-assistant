@@ -1,4 +1,7 @@
+var fs = require("fs");
 const path = require("path");
+
+const sharp = require("sharp");
 
 const fsExtra = require("fs-extra");
 
@@ -31,8 +34,19 @@ function tempPath(fileName) {
   return path.resolve(TEMP_PATH, fileName);
 }
 
+function fileSize(filePath) {
+  const stats = fs.statSync(filePath);
+  return stats.size;
+}
+
+function getImageDataAndInfo(filePath) {
+  return sharp(filePath).toBuffer({ resolveWithObject: true });
+}
+
 module.exports = {
   assetData,
   tempPath,
   resetTempPath,
+  fileSize,
+  getImageDataAndInfo,
 };
