@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "deepmerge": "4.2.2",
+    "fs-extra": "10.0.0",
     "piexifjs": "1.0.6",
     "winston": "3.3.3"
   },
@@ -37,7 +38,6 @@
     "eslint-plugin-jest": "25.3.0",
     "eslint-plugin-prettier": "4.0.0",
     "exif-reader": "1.0.3",
-    "fs-extra": "^10.0.0",
     "husky": "7.0.4",
     "is-ci": "3.0.1",
     "jest": "27.3.1",

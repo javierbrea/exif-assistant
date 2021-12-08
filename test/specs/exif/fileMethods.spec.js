@@ -1,6 +1,6 @@
 const deepMerge = require("deepmerge");
 
-const { readExifData, updateExifData } = require("../../../src/images/exif");
+const { readExifDates, moveAndUpdateExifDates } = require("../../../src/exif/fileMethods");
 const { setLevel } = require("../../../src/support/tracer");
 
 const {
@@ -20,28 +20,28 @@ describe("Exif", () => {
     await resetTempPath();
   });
 
-  describe("readExifData method", () => {
+  describe("readExifDates method", () => {
     function testAsset(asset) {
-      it(`should return date of asset "${asset}"`, async () => {
+      it(`should return dates of asset "${asset}"`, async () => {
         const { metadata, path } = assetData(asset);
-        const { date } = await readExifData(path);
-        expect(date).toEqual(metadata.date);
+        const { DateTimeOriginal } = await readExifDates(path);
+        expect(DateTimeOriginal).toEqual(metadata.date);
       });
     }
 
     testAsset("sphinx.jpg");
   });
 
-  describe("updateExifData method", () => {
+  describe("moveAndUpdateExifExifProperties method", () => {
     function testAsset(asset) {
       const newPath = tempPath(asset);
       const { path: oldPath } = assetData(asset);
-      const date = "2022:05:15 01:02:34";
+      const newDateTimeOriginal = "2022:05:15 01:02:34";
 
       it(`should update date of asset "${asset}"`, async () => {
-        await updateExifData(oldPath, newPath, { date });
-        const { date: dateFromImage } = await readExifData(newPath);
-        expect(dateFromImage).toEqual(date);
+        await moveAndUpdateExifDates(oldPath, newPath, { DateTimeOriginal: newDateTimeOriginal });
+        const { DateTimeOriginal } = await readExifDates(newPath);
+        expect(DateTimeOriginal).toEqual(newDateTimeOriginal);
       });
 
       it("should keep all other exif properties", async () => {
