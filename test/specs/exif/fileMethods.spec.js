@@ -24,8 +24,9 @@ describe("Exif", () => {
     function testAsset(asset) {
       it(`should return dates of asset "${asset}"`, async () => {
         const { metadata, path } = assetData(asset);
-        const { DateTimeOriginal } = await readExifDates(path);
+        const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(path);
         expect(DateTimeOriginal).toEqual(metadata.DateTimeOriginal);
+        expect(DateTimeDigitized).toEqual(metadata.DateTimeDigitized);
       });
     }
 
@@ -65,8 +66,8 @@ describe("Exif", () => {
         expect(isApproximatelyEqual(fileSize(oldPath), fileSize(newPath))).toBe(true);
       });
 
-      it("should keep image data equal", () => {
-        expect(getImageDataAndInfo(oldPath)).toEqual(getImageDataAndInfo(newPath));
+      it("should keep image data equal", async () => {
+        expect(await getImageDataAndInfo(oldPath)).toEqual(await getImageDataAndInfo(newPath));
       });
     }
 

@@ -6,7 +6,7 @@ const {
   formatHumanToExif,
   updateExif,
   getDates,
-  toExifPropertyChildren,
+  toExifChildrenProperty,
 } = require("./data");
 const { Tracer } = require("../support/tracer");
 
@@ -50,15 +50,25 @@ async function moveAndUpdateExifData(filePath, newFilePath, humanPropertiesToMod
 }
 
 async function moveAndUpdateExifExifProperties(filePath, newFilePath, propertiesToModify) {
-  return moveAndUpdateExifData(filePath, newFilePath, toExifPropertyChildren(propertiesToModify));
+  return moveAndUpdateExifData(filePath, newFilePath, toExifChildrenProperty(propertiesToModify));
 }
 
 async function moveAndUpdateExifDates(filePath, newFilePath, datesToModify) {
   return moveAndUpdateExifExifProperties(filePath, newFilePath, datesToModify);
 }
 
+async function isSupportedFile(filePath) {
+  try {
+    await readExifFromFile(filePath);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 module.exports = {
   readExifDates,
   moveAndUpdateExifData,
   moveAndUpdateExifDates,
+  isSupportedFile,
 };

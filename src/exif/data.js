@@ -2,9 +2,11 @@ const deepMerge = require("deepmerge");
 const piexif = require("piexifjs");
 
 const HUMAN_DATE_TIME_ORIGINAL_PROPERTY = "DateTimeOriginal";
+const HUMAN_DATE_TIME_DIGITIZED_PROPERTY = "DateTimeDigitized";
 const THUMBNAIL_PROPERTY = "thumbnail";
 const EXIF_PROPERTY = "Exif";
-const DATE_PROPERTY = piexif.ExifIFD[HUMAN_DATE_TIME_ORIGINAL_PROPERTY];
+const DATE_TIME_ORIGINAL_PROPERTY = piexif.ExifIFD[HUMAN_DATE_TIME_ORIGINAL_PROPERTY];
+const DATE_TIME_DIGITIZED_PROPERTY = piexif.ExifIFD[HUMAN_DATE_TIME_DIGITIZED_PROPERTY];
 
 function isThumbnailProperty(property) {
   return property === THUMBNAIL_PROPERTY;
@@ -43,23 +45,32 @@ function formatHumanToExif(exif) {
   return changeFormat(exif, exifTagFromHumanTag);
 }
 
+function getExifChildrenProperty(exif, property) {
+  return exif[EXIF_PROPERTY][property];
+}
+
+function toExifChildrenProperty(properties) {
+  return {
+    [EXIF_PROPERTY]: properties,
+  };
+}
+
 function getDateTimeOriginal(exif) {
-  return exif[EXIF_PROPERTY][DATE_PROPERTY];
+  return getExifChildrenProperty(exif, DATE_TIME_ORIGINAL_PROPERTY);
+}
+
+function getDateTimeDigited(exif) {
+  return getExifChildrenProperty(exif, DATE_TIME_DIGITIZED_PROPERTY);
 }
 
 function updateExif(exif, modifiedProperties) {
   return deepMerge(exif, modifiedProperties);
 }
 
-function toExifPropertyChildren(properties) {
-  return {
-    [EXIF_PROPERTY]: properties,
-  };
-}
-
 function getDates(exif) {
   return {
     [HUMAN_DATE_TIME_ORIGINAL_PROPERTY]: getDateTimeOriginal(exif),
+    [HUMAN_DATE_TIME_DIGITIZED_PROPERTY]: getDateTimeDigited(exif),
   };
 }
 
@@ -69,5 +80,7 @@ module.exports = {
   formatExifToHuman,
   formatHumanToExif,
   getDates,
-  toExifPropertyChildren,
+  toExifChildrenProperty,
+  HUMAN_DATE_TIME_ORIGINAL_PROPERTY,
+  HUMAN_DATE_TIME_DIGITIZED_PROPERTY,
 };

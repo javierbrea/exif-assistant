@@ -22,7 +22,7 @@
   "scripts": {
     "lint": "eslint src *.js test",
     "lint-staged": "lint-staged",
-    "test": "jest",
+    "test": "jest --runInBand --detectOpenHandles",
     "test:unit": "npm run test",
     "prepare": "is-ci || husky install"
   },
@@ -43,7 +43,8 @@
     "jest": "27.3.1",
     "lint-staged": "12.1.2",
     "prettier": "2.4.1",
-    "sharp": "0.29.3"
+    "sharp": "0.29.3",
+    "sinon": "11.1.2"
   },
   "lint-staged": {
     "test/**/*.js": "eslint",
