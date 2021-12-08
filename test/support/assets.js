@@ -44,6 +44,7 @@ function getImageDataAndInfo(filePath) {
 }
 
 module.exports = {
+  TEMP_PATH,
   assetPath,
   assetData,
   tempPath,
