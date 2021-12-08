@@ -25,7 +25,7 @@ describe("Exif", () => {
       it(`should return dates of asset "${asset}"`, async () => {
         const { metadata, path } = assetData(asset);
         const { DateTimeOriginal } = await readExifDates(path);
-        expect(DateTimeOriginal).toEqual(metadata.date);
+        expect(DateTimeOriginal).toEqual(metadata.DateTimeOriginal);
       });
     }
 
