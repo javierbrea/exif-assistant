@@ -25,6 +25,7 @@ module.exports = {
     "no-shadow": "error",
     "no-undef": "error",
     "no-unused-vars": ["error", { vars: "all", args: "after-used", ignoreRestSiblings: false }],
+    "jest/expect-expect": [0], // Some expects are in functions
   },
   overrides: [
     {

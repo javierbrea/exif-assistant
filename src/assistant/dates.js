@@ -10,38 +10,34 @@ const { formatForExif } = require("../dates/format");
 const { moveFileToSubfolder } = require("../files/move");
 const { Tracer } = require("../support/tracer");
 
-async function addOriginalDate(
+async function setDate(
   filePath,
   {
     folderName,
     outputFolder,
     date,
-    fromDigitized = true,
-    fromFile,
-    fromFolder,
     fallbackDate,
+    modify = false,
+    fromDigitized = true,
+    fromFile = true,
+    fromFolder = true,
     setDigitized = true,
     moveUnknown = true,
     unknownSubfolder,
   } = {}
 ) {
   const fileName = path.basename(filePath);
-  const tracer = new Tracer("Add OriginalDate");
+  const tracer = new Tracer("Set Date");
 
   const traceSet = (newValue, valueFrom) => {
+    const setDigitedMessage = setDigitized ? ` and ${HUMAN_DATE_TIME_DIGITIZED_PROPERTY}` : "";
     tracer.info(
-      `Setting ${fileName} ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY} to ${newValue}, from ${valueFrom}`
+      `${fileName}: Setting ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}${setDigitedMessage} to ${newValue}, from ${valueFrom}`
     );
   };
 
   if (!(await isSupportedFile(filePath))) {
-    tracer.warn(`File type of ${fileName} is not supported`);
-    return false;
-  }
-
-  const dates = await readExifDates(filePath);
-  if (dates[HUMAN_DATE_TIME_ORIGINAL_PROPERTY]) {
-    tracer.verbose(`File ${fileName} already has ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}. Skipping`);
+    tracer.warn(`${fileName}: File type is not supported`);
     return false;
   }
 
@@ -56,6 +52,13 @@ async function addOriginalDate(
     await moveAndUpdateExifDates(filePath, path.resolve(outputFolder, fileName), datesToSet);
     return true;
   };
+
+  // Skip if date already exists in file
+  const dates = await readExifDates(filePath);
+  if (!modify && dates[HUMAN_DATE_TIME_ORIGINAL_PROPERTY]) {
+    tracer.verbose(`${fileName}: Already has ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}. Skipping`);
+    return false;
+  }
 
   // Set date if present
   if (!!date) {
@@ -97,9 +100,11 @@ async function addOriginalDate(
     return false;
   }
 
+  tracer.verbose(`${fileName}: No date was found to set. Skipping`);
+
   return false;
 }
 
 module.exports = {
-  addOriginalDate,
+  setDate,
 };

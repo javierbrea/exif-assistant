@@ -1,12 +1,18 @@
 const sinon = require("sinon");
 
-const { addOriginalDate } = require("../../../src/assistant/dates");
+const { setDate } = require("../../../src/assistant/dates");
 const { readExifDates } = require("../../../src/exif/fileMethods");
 const { setLevel, _logger } = require("../../../src/support/tracer");
 
-const { assetPath, tempPath, resetTempPath, TEMP_PATH } = require("../../support/assets");
+const {
+  assetPath,
+  assetData,
+  tempPath,
+  resetTempPath,
+  TEMP_PATH,
+} = require("../../support/assets");
 
-setLevel("info");
+setLevel("verbose");
 
 describe("Exif", () => {
   let sandbox;
@@ -29,45 +35,221 @@ describe("Exif", () => {
   });
 
   describe("addOriginalDate method", () => {
+    async function expectModifiedDate({
+      fileName,
+      setDateOptions,
+      newDateExpected,
+      dateTimeDigitedExpected,
+      expectedLog,
+    }) {
+      const spy = spyTracer("info");
+      const filePath = assetPath(fileName);
+      const options = {
+        outputFolder: TEMP_PATH,
+        ...setDateOptions,
+      };
+      const result = await setDate(filePath, options);
+      const digitedHasToChange = options.setDigitized !== false;
+      const dateTimeDigitizedMessage = digitedHasToChange ? ` and DateTimeDigitized` : "";
+      expectLog(
+        `${fileName}: Setting DateTimeOriginal${dateTimeDigitizedMessage} to ${newDateExpected},`,
+        spy
+      );
+      if (expectedLog) {
+        expectLog(expectedLog, spy);
+      }
+      const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(tempPath(fileName));
+      expect(DateTimeOriginal).toEqual(newDateExpected);
+      if (digitedHasToChange) {
+        expect(DateTimeDigitized).toEqual(newDateExpected);
+      } else {
+        expect(DateTimeDigitized).toEqual(dateTimeDigitedExpected);
+      }
+      expect(result).toBe(true);
+    }
+
     describe("when file is not supported", () => {
       it("should trace warning and return false", async () => {
-        // TODO, add an unsupported image
-        const notSupportedFileName = "metadata.json";
+        const fileName = "wadi-rum.png";
         const spy = spyTracer("warn");
-        const filePath = assetPath(notSupportedFileName);
-        const result = await addOriginalDate(filePath);
-        expectLog(`${notSupportedFileName} is not supported`, spy);
+        const filePath = assetPath(fileName);
+        const result = await setDate(filePath);
+        expectLog(`${fileName}: File type is not supported`, spy);
         expect(result).toBe(false);
       });
     });
 
     describe("when file has already date", () => {
-      it("should trace verbose and return false", async () => {
-        const fileName = "sphinx.jpg";
-        const spy = spyTracer("verbose");
-        const filePath = assetPath(fileName);
-        const result = await addOriginalDate(filePath);
-        expectLog(`File ${fileName} already has DateTimeOriginal`, spy);
-        expect(result).toBe(false);
+      describe("when no modify option is provided", () => {
+        it("should trace verbose and return false", async () => {
+          const fileName = "sphinx.jpg";
+          const spy = spyTracer("verbose");
+          const filePath = assetPath(fileName);
+          const result = await setDate(filePath);
+          expectLog(`${fileName}: Already has DateTimeOriginal`, spy);
+          expect(result).toBe(false);
+        });
+      });
+
+      describe("when modify option is true", () => {
+        describe("when date is provided", () => {
+          it("should set DateTimeOriginal, DateTimeDigitized and return true", async () => {
+            const date = "2022:07:12 13:00:00";
+            await expectModifiedDate({
+              fileName: "sphinx.jpg",
+              setDateOptions: {
+                date,
+                modify: true,
+              },
+              newDateExpected: date,
+              expectedLog: "from date option",
+            });
+          });
+        });
+
+        describe("when date is provided and setDigitized option is false", () => {
+          it("should set DateTimeOriginal, but not DateTimeDigitized", async () => {
+            const fileName = "sphinx.jpg";
+            const { metadata } = assetData(fileName);
+            const date = "2009:09:09 09:00:00";
+            await expectModifiedDate({
+              fileName,
+              setDateOptions: {
+                date,
+                setDigitized: false,
+                modify: true,
+              },
+              newDateExpected: date,
+              dateTimeDigitedExpected: metadata.DateTimeDigitized,
+              expectedLog: "from date option",
+            });
+          });
+        });
+
+        describe("when fallbackDate is provided and fromDigitized is false", () => {
+          it("should add DateTimeOriginal and modify DateTimeDigitized", async () => {
+            const fileName = "sphinx.jpg";
+            const date = "2009:09:09 09:30:00";
+            await expectModifiedDate({
+              fileName,
+              setDateOptions: {
+                fallbackDate: date,
+                fromDigitized: false,
+                modify: true,
+              },
+              newDateExpected: date,
+              expectedLog: "from fallbackDate option",
+            });
+          });
+
+          it("should add DateTimeOriginal and not modify DateTimeDigitized if setDigitized is false", async () => {
+            const fileName = "sphinx.jpg";
+            const { metadata } = assetData(fileName);
+            const date = "2009:09:09 09:30:00";
+            await expectModifiedDate({
+              fileName,
+              setDateOptions: {
+                fallbackDate: date,
+                fromDigitized: false,
+                setDigitized: false,
+                modify: true,
+              },
+              newDateExpected: date,
+              dateTimeDigitedExpected: metadata.DateTimeDigitized,
+              expectedLog: "from fallbackDate option",
+            });
+          });
+        });
       });
     });
 
     describe("when file has not date", () => {
       describe("when date is provided", () => {
         it("should add DateTimeOriginal, DateTimeDigitized and return true", async () => {
-          const fileName = "gorilla.JPG";
           const date = "2022:06:16 12:00:00";
-          const spy = spyTracer("info");
-          const filePath = assetPath(fileName);
-          const result = await addOriginalDate(filePath, {
-            date,
-            outputFolder: TEMP_PATH,
+          await expectModifiedDate({
+            fileName: "gorilla.JPG",
+            setDateOptions: {
+              date,
+            },
+            newDateExpected: date,
+            expectedLog: "from date option",
           });
-          expectLog(`Setting ${fileName} DateTimeOriginal to ${date}, from date option`, spy);
-          const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(tempPath(fileName));
-          expect(DateTimeOriginal).toEqual(date);
-          expect(DateTimeDigitized).toEqual(date);
-          expect(result).toBe(true);
+        });
+      });
+
+      describe("when date id provided and setDigitized option is false", () => {
+        it("should add DateTimeOriginal, but not DateTimeDigitized", async () => {
+          const date = "2022:06:16 12:00:00";
+          await expectModifiedDate({
+            fileName: "gorilla.JPG",
+            setDateOptions: {
+              date,
+              setDigitized: false,
+            },
+            newDateExpected: date,
+            dateTimeDigitedExpected: undefined,
+            expectedLog: "from date option",
+          });
+        });
+      });
+    });
+
+    describe("when file has only DateTimeDigitized", () => {
+      describe("when no fromDigitized option is provided", () => {
+        it("should add DateTimeOriginal from DateTimeDigitized and return true", async () => {
+          const fileName = "sphinx-no-date-original.jpg";
+          const { metadata } = assetData(fileName);
+          await expectModifiedDate({
+            fileName,
+            setDateOptions: {},
+            newDateExpected: metadata.DateTimeDigitized,
+            expectedLog: "from DateTimeDigitized",
+          });
+        });
+      });
+
+      describe("when fromDigitized option is false", () => {
+        it("should not add DateTimeOriginal, trace and return false", async () => {
+          const fileName = "sphinx-no-date-original.jpg";
+          const spy = spyTracer("verbose");
+          const filePath = assetPath(fileName);
+          const result = await setDate(filePath, {
+            fromDigitized: false,
+          });
+          expectLog(`${fileName}: No date was found to set. Skipping`, spy);
+          expect(result).toBe(false);
+        });
+
+        it("should add DateTimeOriginal and modify DateTimeDigitized if fallbackDate is provided", async () => {
+          const fileName = "sphinx-no-date-original.jpg";
+          const date = "2009:09:09 09:30:00";
+          await expectModifiedDate({
+            fileName,
+            setDateOptions: {
+              fallbackDate: date,
+              fromDigitized: false,
+            },
+            newDateExpected: date,
+            expectedLog: "from fallbackDate option",
+          });
+        });
+
+        it("should add DateTimeOriginal and not modify DateTimeDigitized if fallbackDate is provided but setDigitized is false", async () => {
+          const fileName = "sphinx-no-date-original.jpg";
+          const { metadata } = assetData(fileName);
+          const date = "2009:09:09 09:30:00";
+          await expectModifiedDate({
+            fileName,
+            setDateOptions: {
+              fallbackDate: date,
+              fromDigitized: false,
+              setDigitized: false,
+            },
+            newDateExpected: date,
+            dateTimeDigitedExpected: metadata.DateTimeDigitized,
+            expectedLog: "from fallbackDate option",
+          });
         });
       });
     });
