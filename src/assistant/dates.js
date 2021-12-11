@@ -7,7 +7,7 @@ const {
 } = require("../exif/data");
 const { isDate } = require("../dates/check");
 const { formatForExif } = require("../dates/format");
-const { moveFileToSubfolder } = require("../files/move");
+const { moveOrCopyFileToSubfolder } = require("../files/utils");
 const { Tracer } = require("../support/tracer");
 
 async function setDate(
@@ -92,12 +92,12 @@ async function setDate(
     return setDates(dateToSet);
   }
 
-  // Move to unkown folder
+  // Move to unkown subfolder
   if (!!moveUnknownToSubfolder) {
     tracer.info(
-      `Moving ${fileName} to ${moveUnknownToSubfolder} subfolder because no date was found`
+      `${fileName}: Moving to ${moveUnknownToSubfolder} subfolder because no date was found`
     );
-    await moveFileToSubfolder(filePath, moveUnknownToSubfolder);
+    await moveOrCopyFileToSubfolder(filePath, outputFolder, moveUnknownToSubfolder);
     return false;
   }
 

@@ -1,9 +1,8 @@
 var fs = require("fs");
 const path = require("path");
+const fsExtra = require("fs-extra");
 
 const sharp = require("sharp");
-
-const fsExtra = require("fs-extra");
 
 const data = require("../assets/metadata.json");
 
@@ -43,6 +42,14 @@ function getImageDataAndInfo(filePath) {
   return sharp(filePath).toBuffer({ resolveWithObject: true });
 }
 
+function copyAssetToTempPath(fileName) {
+  return fsExtra.copy(assetPath(fileName), tempPath(fileName));
+}
+
+function copyAssetsToTempPath(fileNames) {
+  return Promise.all(fileNames.map(copyAssetToTempPath));
+}
+
 module.exports = {
   TEMP_PATH,
   assetPath,
@@ -51,4 +58,6 @@ module.exports = {
   resetTempPath,
   fileSize,
   getImageDataAndInfo,
+  copyAssetToTempPath,
+  copyAssetsToTempPath,
 };

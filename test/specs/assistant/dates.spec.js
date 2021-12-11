@@ -1,3 +1,5 @@
+const path = require("path");
+const fsExtra = require("fs-extra");
 const sinon = require("sinon");
 
 const { setDate } = require("../../../src/assistant/dates");
@@ -9,6 +11,7 @@ const {
   assetData,
   tempPath,
   resetTempPath,
+  copyAssetToTempPath,
   TEMP_PATH,
 } = require("../../support/assets");
 
@@ -250,6 +253,48 @@ describe("Exif", () => {
             dateTimeDigitedExpected: metadata.DateTimeDigitized,
             expectedLog: "from fallbackDate option",
           });
+        });
+      });
+    });
+
+    describe("when date is not found", () => {
+      describe("when moveUnknownToSubfolder option is provided", () => {
+        it("should copy the file to a subfolder if outputFolder is not the same in which the file is", async () => {
+          const spy = spyTracer("info");
+          const fileName = "gorilla.JPG";
+          const fileOrigin = tempPath(fileName);
+          const outputFolder = path.resolve(TEMP_PATH, "new-dates");
+          const unknownDatesSubDir = "unknown";
+
+          await copyAssetToTempPath(fileName);
+          await setDate(fileOrigin, {
+            outputFolder,
+            moveUnknownToSubfolder: unknownDatesSubDir,
+          });
+          expectLog(`${fileName}: Moving to unknown subfolder`, spy);
+          expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+          expect(
+            fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))
+          ).toBe(true);
+        });
+
+        it("should move the file to a subfolder if outputFolder is the same in which the file is", async () => {
+          const spy = spyTracer("info");
+          const fileName = "gorilla.JPG";
+          const fileOrigin = tempPath(fileName);
+          const outputFolder = TEMP_PATH;
+          const unknownDatesSubDir = "unknown";
+
+          await copyAssetToTempPath(fileName);
+          await setDate(fileOrigin, {
+            outputFolder,
+            moveUnknownToSubfolder: unknownDatesSubDir,
+          });
+          expectLog(`${fileName}: Moving to unknown subfolder`, spy);
+          expect(fsExtra.existsSync(fileOrigin)).toBe(false);
+          expect(
+            fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))
+          ).toBe(true);
         });
       });
     });
