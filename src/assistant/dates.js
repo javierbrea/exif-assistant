@@ -22,8 +22,7 @@ async function setDate(
     fromFile = true,
     fromFolder = true,
     setDigitized = true,
-    moveUnknown = true,
-    unknownSubfolder,
+    moveUnknownToSubfolder,
   } = {}
 ) {
   const fileName = path.basename(filePath);
@@ -94,9 +93,11 @@ async function setDate(
   }
 
   // Move to unkown folder
-  if (moveUnknown && !!unknownSubfolder) {
-    tracer.info(`Moving ${fileName} to ${unknownSubfolder} subfolder because no date was found`);
-    await moveFileToSubfolder(filePath, unknownSubfolder);
+  if (!!moveUnknownToSubfolder) {
+    tracer.info(
+      `Moving ${fileName} to ${moveUnknownToSubfolder} subfolder because no date was found`
+    );
+    await moveFileToSubfolder(filePath, moveUnknownToSubfolder);
     return false;
   }
 
