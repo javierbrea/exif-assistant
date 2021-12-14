@@ -97,11 +97,12 @@ describe("Exif", () => {
       describe("when modify option is true", () => {
         describe("when date is provided", () => {
           it("should set DateTimeOriginal, DateTimeDigitized and return true", async () => {
+            const dateOption = "2022-07-12 13:00:00";
             const date = "2022:07:12 13:00:00";
             await expectModifiedDate({
               fileName: "sphinx.jpg",
               setDateOptions: {
-                date,
+                date: dateOption,
                 modify: true,
               },
               newDateExpected: date,
@@ -114,11 +115,12 @@ describe("Exif", () => {
           it("should set DateTimeOriginal, but not DateTimeDigitized", async () => {
             const fileName = "sphinx.jpg";
             const { metadata } = assetData(fileName);
+            const dateOption = "2009-09-09 09:00:00";
             const date = "2009:09:09 09:00:00";
             await expectModifiedDate({
               fileName,
               setDateOptions: {
-                date,
+                date: dateOption,
                 setDigitized: false,
                 modify: true,
               },
@@ -132,11 +134,12 @@ describe("Exif", () => {
         describe("when fallbackDate is provided and fromDigitized is false", () => {
           it("should add DateTimeOriginal and modify DateTimeDigitized", async () => {
             const fileName = "sphinx.jpg";
+            const fallbackDate = "2009-09-09 09:30:00";
             const date = "2009:09:09 09:30:00";
             await expectModifiedDate({
               fileName,
               setDateOptions: {
-                fallbackDate: date,
+                fallbackDate,
                 fromDigitized: false,
                 modify: true,
               },
@@ -148,11 +151,12 @@ describe("Exif", () => {
           it("should add DateTimeOriginal and not modify DateTimeDigitized if setDigitized is false", async () => {
             const fileName = "sphinx.jpg";
             const { metadata } = assetData(fileName);
+            const fallbackDate = "2009-09-09 09:30:00";
             const date = "2009:09:09 09:30:00";
             await expectModifiedDate({
               fileName,
               setDateOptions: {
-                fallbackDate: date,
+                fallbackDate,
                 fromDigitized: false,
                 setDigitized: false,
                 modify: true,
@@ -169,11 +173,12 @@ describe("Exif", () => {
     describe("when file has not date", () => {
       describe("when date is provided", () => {
         it("should add DateTimeOriginal, DateTimeDigitized and return true", async () => {
+          const inputDate = "2022-06-16 12:00:00";
           const date = "2022:06:16 12:00:00";
           await expectModifiedDate({
             fileName: "gorilla.JPG",
             setDateOptions: {
-              date,
+              date: inputDate,
             },
             newDateExpected: date,
             expectedLog: "from date option",
@@ -181,13 +186,40 @@ describe("Exif", () => {
         });
       });
 
-      describe("when date id provided and setDigitized option is false", () => {
+      describe("when invalid date is provided", () => {
+        it("should trace warn and return false", async () => {
+          const fileName = "gorilla.JPG";
+          const spy = spyTracer("warn");
+          const filePath = assetPath(fileName);
+          const result = await setDate(filePath, {
+            date: "2022:06:16 12:00:00",
+          });
+          expectLog(`date option is not a valid date. Skipping`, spy);
+          expect(result).toBe(false);
+        });
+      });
+
+      describe("when fallbackDate date is invalid", () => {
+        it("should trace warn and return false", async () => {
+          const fileName = "gorilla.JPG";
+          const spy = spyTracer("warn");
+          const filePath = assetPath(fileName);
+          const result = await setDate(filePath, {
+            fallbackDate: "2022:06:16 12:00:00",
+          });
+          expectLog(`fallbackDate option is not a valid date. Skipping`, spy);
+          expect(result).toBe(false);
+        });
+      });
+
+      describe("when date is provided and setDigitized option is false", () => {
         it("should add DateTimeOriginal, but not DateTimeDigitized", async () => {
+          const inputDate = "2022-06-16 12:00:00";
           const date = "2022:06:16 12:00:00";
           await expectModifiedDate({
             fileName: "gorilla.JPG",
             setDateOptions: {
-              date,
+              date: inputDate,
               setDigitized: false,
             },
             newDateExpected: date,
@@ -226,11 +258,12 @@ describe("Exif", () => {
 
         it("should add DateTimeOriginal and modify DateTimeDigitized if fallbackDate is provided", async () => {
           const fileName = "sphinx-no-date-original.jpg";
+          const fallbackDate = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
           await expectModifiedDate({
             fileName,
             setDateOptions: {
-              fallbackDate: date,
+              fallbackDate,
               fromDigitized: false,
             },
             newDateExpected: date,
@@ -241,11 +274,12 @@ describe("Exif", () => {
         it("should add DateTimeOriginal and not modify DateTimeDigitized if fallbackDate is provided but setDigitized is false", async () => {
           const fileName = "sphinx-no-date-original.jpg";
           const { metadata } = assetData(fileName);
+          const fallbackDate = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
           await expectModifiedDate({
             fileName,
             setDateOptions: {
-              fallbackDate: date,
+              fallbackDate,
               fromDigitized: false,
               setDigitized: false,
             },

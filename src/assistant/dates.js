@@ -35,8 +35,18 @@ async function setDate(
     );
   };
 
+  if (!!date && !isDate(date)) {
+    tracer.warn(`date option is not a valid date. Skipping`);
+    return false;
+  }
+
+  if (!!fallbackDate && !isDate(fallbackDate)) {
+    tracer.warn(`fallbackDate option is not a valid date. Skipping`);
+    return false;
+  }
+
   if (!(await isSupportedFile(filePath))) {
-    tracer.warn(`${fileName}: File type is not supported`);
+    tracer.warn(`${fileName}: File type is not supported. Skipping`);
     return false;
   }
 
@@ -61,8 +71,9 @@ async function setDate(
 
   // Set date if present
   if (!!date) {
-    traceSet(date, "date option");
-    return setDates(date);
+    const dateToSet = formatForExif(date);
+    traceSet(dateToSet, "date option");
+    return setDates(dateToSet);
   }
 
   // Copy DateTimeDigitized to DateTimeOriginal if present

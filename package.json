@@ -29,6 +29,7 @@
   "dependencies": {
     "deepmerge": "4.2.2",
     "fs-extra": "10.0.0",
+    "moment": "2.29.1",
     "piexifjs": "1.0.6",
     "winston": "3.3.3"
   },
