@@ -8,8 +8,11 @@
     "cli",
     "tool",
     "photo",
-    "images",
+    "image",
     "organizer",
+    "metadata",
+    "folder",
+    "file name",
     "assistant"
   ],
   "author": "Javier Brea",

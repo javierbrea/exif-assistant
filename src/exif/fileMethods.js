@@ -1,3 +1,4 @@
+const path = require("path");
 const fsExtra = require("fs-extra");
 const piexif = require("piexifjs");
 
@@ -27,6 +28,7 @@ async function moveAndWriteExif(filePath, newFilePath, exif) {
   const exifBinary = piexif.dump(exif);
   const newImageData = piexif.insert(exifBinary, await getBase64DataFromFile(filePath));
   const fileBuffer = Buffer.from(newImageData, BINARY_FORMAT);
+  await fsExtra.ensureDir(path.dirname(newFilePath));
   return fsExtra.writeFile(newFilePath, fileBuffer);
 }
 

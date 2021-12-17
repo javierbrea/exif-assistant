@@ -42,8 +42,8 @@ function getImageDataAndInfo(filePath) {
   return sharp(filePath).toBuffer({ resolveWithObject: true });
 }
 
-function copyAssetToTempPath(fileName) {
-  return fsExtra.copy(assetPath(fileName), tempPath(fileName));
+function copyAssetToTempPath(fileName, newName) {
+  return fsExtra.copy(assetPath(fileName), tempPath(newName || fileName));
 }
 
 function copyAssetsToTempPath(fileNames) {

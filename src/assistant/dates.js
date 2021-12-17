@@ -7,13 +7,13 @@ const {
 } = require("../exif/data");
 const { isDate } = require("../dates/check");
 const { formatForExif } = require("../dates/format");
-const { moveOrCopyFileToSubfolder } = require("../files/utils");
+const { moveOrCopyFileToSubfolder, removeExtension } = require("../files/utils");
 const { Tracer } = require("../support/tracer");
 
 async function setDate(
   filePath,
   {
-    folderName,
+    folderName, // TODO, accept array of folder Names
     outputFolder,
     date,
     fallbackDate,
@@ -83,8 +83,9 @@ async function setDate(
   }
 
   // Set date from file name
-  if (fromFile && isDate(fileName)) {
-    const dateToSet = formatForExif(fileName);
+  const fileNameWithoutExtension = removeExtension(fileName);
+  if (fromFile && isDate(fileNameWithoutExtension)) {
+    const dateToSet = formatForExif(fileNameWithoutExtension);
     traceSet(dateToSet, "file name");
     return setDates(dateToSet);
   }

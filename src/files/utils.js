@@ -19,8 +19,13 @@ async function moveOrCopyFileToSubfolder(filePath, outputFolder, subfolder) {
   return copyFileToFolder(filePath, path.resolve(outputFolder, subfolder));
 }
 
+function removeExtension(fileName) {
+  return fileName.split(".")[0];
+}
+
 module.exports = {
   moveFileToFolder,
   copyFileToFolder,
   moveOrCopyFileToSubfolder,
+  removeExtension,
 };

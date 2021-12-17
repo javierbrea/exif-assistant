@@ -15,13 +15,16 @@ const {
   TEMP_PATH,
 } = require("../../support/assets");
 
-setLevel("verbose");
+setLevel("silent");
 
 describe("Exif", () => {
   let sandbox;
 
   function expectLog(log, spy) {
-    expect(spy.getCall(0).args[0]).toEqual(expect.stringContaining(log));
+    const firstSpyCall = spy.getCall(0);
+    const args = firstSpyCall && firstSpyCall.args;
+    const firstArg = (args && args[0]) || "";
+    expect(firstArg).toEqual(expect.stringContaining(log));
   }
 
   function spyTracer(level) {
@@ -39,16 +42,17 @@ describe("Exif", () => {
 
   describe("addOriginalDate method", () => {
     async function expectModifiedDate({
+      inputPath,
       fileName,
-      setDateOptions,
+      setDateOptions = {},
       newDateExpected,
       dateTimeDigitedExpected,
       expectedLog,
     }) {
       const spy = spyTracer("info");
-      const filePath = assetPath(fileName);
+      const filePath = inputPath ? path.resolve(inputPath, fileName) : assetPath(fileName);
       const options = {
-        outputFolder: TEMP_PATH,
+        outputFolder: setDateOptions.outputFolder || TEMP_PATH,
         ...setDateOptions,
       };
       const result = await setDate(filePath, options);
@@ -61,7 +65,10 @@ describe("Exif", () => {
       if (expectedLog) {
         expectLog(expectedLog, spy);
       }
-      const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(tempPath(fileName));
+      const newFilePath = options.outputFolder
+        ? path.resolve(options.outputFolder, fileName)
+        : tempPath(fileName);
+      const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(newFilePath);
       expect(DateTimeOriginal).toEqual(newDateExpected);
       if (digitedHasToChange) {
         expect(DateTimeDigitized).toEqual(newDateExpected);
@@ -329,6 +336,64 @@ describe("Exif", () => {
           expect(
             fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))
           ).toBe(true);
+        });
+      });
+    });
+
+    describe("when fileName is a valid date", () => {
+      function testFileName(newFileName, format, date) {
+        describe(`when fileName has format ${format} and outputFolder is different`, () => {
+          it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
+            const fileName = "gorilla.JPG";
+            const outputFolder = path.resolve(TEMP_PATH, "modified");
+            await copyAssetToTempPath(fileName, newFileName);
+            const fileOrigin = tempPath(newFileName);
+
+            await expectModifiedDate({
+              inputPath: TEMP_PATH,
+              fileName: newFileName,
+              setDateOptions: {
+                outputFolder,
+              },
+              newDateExpected: date,
+              dateTimeDigitedExpected: date,
+              expectedLog: "from file name",
+            });
+
+            // Check also original file
+            expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+            const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
+            expect(DateTimeOriginal).toBe(undefined);
+            expect(DateTimeDigitized).toBe(undefined);
+          });
+        });
+      }
+
+      // TODO, test valid dates in date utils tests
+      //testFileName("2013-10-23-10:32:55.jpg", "YYYY-MM-dd-hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
+      //testFileName("2013_10_23 10:32:55.jpg", "YYYY_MM_dd hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
+      testFileName("2013-10-23 10:32:55.jpg", "YYYY-MM-dd hh:mm:ss", "2013:10:23 10:32:55");
+      testFileName("2013-10-23 10:32.jpg", "YYYY-MM-dd hh:mm", "2013:10:23 10:32:00");
+      testFileName("2013-10-23 10.jpg", "YYYY-MM-dd hh", "2013:10:23 10:00:00");
+      // testFileName("2013-10-23 5.jpg", "YYYY-MM-dd h", "2013:10:23 05:00:00"); Not valid date
+      testFileName("2013-10-23.jpg", "YYYY-MM-dd", "2013:10:23 00:00:00");
+      testFileName("2013-10.jpg", "YYYY-MM", "2013:10:01 00:00:00");
+      testFileName("2013.jpg", "YYYY", "2013:01:01 00:00:00");
+
+      describe("when outputFolder is the same to file folder", () => {
+        it("should add date to exif in original file", async () => {
+          const fileName = "gorilla.JPG";
+          const newFileName = "2013-10-23 10:32:55.jpg";
+          const date = "2013:10:23 10:32:55";
+          await copyAssetToTempPath(fileName, newFileName);
+
+          await expectModifiedDate({
+            inputPath: TEMP_PATH,
+            fileName: newFileName,
+            newDateExpected: date,
+            dateTimeDigitedExpected: date,
+            expectedLog: "from file name",
+          });
         });
       });
     });

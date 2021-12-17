@@ -1,16 +1,18 @@
 const moment = require("moment");
+const { disableWarn, restoreWarn } = require("../support/console");
+
+function isValidMomentDate(string) {
+  disableWarn();
+  const isValid = moment(string).isValid();
+  restoreWarn();
+  return isValid;
+}
 
 function isDate(string) {
   if (!string) {
     return false;
   }
-  const originalWarn = console.warn;
-  console.warn = () => {
-    // Disable console.warn due to moment warnings on invalid date format
-  };
-  const isValid = moment(string).isValid();
-  console.warn = originalWarn;
-  return isValid;
+  return isValidMomentDate(string);
 }
 
 module.exports = {
