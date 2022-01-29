@@ -20,26 +20,35 @@ function TraceSetDate(fileName, setDigitized) {
   };
 }
 
-function IsDateAccordingToOptions(format, parsedBaseDate) {
+function getDateUsingDateRegex(string, dateRegex) {
+  if (!dateRegex) {
+    return string;
+  }
+  const regexResult = new RegExp(dateRegex).exec(string);
+  return regexResult && regexResult[1];
+}
+
+function IsDateAccordingToOptions(format, parsedBaseDate, dateRegex) {
   return function (date) {
-    return isDate(date, format, parsedBaseDate);
+    return isDate(getDateUsingDateRegex(date, dateRegex), format, parsedBaseDate);
   };
 }
 
-function FormatForExifAccordingToOptions(format, parsedBaseDate) {
+function FormatForExifAccordingToOptions(format, parsedBaseDate, dateRegex) {
   return function (date) {
-    return formatForExif(date, format, parsedBaseDate);
+    return formatForExif(getDateUsingDateRegex(date, dateRegex), format, parsedBaseDate);
   };
 }
 
 async function setDate(
   filePath,
   {
-    folderName, // TODO, accept array of folder Names
+    folderName, // TODO, accept array of folder names in order to check parent folder names
     outputFolder,
     date,
     format,
     baseDate,
+    dateRegex,
     baseDateFormat,
     modify = false,
     fromDigitized = true,
@@ -62,8 +71,12 @@ async function setDate(
     parsedBaseDate = dateFromString(baseDate, baseDateFormat);
   }
 
-  isDateAccordingToOptions = IsDateAccordingToOptions(format, parsedBaseDate);
-  formatForExifAccordingToOptions = FormatForExifAccordingToOptions(format, parsedBaseDate);
+  isDateAccordingToOptions = IsDateAccordingToOptions(format, parsedBaseDate, dateRegex);
+  formatForExifAccordingToOptions = FormatForExifAccordingToOptions(
+    format,
+    parsedBaseDate,
+    dateRegex
+  );
 
   if (!!date && !isDateAccordingToOptions(date)) {
     tracer.warn(`date option is not a valid date. Skipping`);
