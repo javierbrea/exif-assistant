@@ -9,6 +9,16 @@ describe("Console", () => {
       console.warn("foo");
       expect(spy).toHaveBeenCalledWith("[console] foo");
     });
+
+    it("should be able to be called many times without error", () => {
+      const spy = jest.spyOn(_logger, "silly");
+      disableWarn();
+      disableWarn();
+      disableWarn();
+      disableWarn();
+      console.warn("foo");
+      expect(spy).toHaveBeenCalledWith("[console] foo");
+    });
   });
 
   describe("restoreWarn", () => {
