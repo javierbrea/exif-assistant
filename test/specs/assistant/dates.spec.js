@@ -434,6 +434,8 @@ describe("Exif", () => {
 
       testFileName("10-23.jpg", "MM-dd", "2015", "yyyy", "2015:10:23 00:00:00");
       testFileName("18.jpg", "dd", "2015-10", "yyyy-MM", "2015:10:18 00:00:00");
+      testFileName("18_13_24.jpg", "HH_mm_ss", "2015-10-23", "yyyy-MM-dd", "2015:10:23 18:13:24");
+      testFileName("17_30.jpg", "HH_mm", "2015-10-23", "yyyy-MM-dd", "2015:10:23 17:30:00");
     });
 
     describe("when folder name is a valid date", () => {
