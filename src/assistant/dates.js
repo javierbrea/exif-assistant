@@ -5,10 +5,32 @@ const {
   HUMAN_DATE_TIME_ORIGINAL_PROPERTY,
   HUMAN_DATE_TIME_DIGITIZED_PROPERTY,
 } = require("../exif/data");
-const { isDate } = require("../dates/check");
-const { formatForExif } = require("../dates/format");
+const { formatForExif, isDate, dateFromString } = require("../dates/format");
 const { moveOrCopyFileToSubfolder, removeExtension } = require("../files/utils");
 const { Tracer } = require("../support/tracer");
+
+const tracer = new Tracer("Set Date");
+
+function TraceSetDate(fileName, setDigitized) {
+  return function (newValue, valueFrom) {
+    const setDigitedMessage = setDigitized ? ` and ${HUMAN_DATE_TIME_DIGITIZED_PROPERTY}` : "";
+    tracer.info(
+      `${fileName}: Setting ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}${setDigitedMessage} to ${newValue}, from ${valueFrom}`
+    );
+  };
+}
+
+function IsDateAccordingToOptions(format, parsedBaseDate) {
+  return function (date) {
+    return isDate(date, format, parsedBaseDate);
+  };
+}
+
+function FormatForExifAccordingToOptions(format, parsedBaseDate) {
+  return function (date) {
+    return formatForExif(date, format, parsedBaseDate);
+  };
+}
 
 async function setDate(
   filePath,
@@ -16,32 +38,34 @@ async function setDate(
     folderName, // TODO, accept array of folder Names
     outputFolder,
     date,
-    fallbackDate,
+    baseDate,
     modify = false,
     fromDigitized = true,
     fromFile = true,
     fromFolder = true,
     setDigitized = true,
     moveUnknownToSubfolder,
+    format,
   } = {}
 ) {
+  let parsedBaseDate, isDateAccordingToOptions, formatForExifAccordingToOptions;
   const fileName = path.basename(filePath);
-  const tracer = new Tracer("Set Date");
 
-  const traceSet = (newValue, valueFrom) => {
-    const setDigitedMessage = setDigitized ? ` and ${HUMAN_DATE_TIME_DIGITIZED_PROPERTY}` : "";
-    tracer.info(
-      `${fileName}: Setting ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}${setDigitedMessage} to ${newValue}, from ${valueFrom}`
-    );
-  };
+  const traceSet = TraceSetDate(fileName, setDigitized);
 
-  if (!!date && !isDate(date)) {
-    tracer.warn(`date option is not a valid date. Skipping`);
-    return false;
+  if (!!baseDate) {
+    if (!isDate(baseDate, format)) {
+      tracer.warn(`baseDate option is not a valid date. Skipping`);
+      return false;
+    }
+    parsedBaseDate = dateFromString(baseDate, format);
   }
 
-  if (!!fallbackDate && !isDate(fallbackDate)) {
-    tracer.warn(`fallbackDate option is not a valid date. Skipping`);
+  isDateAccordingToOptions = IsDateAccordingToOptions(format, parsedBaseDate);
+  formatForExifAccordingToOptions = FormatForExifAccordingToOptions(format, parsedBaseDate);
+
+  if (!!date && !isDateAccordingToOptions(date)) {
+    tracer.warn(`date option is not a valid date. Skipping`);
     return false;
   }
 
@@ -71,7 +95,7 @@ async function setDate(
 
   // Set date if present
   if (!!date) {
-    const dateToSet = formatForExif(date);
+    const dateToSet = formatForExifAccordingToOptions(date);
     traceSet(dateToSet, "date option");
     return setDates(dateToSet);
   }
@@ -84,23 +108,23 @@ async function setDate(
 
   // Set date from file name
   const fileNameWithoutExtension = removeExtension(fileName);
-  if (fromFile && isDate(fileNameWithoutExtension)) {
-    const dateToSet = formatForExif(fileNameWithoutExtension);
+  if (fromFile && isDateAccordingToOptions(fileNameWithoutExtension)) {
+    const dateToSet = formatForExifAccordingToOptions(fileNameWithoutExtension);
     traceSet(dateToSet, "file name");
     return setDates(dateToSet);
   }
 
   // Set date from folder name
-  if (fromFolder && isDate(folderName)) {
-    const dateToSet = formatForExif(folderName);
+  if (fromFolder && isDateAccordingToOptions(folderName)) {
+    const dateToSet = formatForExifAccordingToOptions(folderName);
     traceSet(dateToSet, "folder name");
     return setDates(dateToSet);
   }
 
   // Set date from fallback date
-  if (!!fallbackDate) {
-    const dateToSet = formatForExif(fallbackDate);
-    traceSet(dateToSet, "fallbackDate option");
+  if (!!baseDate) {
+    const dateToSet = formatForExifAccordingToOptions(baseDate);
+    traceSet(dateToSet, "baseDate option");
     return setDates(dateToSet);
   }
 

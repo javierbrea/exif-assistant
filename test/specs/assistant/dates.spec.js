@@ -138,39 +138,39 @@ describe("Exif", () => {
           });
         });
 
-        describe("when fallbackDate is provided and fromDigitized is false", () => {
+        describe("when baseDate is provided and fromDigitized is false", () => {
           it("should add DateTimeOriginal and modify DateTimeDigitized", async () => {
             const fileName = "sphinx.jpg";
-            const fallbackDate = "2009-09-09 09:30:00";
+            const baseDate = "2009-09-09 09:30:00";
             const date = "2009:09:09 09:30:00";
             await expectModifiedDate({
               fileName,
               setDateOptions: {
-                fallbackDate,
+                baseDate,
                 fromDigitized: false,
                 modify: true,
               },
               newDateExpected: date,
-              expectedLog: "from fallbackDate option",
+              expectedLog: "from baseDate option",
             });
           });
 
           it("should add DateTimeOriginal and not modify DateTimeDigitized if setDigitized is false", async () => {
             const fileName = "sphinx.jpg";
             const { metadata } = assetData(fileName);
-            const fallbackDate = "2009-09-09 09:30:00";
+            const baseDate = "2009-09-09 09:30:00";
             const date = "2009:09:09 09:30:00";
             await expectModifiedDate({
               fileName,
               setDateOptions: {
-                fallbackDate,
+                baseDate,
                 fromDigitized: false,
                 setDigitized: false,
                 modify: true,
               },
               newDateExpected: date,
               dateTimeDigitedExpected: metadata.DateTimeDigitized,
-              expectedLog: "from fallbackDate option",
+              expectedLog: "from baseDate option",
             });
           });
         });
@@ -206,15 +206,15 @@ describe("Exif", () => {
         });
       });
 
-      describe("when fallbackDate date is invalid", () => {
+      describe("when baseDate date is invalid", () => {
         it("should trace warn and return false", async () => {
           const fileName = "gorilla.JPG";
           const spy = spyTracer("warn");
           const filePath = assetPath(fileName);
           const result = await setDate(filePath, {
-            fallbackDate: "2022:06:16 12:00:00",
+            baseDate: "2022:06:16 12:00:00",
           });
-          expectLog(`fallbackDate option is not a valid date. Skipping`, spy);
+          expectLog(`baseDate option is not a valid date. Skipping`, spy);
           expect(result).toBe(false);
         });
       });
@@ -263,36 +263,36 @@ describe("Exif", () => {
           expect(result).toBe(false);
         });
 
-        it("should add DateTimeOriginal and modify DateTimeDigitized if fallbackDate is provided", async () => {
+        it("should add DateTimeOriginal and modify DateTimeDigitized if baseDate is provided", async () => {
           const fileName = "sphinx-no-date-original.jpg";
-          const fallbackDate = "2009-09-09 09:30:00";
+          const baseDate = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
           await expectModifiedDate({
             fileName,
             setDateOptions: {
-              fallbackDate,
+              baseDate,
               fromDigitized: false,
             },
             newDateExpected: date,
-            expectedLog: "from fallbackDate option",
+            expectedLog: "from baseDate option",
           });
         });
 
-        it("should add DateTimeOriginal and not modify DateTimeDigitized if fallbackDate is provided but setDigitized is false", async () => {
+        it("should add DateTimeOriginal and not modify DateTimeDigitized if baseDate is provided but setDigitized is false", async () => {
           const fileName = "sphinx-no-date-original.jpg";
           const { metadata } = assetData(fileName);
-          const fallbackDate = "2009-09-09 09:30:00";
+          const baseDate = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
           await expectModifiedDate({
             fileName,
             setDateOptions: {
-              fallbackDate,
+              baseDate,
               fromDigitized: false,
               setDigitized: false,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: metadata.DateTimeDigitized,
-            expectedLog: "from fallbackDate option",
+            expectedLog: "from baseDate option",
           });
         });
       });
@@ -341,8 +341,10 @@ describe("Exif", () => {
     });
 
     describe("when fileName is a valid date", () => {
-      function testFileName(newFileName, format, date) {
-        describe(`when fileName has format ${format} and outputFolder is different`, () => {
+      function testFileName(newFileName, format, date, passFormat) {
+        describe(`when fileName has format ${format}, format is ${
+          passFormat ? "" : "not"
+        } defined and outputFolder is different`, () => {
           it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
             const fileName = "gorilla.JPG";
             const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -354,6 +356,7 @@ describe("Exif", () => {
               fileName: newFileName,
               setDateOptions: {
                 outputFolder,
+                format: passFormat && format,
               },
               newDateExpected: date,
               dateTimeDigitedExpected: date,
@@ -369,22 +372,21 @@ describe("Exif", () => {
         });
       }
 
-      // TODO, test valid dates in date utils tests
-      //testFileName("2013-10-23-10:32:55.jpg", "YYYY-MM-dd-hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
-      //testFileName("2013_10_23 10:32:55.jpg", "YYYY_MM_dd hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
-      testFileName("2013-10-23 10:32:55.jpg", "YYYY-MM-dd hh:mm:ss", "2013:10:23 10:32:55");
-      testFileName("2013-10-23 10:32.jpg", "YYYY-MM-dd hh:mm", "2013:10:23 10:32:00");
-      testFileName("2013-10-23 10.jpg", "YYYY-MM-dd hh", "2013:10:23 10:00:00");
-      // testFileName("2013-10-23 5.jpg", "YYYY-MM-dd h", "2013:10:23 05:00:00"); Not valid date
-      testFileName("2013-10-23.jpg", "YYYY-MM-dd", "2013:10:23 00:00:00");
-      testFileName("2013-10.jpg", "YYYY-MM", "2013:10:01 00:00:00");
-      testFileName("2013.jpg", "YYYY", "2013:01:01 00:00:00");
+      testFileName("2013-10-23-10_32-55.jpg", "yyyy-MM-dd-hh_mm-ss", "2013:10:23 10:32:55", true);
+      testFileName("23_10_2013-10_32_55.jpg", "dd_MM_yyyy-hh_mm_ss", "2013:10:23 10:32:55", true);
+      testFileName("2013-10-23 10-32-55.jpg", "yyyy-MM-dd HH-mm-ss", "2013:10:23 10:32:55", true);
+      testFileName("2013-10-23 10_32.jpg", "yyyy-MM-dd HH_mm", "2013:10:23 10:32:00", true);
+      testFileName("2013-10-23 10.jpg", "yyyy-MM-dd HH", "2013:10:23 10:00:00");
+      testFileName("2013-10-23 5.jpg", "yyyy-MM-dd h", "2013:10:23 05:00:00", true);
+      testFileName("2013-10-23.jpg", "yyyy-MM-dd", "2013:10:23 00:00:00");
+      testFileName("2013-10.jpg", "yyyy-MM", "2013:10:01 00:00:00");
+      testFileName("2013.jpg", "yyyy", "2013:01:01 00:00:00");
 
       describe("when outputFolder is the same to file folder", () => {
         it("should add date to exif in original file", async () => {
           const fileName = "gorilla.JPG";
-          const newFileName = "2013-10-23 10:32:55.jpg";
-          const date = "2013:10:23 10:32:55";
+          const newFileName = "2013-10-23.jpg";
+          const date = "2013:10:23 00:00:00";
           await copyAssetToTempPath(fileName, newFileName);
 
           await expectModifiedDate({
@@ -428,13 +430,9 @@ describe("Exif", () => {
         });
       }
 
-      // TODO, test valid dates in date utils tests
-      //testFileName("2013-10-23-10:32:55", "YYYY-MM-dd-hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
-      //testFileName("2013_10_23 10:32:55", "YYYY_MM_dd hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
       testFolderName("2013-10-23 10:32:55", "YYYY-MM-dd hh:mm:ss", "2013:10:23 10:32:55");
       testFolderName("2013-10-23 10:32", "YYYY-MM-dd hh:mm", "2013:10:23 10:32:00");
       testFolderName("2013-10-23 10", "YYYY-MM-dd hh", "2013:10:23 10:00:00");
-      // testFileName("2013-10-23 5", "YYYY-MM-dd h", "2013:10:23 05:00:00"); Not valid date
       testFolderName("2013-10-23", "YYYY-MM-dd", "2013:10:23 00:00:00");
       testFolderName("2013-10", "YYYY-MM", "2013:10:01 00:00:00");
       testFolderName("2013", "YYYY", "2013:01:01 00:00:00");
