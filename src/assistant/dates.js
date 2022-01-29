@@ -38,14 +38,15 @@ async function setDate(
     folderName, // TODO, accept array of folder Names
     outputFolder,
     date,
+    format,
     baseDate,
+    baseDateFormat,
     modify = false,
     fromDigitized = true,
     fromFile = true,
     fromFolder = true,
     setDigitized = true,
     moveUnknownToSubfolder,
-    format,
   } = {}
 ) {
   let parsedBaseDate, isDateAccordingToOptions, formatForExifAccordingToOptions;
@@ -54,11 +55,11 @@ async function setDate(
   const traceSet = TraceSetDate(fileName, setDigitized);
 
   if (!!baseDate) {
-    if (!isDate(baseDate, format)) {
+    if (!isDate(baseDate, baseDateFormat)) {
       tracer.warn(`baseDate option is not a valid date. Skipping`);
       return false;
     }
-    parsedBaseDate = dateFromString(baseDate, format);
+    parsedBaseDate = dateFromString(baseDate, baseDateFormat);
   }
 
   isDateAccordingToOptions = IsDateAccordingToOptions(format, parsedBaseDate);
