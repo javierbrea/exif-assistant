@@ -397,5 +397,67 @@ describe("Exif", () => {
         });
       });
     });
+
+    describe("when folder name is a valid date", () => {
+      function testFolderName(folderName, format, date) {
+        describe(`when folderName has format ${format} and outputFolder is different`, () => {
+          it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
+            const fileName = "gorilla.JPG";
+            const outputFolder = path.resolve(TEMP_PATH, "modified");
+            await copyAssetToTempPath(fileName, fileName);
+            const fileOrigin = tempPath(fileName);
+
+            await expectModifiedDate({
+              inputPath: TEMP_PATH,
+              fileName,
+              setDateOptions: {
+                outputFolder,
+                folderName,
+              },
+              newDateExpected: date,
+              dateTimeDigitedExpected: date,
+              expectedLog: "from folder name",
+            });
+
+            // Check also original file
+            expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+            const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
+            expect(DateTimeOriginal).toBe(undefined);
+            expect(DateTimeDigitized).toBe(undefined);
+          });
+        });
+      }
+
+      // TODO, test valid dates in date utils tests
+      //testFileName("2013-10-23-10:32:55", "YYYY-MM-dd-hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
+      //testFileName("2013_10_23 10:32:55", "YYYY_MM_dd hh:mm:ss", "2013:10:23 10:32:55"); Not valid date
+      testFolderName("2013-10-23 10:32:55", "YYYY-MM-dd hh:mm:ss", "2013:10:23 10:32:55");
+      testFolderName("2013-10-23 10:32", "YYYY-MM-dd hh:mm", "2013:10:23 10:32:00");
+      testFolderName("2013-10-23 10", "YYYY-MM-dd hh", "2013:10:23 10:00:00");
+      // testFileName("2013-10-23 5", "YYYY-MM-dd h", "2013:10:23 05:00:00"); Not valid date
+      testFolderName("2013-10-23", "YYYY-MM-dd", "2013:10:23 00:00:00");
+      testFolderName("2013-10", "YYYY-MM", "2013:10:01 00:00:00");
+      testFolderName("2013", "YYYY", "2013:01:01 00:00:00");
+
+      describe("when outputFolder is the same to file folder", () => {
+        it("should add date to exif in original file", async () => {
+          const fileName = "gorilla.JPG";
+          const folderName = "2013-10-23 10:32:55";
+          const date = "2013:10:23 10:32:55";
+          await copyAssetToTempPath(fileName, fileName);
+
+          await expectModifiedDate({
+            inputPath: TEMP_PATH,
+            fileName,
+            setDateOptions: {
+              folderName,
+            },
+            newDateExpected: date,
+            dateTimeDigitedExpected: date,
+            expectedLog: "from folder name",
+          });
+        });
+      });
+    });
   });
 });
