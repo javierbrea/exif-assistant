@@ -28,15 +28,15 @@ function getDateUsingDateRegex(string, dateRegex) {
   return regexResult && regexResult[1];
 }
 
-function IsDateAccordingToOptions(format, parsedBaseDate, dateRegex) {
+function IsDateAccordingToOptions(dateFormat, parsedBaseDate, dateRegex) {
   return function (date) {
-    return isDate(getDateUsingDateRegex(date, dateRegex), format, parsedBaseDate);
+    return isDate(getDateUsingDateRegex(date, dateRegex), dateFormat, parsedBaseDate);
   };
 }
 
-function FormatForExifAccordingToOptions(format, parsedBaseDate, dateRegex) {
+function FormatForExifAccordingToOptions(dateFormat, parsedBaseDate, dateRegex) {
   return function (date) {
-    return formatForExif(getDateUsingDateRegex(date, dateRegex), format, parsedBaseDate);
+    return formatForExif(getDateUsingDateRegex(date, dateRegex), dateFormat, parsedBaseDate);
   };
 }
 
@@ -46,9 +46,9 @@ async function setDate(
     folderName, // TODO, accept array of folder names in order to check parent folder names
     outputFolder,
     date,
-    format,
-    baseDate,
+    dateFormat,
     dateRegex,
+    baseDate,
     baseDateFormat,
     modify = false,
     fromDigitized = true,
@@ -71,9 +71,9 @@ async function setDate(
     parsedBaseDate = dateFromString(baseDate, baseDateFormat);
   }
 
-  isDateAccordingToOptions = IsDateAccordingToOptions(format, parsedBaseDate, dateRegex);
+  isDateAccordingToOptions = IsDateAccordingToOptions(dateFormat, parsedBaseDate, dateRegex);
   formatForExifAccordingToOptions = FormatForExifAccordingToOptions(
-    format,
+    dateFormat,
     parsedBaseDate,
     dateRegex
   );
@@ -135,9 +135,9 @@ async function setDate(
     return setDates(dateToSet);
   }
 
-  // Set date from fallback date
+  // Set date from baseDate
   if (!!baseDate) {
-    const dateToSet = formatForExifAccordingToOptions(baseDate);
+    const dateToSet = formatForExif(baseDate, baseDateFormat);
     traceSet(dateToSet, "baseDate option");
     return setDates(dateToSet);
   }

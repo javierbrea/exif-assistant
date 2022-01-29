@@ -341,8 +341,8 @@ describe("Exif", () => {
     });
 
     describe("when fileName is a valid date", () => {
-      function testFileName(newFileName, format, date, passFormat) {
-        describe(`when fileName has format ${format}, format is ${
+      function testFileName(newFileName, dateFormat, date, passFormat) {
+        describe(`when fileName has format ${dateFormat}, dateFormat is ${
           passFormat ? "" : "not"
         } defined and outputFolder is different`, () => {
           it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
@@ -356,7 +356,7 @@ describe("Exif", () => {
               fileName: newFileName,
               setDateOptions: {
                 outputFolder,
-                format: passFormat && format,
+                dateFormat: passFormat && dateFormat,
               },
               newDateExpected: date,
               dateTimeDigitedExpected: date,
@@ -401,8 +401,8 @@ describe("Exif", () => {
     });
 
     describe("when fileName is a valid partial date and baseDate is provided", () => {
-      function testFileName(newFileName, format, baseDate, baseDateFormat, date) {
-        describe(`when fileName has format ${format} and baseDate has format ${baseDateFormat} and outputFolder is different`, () => {
+      function testFileName(newFileName, dateFormat, baseDate, baseDateFormat, date) {
+        describe(`when fileName has format ${dateFormat} and baseDate has format ${baseDateFormat} and outputFolder is different`, () => {
           it("should add date to exif and save the file to output folder", async () => {
             const fileName = "gorilla.JPG";
             const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -414,7 +414,7 @@ describe("Exif", () => {
               fileName: newFileName,
               setDateOptions: {
                 outputFolder,
-                format,
+                dateFormat,
                 baseDate,
                 baseDateFormat,
               },
@@ -439,7 +439,7 @@ describe("Exif", () => {
     });
 
     describe("when fileName contains a valid date and dateRegex is provided", () => {
-      function testFileName(newFileName, format, dateRegex, date) {
+      function testFileName(newFileName, dateFormat, dateRegex, date) {
         describe(`when fileName has name ${newFileName}, and dateRegex is ${dateRegex}`, () => {
           it("should add date to exif and save the file to output folder", async () => {
             const fileName = "gorilla.JPG";
@@ -452,7 +452,7 @@ describe("Exif", () => {
               fileName: newFileName,
               setDateOptions: {
                 outputFolder,
-                format,
+                dateFormat,
                 dateRegex,
               },
               newDateExpected: date,
@@ -477,6 +477,82 @@ describe("Exif", () => {
       );
     });
 
+    describe("when fileName contains a valid partial date and dateRegex and baseDate are provided", () => {
+      function testFileName(newFileName, dateFormat, dateRegex, baseDate, baseDateFormat, date) {
+        describe(`when fileName has name ${newFileName}, dateRegex is ${dateRegex}, baseDate is ${baseDate} and baseDateFormat is ${baseDateFormat}`, () => {
+          it("should add date to exif and save the file to output folder", async () => {
+            const fileName = "gorilla.JPG";
+            const outputFolder = path.resolve(TEMP_PATH, "modified");
+            await copyAssetToTempPath(fileName, newFileName);
+            const fileOrigin = tempPath(newFileName);
+
+            await expectModifiedDate({
+              inputPath: TEMP_PATH,
+              fileName: newFileName,
+              setDateOptions: {
+                outputFolder,
+                dateFormat,
+                dateRegex,
+                baseDate,
+                baseDateFormat,
+              },
+              newDateExpected: date,
+              dateTimeDigitedExpected: date,
+              expectedLog: "from file name",
+            });
+
+            // Check also original file
+            expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+            const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
+            expect(DateTimeOriginal).toBe(undefined);
+            expect(DateTimeDigitized).toBe(undefined);
+          });
+        });
+      }
+
+      testFileName("day_23.jpg", "dd", "day_(\\S*)", "10-2013", "MM-yyyy", "2013:10:23 00:00:00");
+      testFileName("DAY_26.jpg", "dd", "DAY_(\\S*)", "11-2015", "MM-yyyy", "2015:11:26 00:00:00");
+      testFileName(
+        "DAY_HOUR-21-13.jpg",
+        "dd-HH",
+        "DAY_HOUR-(\\S*)",
+        "07-2020",
+        "MM-yyyy",
+        "2020:07:21 13:00:00"
+      );
+    });
+
+    describe("when dateRegex does not capture anything from fileName but baseDate is provided", () => {
+      it("should add baseDate to file", async () => {
+        const fileName = "gorilla.JPG";
+        const newFileName = "DAY_HOUR-21-13.jpg";
+        const outputFolder = path.resolve(TEMP_PATH, "modified");
+        await copyAssetToTempPath(fileName, newFileName);
+        const fileOrigin = tempPath(newFileName);
+
+        await expectModifiedDate({
+          inputPath: TEMP_PATH,
+          fileName: newFileName,
+          setDateOptions: {
+            outputFolder,
+            dateFormat: "dd-HH",
+            dateRegex: "DAY_HOUR_(\\S*)",
+            baseDate: "07-2020",
+            baseDateFormat: "MM-yyyy",
+          },
+          newDateExpected: "2020:07:01 00:00:00",
+          dateTimeDigitedExpected: "2020:07:01 00:00:00",
+          expectedLog: "from baseDate",
+        });
+
+        // Check also original file
+        expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+        const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
+        expect(DateTimeOriginal).toBe(undefined);
+        expect(DateTimeDigitized).toBe(undefined);
+      });
+    });
+
     describe("when dateRegex does not capture anything from fileName", () => {
       it("should trace warn and return false", async () => {
         const fileName = "gorilla.JPG";
@@ -494,8 +570,8 @@ describe("Exif", () => {
     });
 
     describe("when folder name is a valid date", () => {
-      function testFolderName(folderName, format, date) {
-        describe(`when folderName has format ${format} and outputFolder is different`, () => {
+      function testFolderName(folderName, dateFormat, date) {
+        describe(`when folderName has format ${dateFormat} and outputFolder is different`, () => {
           it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
             const fileName = "gorilla.JPG";
             const outputFolder = path.resolve(TEMP_PATH, "modified");
