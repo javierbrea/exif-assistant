@@ -1,5 +1,6 @@
 const path = require("path");
 const fsExtra = require("fs-extra");
+const globule = require("globule");
 
 async function moveFileToFolder(filePath, destFolder) {
   const fileName = path.basename(filePath);
@@ -23,9 +24,33 @@ function removeExtension(fileName) {
   return fileName.split(".")[0];
 }
 
+function toAbsolute(filePath) {
+  return path.resolve(process.cwd(), filePath);
+}
+
+function findFolderFiles(folderPath) {
+  return globule.find("**/*", {
+    srcBase: folderPath,
+    prefixBase: true,
+  });
+}
+
+function getFolderName(filePath) {
+  return path.basename(path.dirname(filePath));
+}
+
+function fileOutputFolderChangingBasePath(filePath, basePath, newBasePath) {
+  const relativePath = path.relative(basePath, filePath);
+  return path.dirname(path.resolve(newBasePath, relativePath));
+}
+
 module.exports = {
   moveFileToFolder,
   copyFileToFolder,
   moveOrCopyFileToSubfolder,
   removeExtension,
+  toAbsolute,
+  findFolderFiles,
+  getFolderName,
+  fileOutputFolderChangingBasePath,
 };

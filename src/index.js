@@ -1,9 +1,11 @@
-const { tracer } = require("./support/tracer");
+const { program } = require("./program");
 
-function start() {
-  tracer.info("Hello world!");
+async function run() {
+  await program.parseAsync();
 }
 
+run();
+
 module.exports = {
-  start,
+  run,
 };
