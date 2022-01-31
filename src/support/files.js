@@ -3,22 +3,34 @@ const fsExtra = require("fs-extra");
 const fs = require("fs");
 const globule = require("globule");
 
+function dirName(filePath) {
+  return path.dirname(filePath);
+}
+
+function baseName(filePath) {
+  return path.basename(filePath);
+}
+
+function resolve(basePath, relativePath) {
+  return path.resolve(basePath, relativePath);
+}
+
 async function moveFileToFolder(filePath, destFolder) {
-  const fileName = path.basename(filePath);
-  return fsExtra.move(filePath, path.resolve(destFolder, fileName), { overwrite: true });
+  const fileName = baseName(filePath);
+  return fsExtra.move(filePath, resolve(destFolder, fileName), { overwrite: true });
 }
 
 async function copyFileToFolder(filePath, destFolder) {
-  const fileName = path.basename(filePath);
-  return fsExtra.copy(filePath, path.resolve(destFolder, fileName));
+  const fileName = baseName(filePath);
+  return fsExtra.copy(filePath, resolve(destFolder, fileName));
 }
 
 async function moveOrCopyFileToSubfolder(filePath, outputFolder, subfolder) {
-  const fileFolder = path.dirname(filePath);
+  const fileFolder = dirName(filePath);
   if (fileFolder === outputFolder) {
-    return moveFileToFolder(filePath, path.resolve(outputFolder, subfolder));
+    return moveFileToFolder(filePath, resolve(outputFolder, subfolder));
   }
-  return copyFileToFolder(filePath, path.resolve(outputFolder, subfolder));
+  return copyFileToFolder(filePath, resolve(outputFolder, subfolder));
 }
 
 function removeExtension(fileName) {
@@ -26,7 +38,7 @@ function removeExtension(fileName) {
 }
 
 function toAbsolute(filePath) {
-  return path.resolve(process.cwd(), filePath);
+  return resolve(process.cwd(), filePath);
 }
 
 function isFile(filePath) {
@@ -43,12 +55,28 @@ function findFolderFiles(folderPath) {
 }
 
 function getFolderName(filePath) {
-  return path.basename(path.dirname(filePath));
+  return baseName(dirName(filePath));
+}
+
+function getFileName(filePath) {
+  return baseName(filePath);
 }
 
 function fileOutputFolderChangingBasePath(filePath, basePath, newBasePath) {
   const relativePath = path.relative(basePath, filePath);
-  return path.dirname(path.resolve(newBasePath, relativePath));
+  return dirName(resolve(newBasePath, relativePath));
+}
+
+function readFile(filePath) {
+  return fsExtra.readFile(filePath);
+}
+
+function writeFile(filePath, fileContent) {
+  return fsExtra.writeFile(filePath, fileContent);
+}
+
+function ensureDir(dirPath) {
+  return fsExtra.ensureDir(dirPath);
 }
 
 module.exports = {
@@ -59,5 +87,11 @@ module.exports = {
   toAbsolute,
   findFolderFiles,
   getFolderName,
+  getFileName,
   fileOutputFolderChangingBasePath,
+  dirName,
+  readFile,
+  writeFile,
+  ensureDir,
+  resolve,
 };

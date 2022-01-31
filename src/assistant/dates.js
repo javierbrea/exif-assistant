@@ -1,5 +1,3 @@
-const path = require("path");
-
 const { isSupportedFile, readExifDates, moveAndUpdateExifDates } = require("../exif/fileMethods");
 const {
   HUMAN_DATE_TIME_ORIGINAL_PROPERTY,
@@ -15,6 +13,8 @@ const {
   moveOrCopyFileToSubfolder,
   removeExtension,
   copyFileToFolder,
+  getFileName,
+  resolve,
 } = require("../support/files");
 const { Tracer } = require("../support/tracer");
 
@@ -74,7 +74,7 @@ async function setDate(
   } = {}
 ) {
   let parsedBaseDate, isDateAccordingToOptions, formatForExifAccordingToOptions;
-  const fileName = path.basename(filePath);
+  const fileName = getFileName(filePath);
 
   const traceSet = TraceSetDate(fileName, setDigitized);
 
@@ -123,7 +123,7 @@ async function setDate(
     if (setDigitized) {
       datesToSet[HUMAN_DATE_TIME_DIGITIZED_PROPERTY] = originalDate;
     }
-    await moveAndUpdateExifDates(filePath, path.resolve(outputFolder, fileName), datesToSet);
+    await moveAndUpdateExifDates(filePath, resolve(outputFolder, fileName), datesToSet);
     return true;
   };
 

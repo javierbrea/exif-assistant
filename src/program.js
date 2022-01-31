@@ -1,9 +1,10 @@
 const { Command, Option } = require("commander");
-const program = new Command();
 
 const { setDatesInFolder } = require("./assistant/runner");
 const { toAbsolute } = require("./support/files");
 const { setLevel } = require("./support/tracer");
+
+const program = new Command();
 
 const logOption = new Option("-l, --log <logLevel>", "Log level").choices([
   "silly",

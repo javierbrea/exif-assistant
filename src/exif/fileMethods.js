@@ -1,5 +1,3 @@
-const path = require("path");
-const fsExtra = require("fs-extra");
 const piexif = require("piexifjs");
 
 const {
@@ -10,13 +8,14 @@ const {
   toExifChildrenProperty,
 } = require("./data");
 const { Tracer } = require("../support/tracer");
+const { dirName, readFile, ensureDir, writeFile } = require("../support/files");
 
 const BINARY_FORMAT = "binary";
 
 const tracer = new Tracer("Exif");
 
 async function getBase64DataFromFile(filePath) {
-  const fileData = await fsExtra.readFile(filePath);
+  const fileData = await readFile(filePath);
   return fileData.toString(BINARY_FORMAT);
 }
 
@@ -28,8 +27,8 @@ async function moveAndWriteExif(filePath, newFilePath, exif) {
   const exifBinary = piexif.dump(exif);
   const newImageData = piexif.insert(exifBinary, await getBase64DataFromFile(filePath));
   const fileBuffer = Buffer.from(newImageData, BINARY_FORMAT);
-  await fsExtra.ensureDir(path.dirname(newFilePath));
-  return fsExtra.writeFile(newFilePath, fileBuffer);
+  await ensureDir(dirName(newFilePath));
+  return writeFile(newFilePath, fileBuffer);
 }
 
 async function readExifDates(filePath) {

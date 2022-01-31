@@ -1,6 +1,6 @@
-const { isArray, isNumber, isString, isUndefined } = require("./utils");
-
 const winston = require("winston");
+
+const { isArray, isNumber, isString, isUndefined } = require("./utils");
 
 const NEW_LINE = "\n";
 
