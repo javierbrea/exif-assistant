@@ -31,7 +31,8 @@ function setDateToFiles(files, options, folderPath) {
 function setDatesInFolder(inputFolder, options) {
   setDatesTracer.info(`Searching files in folder ${inputFolder}`);
   const files = findFolderFiles(inputFolder);
-  setDatesTracer.debug(`Files found:`, files);
+  setDatesTracer.info(`Files found:`, files.length);
+  setDatesTracer.debug(`Files found list:`, files);
   return setDateToFiles(files, options, inputFolder);
 }
 
