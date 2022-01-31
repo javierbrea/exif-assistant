@@ -5,7 +5,7 @@ const sinon = require("sinon");
 const { setDate } = require("../../../src/assistant/dates");
 const { readExifDates } = require("../../../src/exif/fileMethods");
 const { setLevel, _logger } = require("../../../src/support/tracer");
-const { formatForLogsFromExif } = require("../../../src/dates/format");
+const { formatForLogsFromExif } = require("../../../src/support/dates");
 
 const {
   assetPath,

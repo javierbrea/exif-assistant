@@ -4,10 +4,10 @@ const {
   getFolderName,
   fileOutputFolderChangingBasePath,
   toAbsolute,
-} = require("../files/utils");
+} = require("../support/files");
 const { setDate } = require("./dates");
 
-const tracer = new Tracer("Runner");
+const setDatesTracer = new Tracer("Set Dates");
 
 function SetDateToFile(options, inputFolder) {
   return function (filePath) {
@@ -18,7 +18,7 @@ function SetDateToFile(options, inputFolder) {
       outputFolder: fileOutputFolderChangingBasePath(filePath, inputFolder, newBasePath),
       isOverwrite: newBasePath !== inputFolder,
     };
-    tracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
+    setDatesTracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
     return setDate(filePath, fileOptions);
   };
 }
@@ -29,9 +29,9 @@ function setDateToFiles(files, options, folderPath) {
 }
 
 function setDatesInFolder(inputFolder, options) {
-  tracer.info(`Searching files in folder ${inputFolder}`);
+  setDatesTracer.info(`Searching files in folder ${inputFolder}`);
   const files = findFolderFiles(inputFolder);
-  tracer.debug(`Files found:`, files);
+  setDatesTracer.debug(`Files found:`, files);
   return setDateToFiles(files, options, inputFolder);
 }
 

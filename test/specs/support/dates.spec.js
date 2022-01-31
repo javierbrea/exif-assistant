@@ -1,4 +1,4 @@
-const { dateFromString, formatForExif, isDate } = require("../../../src/dates/format");
+const { dateFromString, formatForExif, isDate } = require("../../../src/support/dates");
 
 describe("Dates format", () => {
   describe("isDate method", () => {

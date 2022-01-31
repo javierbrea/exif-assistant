@@ -10,8 +10,12 @@ const {
   isDate,
   dateFromString,
   formatForLogsFromExif,
-} = require("../dates/format");
-const { moveOrCopyFileToSubfolder, removeExtension, copyFileToFolder } = require("../files/utils");
+} = require("../support/dates");
+const {
+  moveOrCopyFileToSubfolder,
+  removeExtension,
+  copyFileToFolder,
+} = require("../support/files");
 const { Tracer } = require("../support/tracer");
 
 const tracer = new Tracer("Set Date");

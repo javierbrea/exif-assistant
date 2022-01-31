@@ -1,5 +1,9 @@
-// const index = require("../../src/index");
+const index = require("../../src/index");
 
-describe.skip("Index file", () => {
-  describe("start method", () => {});
+describe("Index file", () => {
+  describe("run method", () => {
+    it("should exist", () => {
+      expect(index.run).toBeDefined();
+    });
+  });
 });
