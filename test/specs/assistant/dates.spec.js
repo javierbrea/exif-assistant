@@ -5,6 +5,7 @@ const sinon = require("sinon");
 const { setDate } = require("../../../src/assistant/dates");
 const { readExifDates } = require("../../../src/exif/fileMethods");
 const { setLevel, _logger } = require("../../../src/support/tracer");
+const { formatForLogsFromExif } = require("../../../src/dates/format");
 
 const {
   assetPath,
@@ -59,7 +60,9 @@ describe("Exif", () => {
       const digitedHasToChange = options.setDigitized !== false;
       const dateTimeDigitizedMessage = digitedHasToChange ? ` and DateTimeDigitized` : "";
       expectLog(
-        `${fileName}: Setting DateTimeOriginal${dateTimeDigitizedMessage} to ${newDateExpected},`,
+        `${fileName}: Setting DateTimeOriginal${dateTimeDigitizedMessage} to ${formatForLogsFromExif(
+          newDateExpected
+        )},`,
         spy
       );
       if (expectedLog) {
@@ -138,39 +141,39 @@ describe("Exif", () => {
           });
         });
 
-        describe("when baseDate is provided and fromDigitized is false", () => {
+        describe("when fallbackDate is provided and fromDigitized is false", () => {
           it("should add DateTimeOriginal and modify DateTimeDigitized", async () => {
             const fileName = "sphinx.jpg";
-            const baseDate = "2009-09-09 09:30:00";
+            const fallbackDate = "2009-09-09 09:30:00";
             const date = "2009:09:09 09:30:00";
             await expectModifiedDate({
               fileName,
               setDateOptions: {
-                baseDate,
+                fallbackDate,
                 fromDigitized: false,
                 modify: true,
               },
               newDateExpected: date,
-              expectedLog: "from baseDate option",
+              expectedLog: "from fallbackDate option",
             });
           });
 
           it("should add DateTimeOriginal and not modify DateTimeDigitized if setDigitized is false", async () => {
             const fileName = "sphinx.jpg";
             const { metadata } = assetData(fileName);
-            const baseDate = "2009-09-09 09:30:00";
+            const fallbackDate = "2009-09-09 09:30:00";
             const date = "2009:09:09 09:30:00";
             await expectModifiedDate({
               fileName,
               setDateOptions: {
-                baseDate,
+                fallbackDate,
                 fromDigitized: false,
                 setDigitized: false,
                 modify: true,
               },
               newDateExpected: date,
               dateTimeDigitedExpected: metadata.DateTimeDigitized,
-              expectedLog: "from baseDate option",
+              expectedLog: "from fallbackDate option",
             });
           });
         });
@@ -263,43 +266,43 @@ describe("Exif", () => {
           expect(result).toBe(false);
         });
 
-        it("should add DateTimeOriginal and modify DateTimeDigitized if baseDate is provided", async () => {
+        it("should add DateTimeOriginal and modify DateTimeDigitized if fallbackDate is provided", async () => {
           const fileName = "sphinx-no-date-original.jpg";
-          const baseDate = "2009-09-09 09:30:00";
+          const fallbackDate = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
           await expectModifiedDate({
             fileName,
             setDateOptions: {
-              baseDate,
+              fallbackDate,
               fromDigitized: false,
             },
             newDateExpected: date,
-            expectedLog: "from baseDate option",
+            expectedLog: "from fallbackDate option",
           });
         });
 
-        it("should add DateTimeOriginal and not modify DateTimeDigitized if baseDate is provided but setDigitized is false", async () => {
+        it("should add DateTimeOriginal and not modify DateTimeDigitized if fallbackDate is provided but setDigitized is false", async () => {
           const fileName = "sphinx-no-date-original.jpg";
           const { metadata } = assetData(fileName);
-          const baseDate = "2009-09-09 09:30:00";
+          const fallbackDate = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
           await expectModifiedDate({
             fileName,
             setDateOptions: {
-              baseDate,
+              fallbackDate,
               fromDigitized: false,
               setDigitized: false,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: metadata.DateTimeDigitized,
-            expectedLog: "from baseDate option",
+            expectedLog: "from fallbackDate option",
           });
         });
       });
     });
 
     describe("when date is not found", () => {
-      describe("when moveUnknownToSubfolder option is provided", () => {
+      describe("when moveUnresolvedTo option is provided", () => {
         it("should copy the file to a subfolder if outputFolder is not the same in which the file is", async () => {
           const spy = spyTracer("info");
           const fileName = "gorilla.JPG";
@@ -310,7 +313,7 @@ describe("Exif", () => {
           await copyAssetToTempPath(fileName);
           await setDate(fileOrigin, {
             outputFolder,
-            moveUnknownToSubfolder: unknownDatesSubDir,
+            moveUnresolvedTo: unknownDatesSubDir,
           });
           expectLog(`${fileName}: Moving to unknown subfolder`, spy);
           expect(fsExtra.existsSync(fileOrigin)).toBe(true);
@@ -329,7 +332,7 @@ describe("Exif", () => {
           await copyAssetToTempPath(fileName);
           await setDate(fileOrigin, {
             outputFolder,
-            moveUnknownToSubfolder: unknownDatesSubDir,
+            moveUnresolvedTo: unknownDatesSubDir,
           });
           expectLog(`${fileName}: Moving to unknown subfolder`, spy);
           expect(fsExtra.existsSync(fileOrigin)).toBe(false);
@@ -522,8 +525,8 @@ describe("Exif", () => {
       );
     });
 
-    describe("when dateRegex does not capture anything from fileName but baseDate is provided", () => {
-      it("should add baseDate to file", async () => {
+    describe("when dateRegex does not capture anything from fileName but fallbackDate is provided", () => {
+      it("should add fallbackDate to file", async () => {
         const fileName = "gorilla.JPG";
         const newFileName = "DAY_HOUR-21-13.jpg";
         const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -537,12 +540,12 @@ describe("Exif", () => {
             outputFolder,
             dateFormat: "dd-HH",
             dateRegex: "DAY_HOUR_(\\S*)",
-            baseDate: "07-2020",
-            baseDateFormat: "MM-yyyy",
+            fallbackDate: "07-2020",
+            fallbackDateFormat: "MM-yyyy",
           },
           newDateExpected: "2020:07:01 00:00:00",
           dateTimeDigitedExpected: "2020:07:01 00:00:00",
-          expectedLog: "from baseDate",
+          expectedLog: "from fallbackDate",
         });
 
         // Check also original file

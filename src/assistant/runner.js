@@ -16,6 +16,7 @@ function SetDateToFile(options, inputFolder) {
       ...options,
       folderName: getFolderName(filePath),
       outputFolder: fileOutputFolderChangingBasePath(filePath, inputFolder, newBasePath),
+      isOverwrite: newBasePath !== inputFolder,
     };
     tracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
     return setDate(filePath, fileOptions);

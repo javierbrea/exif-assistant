@@ -5,8 +5,13 @@ const {
   HUMAN_DATE_TIME_ORIGINAL_PROPERTY,
   HUMAN_DATE_TIME_DIGITIZED_PROPERTY,
 } = require("../exif/data");
-const { formatForExif, isDate, dateFromString } = require("../dates/format");
-const { moveOrCopyFileToSubfolder, removeExtension } = require("../files/utils");
+const {
+  formatForExif,
+  isDate,
+  dateFromString,
+  formatForLogsFromExif,
+} = require("../dates/format");
+const { moveOrCopyFileToSubfolder, removeExtension, copyFileToFolder } = require("../files/utils");
 const { Tracer } = require("../support/tracer");
 
 const tracer = new Tracer("Set Date");
@@ -15,7 +20,9 @@ function TraceSetDate(fileName, setDigitized) {
   return function (newValue, valueFrom) {
     const setDigitedMessage = setDigitized ? ` and ${HUMAN_DATE_TIME_DIGITIZED_PROPERTY}` : "";
     tracer.info(
-      `${fileName}: Setting ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}${setDigitedMessage} to ${newValue}, from ${valueFrom}`
+      `${fileName}: Setting ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}${setDigitedMessage} to ${formatForLogsFromExif(
+        newValue
+      )}, from ${valueFrom}`
     );
   };
 }
@@ -45,17 +52,21 @@ async function setDate(
   {
     folderName, // TODO, accept array of folder names in order to check parent folder names
     outputFolder,
+    isSameOutputFolder,
     date,
     dateFormat,
     dateRegex,
     baseDate,
     baseDateFormat,
+    fallbackDate,
+    fallbackDateFormat,
     modify = false,
     fromDigitized = true,
     fromFile = true,
     fromFolder = true,
     setDigitized = true,
-    moveUnknownToSubfolder,
+    copyUnresolved, // Copy also unresolved files when move is true and no `moveUnresolvedToSubfolder` is provided
+    moveUnresolvedTo,
   } = {}
 ) {
   let parsedBaseDate, isDateAccordingToOptions, formatForExifAccordingToOptions;
@@ -84,6 +95,18 @@ async function setDate(
   }
 
   if (!(await isSupportedFile(filePath))) {
+    if (!!moveUnresolvedTo) {
+      tracer.info(
+        `${fileName}: Moving to ${moveUnresolvedTo} subfolder because file type is not supported`
+      );
+      await moveOrCopyFileToSubfolder(filePath, outputFolder, moveUnresolvedTo);
+      return false;
+    }
+    if (!!copyUnresolved && !isSameOutputFolder) {
+      tracer.info(`${fileName}: Copying to output folder because file type is not supported`);
+      await copyFileToFolder(filePath, outputFolder);
+      return false;
+    }
     tracer.warn(`${fileName}: File type is not supported. Skipping`);
     return false;
   }
@@ -135,20 +158,23 @@ async function setDate(
     return setDates(dateToSet);
   }
 
-  // Set date from baseDate
-  if (!!baseDate) {
-    const dateToSet = formatForExif(baseDate, baseDateFormat);
-    traceSet(dateToSet, "baseDate option");
+  // Set date from fallbackDate
+  if (!!fallbackDate) {
+    const dateToSet = formatForExif(fallbackDate, fallbackDateFormat);
+    traceSet(dateToSet, "fallbackDate option");
     return setDates(dateToSet);
   }
 
-  // Move to unkown subfolder
-  if (!!moveUnknownToSubfolder) {
-    tracer.info(
-      `${fileName}: Moving to ${moveUnknownToSubfolder} subfolder because no date was found`
-    );
-    await moveOrCopyFileToSubfolder(filePath, outputFolder, moveUnknownToSubfolder);
+  // Move unresolved to subfolder
+  if (!!moveUnresolvedTo) {
+    tracer.info(`${fileName}: Moving to ${moveUnresolvedTo} subfolder because no date was found`);
+    await moveOrCopyFileToSubfolder(filePath, outputFolder, moveUnresolvedTo);
     return false;
+  }
+
+  if (!!copyUnresolved && !isSameOutputFolder) {
+    tracer.info(`${fileName}: Copying to output folder because no date was found`);
+    await copyFileToFolder(filePath, outputFolder);
   }
 
   tracer.verbose(`${fileName}: No date was found to set. Skipping`);

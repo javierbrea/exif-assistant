@@ -21,10 +21,7 @@ function setLogLevel(level) {
   }
 }
 
-program
-  .name("exif-assistant")
-  .description("Set exif data to all files in a folder")
-  .version("0.0.1-beta.1");
+program.name("exif-assistant").description("Set exif data to image files").version("0.0.1-beta.1");
 
 program
   .command("set-dates")
@@ -33,13 +30,15 @@ program
   .addOption(logOption)
   .option("-o, --outputFolder <outputFolder>", "Output folder", ".")
   .option("-d, --date <date>", "Date to be set")
-  .option("-f, --dateFormat <dateFormat>", "Format of dates")
-  .option("-r, --dateRegex <dateRegex>", "Regex used to get date from file or folder names")
   .option(
-    "-b, --baseDate <baseDate>",
-    "Date used to complete dates when they are partial. Used also as fallback date when it is not found anywhere else"
+    "-f, --dateFormat <dateFormat>",
+    "Format of dates from date option, file or folder names"
   )
+  .option("-r, --dateRegex <dateRegex>", "Regex used to get date from file or folder names")
+  .option("-b, --baseDate <baseDate>", "Date used to complete dates when they are partial")
   .option("--baseDateFormat <baseDateFormat>", "Format of baseDate")
+  .option("-f, --fallbackDate <fallbackDate>", "Set this date when it is not found anywhere else")
+  .option("--fallbackDateFormat <fallbackDateFormat>", "Format of fallbackDate")
   .option("-m, --modify", "Modify already defined dates", false)
   .option(
     "--no-fromDigitized",
@@ -49,8 +48,12 @@ program
   .option("--no-fromFolder", "Do not use folder name to set date")
   .option("--no-setDigitized", "Do not set also DateTimeDigitized")
   .option(
-    "-u, --moveUnknownToSubfolder <moveUnknownToSubfolder>",
-    "Folder name. If no date is found for a file, create a subfolder with this name and move the file into it"
+    "-u, --moveUnresolvedTo <moveUnresolvedTo>",
+    "If no date is found for a file or it is not supported, create a subfolder with this name and move the file into it"
+  )
+  .option(
+    "-c, --copyUnresolved",
+    "Copy also files with no date and not supported files to output folder"
   )
   .showHelpAfterError()
   .action((folderPath, options) => {

@@ -1,7 +1,7 @@
 {
   "name": "exif-assistant",
   "version": "0.0.1-beta.1",
-  "description": "CLI tool for adding missing EXIF metadata",
+  "description": "CLI tool for setting EXIF metadata",
   "keywords": [
     "exif",
     "wizard",
@@ -23,6 +23,7 @@
     "exif-assistant": "./bin/exif-assistant"
   },
   "scripts": {
+    "start": "node bin/exif-assistant",
     "lint": "eslint src *.js test",
     "lint-staged": "lint-staged",
     "test": "jest --runInBand --detectOpenHandles",

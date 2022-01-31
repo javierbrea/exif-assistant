@@ -1,5 +1,6 @@
 const path = require("path");
 const fsExtra = require("fs-extra");
+const fs = require("fs");
 const globule = require("globule");
 
 async function moveFileToFolder(filePath, destFolder) {
@@ -28,11 +29,17 @@ function toAbsolute(filePath) {
   return path.resolve(process.cwd(), filePath);
 }
 
+function isFile(filePath) {
+  return fs.lstatSync(filePath).isFile();
+}
+
 function findFolderFiles(folderPath) {
-  return globule.find("**/*", {
-    srcBase: folderPath,
-    prefixBase: true,
-  });
+  return globule
+    .find("**/*", {
+      srcBase: folderPath,
+      prefixBase: true,
+    })
+    .filter(isFile);
 }
 
 function getFolderName(filePath) {

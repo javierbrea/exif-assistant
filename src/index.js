@@ -4,8 +4,6 @@ async function run() {
   await program.parseAsync();
 }
 
-run();
-
 module.exports = {
   run,
 };
