@@ -28,6 +28,7 @@ async function copyFileToFolder(filePath, destFolder) {
 async function moveOrCopyFileToSubfolder(filePath, outputFolder, subfolder) {
   const fileFolder = dirName(filePath);
   console.log({
+    filePath,
     fileFolder,
     outputFolder,
   });
