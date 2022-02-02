@@ -17,11 +17,11 @@ const IMAGE_NOT_SUPPORTED = "wadi-rum.png";
 const UNRESOLVED_FOLDER = "unresolved";
 const OUTPUT_FOLDER = tempPath("output");
 
-function resolveOutputPath() {
+function outputPath() {
   return path.resolve.apply(null, [TEMP_PATH, OUTPUT_FOLDER, ...arguments]);
 }
 
-function resolveUnresolvedPath() {
+function unresolvedPath() {
   return path.resolve.apply(null, [TEMP_PATH, UNRESOLVED_FOLDER, ...arguments]);
 }
 
@@ -72,20 +72,20 @@ describe("setDatesInFolder", () => {
       });
 
       it("should have moved images with no date to unresolved folder", async () => {
-        expect(existsSync(resolveUnresolvedPath(IMAGE_NO_DATE))).toEqual(true);
+        expect(existsSync(unresolvedPath(IMAGE_NO_DATE))).toEqual(true);
         expect(existsSync(tempPath(IMAGE_NO_DATE))).toEqual(false);
-        expect(existsSync(resolveUnresolvedPath(IMAGE_NOT_SUPPORTED))).toEqual(true);
+        expect(existsSync(unresolvedPath(IMAGE_NOT_SUPPORTED))).toEqual(true);
         expect(existsSync(tempPath(IMAGE_NOT_SUPPORTED))).toEqual(false);
       });
 
       it("should have not moved images with no date to unresolved folder", async () => {
         expect(existsSync(tempPath(IMAGE_WITH_DATE))).toEqual(true);
-        expect(existsSync(resolveUnresolvedPath(IMAGE_WITH_DATE))).toEqual(false);
+        expect(existsSync(unresolvedPath(IMAGE_WITH_DATE))).toEqual(false);
       });
 
       it("should have not moved images with dateTimeDigited to unresolved folder", async () => {
         expect(existsSync(tempPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(true);
-        expect(existsSync(resolveUnresolvedPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(false);
+        expect(existsSync(unresolvedPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(false);
       });
 
       it("should have set DateTimeOriginal to image with DateTimeDigited", async () => {
@@ -184,16 +184,16 @@ describe("setDatesInFolder", () => {
       });
 
       it("should have not copied image with no date", async () => {
-        expect(existsSync(resolveOutputPath(IMAGE_NO_DATE))).toEqual(false);
+        expect(existsSync(outputPath(IMAGE_NO_DATE))).toEqual(false);
       });
 
       it("should have not copied image with date", async () => {
-        expect(existsSync(resolveOutputPath(IMAGE_WITH_DATE))).toEqual(false);
+        expect(existsSync(outputPath(IMAGE_WITH_DATE))).toEqual(false);
       });
 
       it("should have set DateTimeOriginal to image with DateTimeDigited", async () => {
         const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(
-          resolveOutputPath(IMAGE_NO_DATE_ORIGINAL)
+          outputPath(IMAGE_NO_DATE_ORIGINAL)
         );
         expect(DateTimeOriginal).toEqual(DateTimeDigitized);
         expect(DateTimeDigitized).toEqual("2021:10:14 10:58:31");
@@ -213,15 +213,15 @@ describe("setDatesInFolder", () => {
       });
 
       it("should have copied all images", async () => {
-        expect(existsSync(resolveOutputPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(true);
-        expect(existsSync(resolveOutputPath(IMAGE_NO_DATE))).toEqual(true);
-        expect(existsSync(resolveOutputPath(IMAGE_WITH_DATE))).toEqual(true);
-        expect(existsSync(resolveOutputPath(IMAGE_NOT_SUPPORTED))).toEqual(true);
+        expect(existsSync(outputPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(true);
+        expect(existsSync(outputPath(IMAGE_NO_DATE))).toEqual(true);
+        expect(existsSync(outputPath(IMAGE_WITH_DATE))).toEqual(true);
+        expect(existsSync(outputPath(IMAGE_NOT_SUPPORTED))).toEqual(true);
       });
 
       it("should have set DateTimeOriginal to image with DateTimeDigited", async () => {
         const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(
-          resolveOutputPath(IMAGE_NO_DATE_ORIGINAL)
+          outputPath(IMAGE_NO_DATE_ORIGINAL)
         );
         expect(DateTimeOriginal).toEqual(DateTimeDigitized);
         expect(DateTimeDigitized).toEqual("2021:10:14 10:58:31");
@@ -244,23 +244,21 @@ describe("setDatesInFolder", () => {
       });
 
       it("should have copied unresolved images to unresolved folder", async () => {
-        expect(existsSync(resolveOutputPath(UNRESOLVED_FOLDER, IMAGE_NO_DATE))).toEqual(true);
-        expect(existsSync(resolveOutputPath(UNRESOLVED_FOLDER, IMAGE_NOT_SUPPORTED))).toEqual(
-          true
-        );
+        expect(existsSync(outputPath(UNRESOLVED_FOLDER, IMAGE_NO_DATE))).toEqual(true);
+        expect(existsSync(outputPath(UNRESOLVED_FOLDER, IMAGE_NOT_SUPPORTED))).toEqual(true);
       });
 
       it("should not have copied images with date to unresolved folder", async () => {
-        expect(existsSync(resolveOutputPath(UNRESOLVED_FOLDER, IMAGE_WITH_DATE))).toEqual(false);
+        expect(existsSync(outputPath(UNRESOLVED_FOLDER, IMAGE_WITH_DATE))).toEqual(false);
       });
 
       it("should not have copied images with date to output folder", async () => {
-        expect(existsSync(resolveOutputPath(IMAGE_WITH_DATE))).toEqual(false);
+        expect(existsSync(outputPath(IMAGE_WITH_DATE))).toEqual(false);
       });
 
       it("should have set DateTimeOriginal to image with DateTimeDigited", async () => {
         const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(
-          resolveOutputPath(IMAGE_NO_DATE_ORIGINAL)
+          outputPath(IMAGE_NO_DATE_ORIGINAL)
         );
         expect(DateTimeOriginal).toEqual(DateTimeDigitized);
         expect(DateTimeDigitized).toEqual("2021:10:14 10:58:31");
