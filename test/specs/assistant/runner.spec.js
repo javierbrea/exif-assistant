@@ -71,19 +71,19 @@ describe("setDatesInFolder", () => {
         await setDatesInFolder(TEMP_PATH, { moveUnresolvedTo: UNRESOLVED_FOLDER });
       });
 
-      it("should have moved images with no date to unresolved folder", async () => {
+      it("should have moved images with no date to unresolved folder", () => {
         expect(existsSync(unresolvedPath(IMAGE_NO_DATE))).toEqual(true);
         expect(existsSync(tempPath(IMAGE_NO_DATE))).toEqual(false);
         expect(existsSync(unresolvedPath(IMAGE_NOT_SUPPORTED))).toEqual(true);
         expect(existsSync(tempPath(IMAGE_NOT_SUPPORTED))).toEqual(false);
       });
 
-      it("should have not moved images with no date to unresolved folder", async () => {
+      it("should have not moved images with date to unresolved folder", () => {
         expect(existsSync(tempPath(IMAGE_WITH_DATE))).toEqual(true);
         expect(existsSync(unresolvedPath(IMAGE_WITH_DATE))).toEqual(false);
       });
 
-      it("should have not moved images with dateTimeDigited to unresolved folder", async () => {
+      it("should have not moved images with dateTimeDigited to unresolved folder", () => {
         expect(existsSync(tempPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(true);
         expect(existsSync(unresolvedPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(false);
       });
@@ -183,11 +183,11 @@ describe("setDatesInFolder", () => {
         await setDatesInFolder(TEMP_PATH, { outputFolder: OUTPUT_FOLDER });
       });
 
-      it("should have not copied image with no date", async () => {
+      it("should have not copied image with no date", () => {
         expect(existsSync(outputPath(IMAGE_NO_DATE))).toEqual(false);
       });
 
-      it("should have not copied image with date", async () => {
+      it("should have not copied image with date", () => {
         expect(existsSync(outputPath(IMAGE_WITH_DATE))).toEqual(false);
       });
 
@@ -212,7 +212,7 @@ describe("setDatesInFolder", () => {
         await setDatesInFolder(TEMP_PATH, { outputFolder: OUTPUT_FOLDER, copyAll: true });
       });
 
-      it("should have copied all images", async () => {
+      it("should have copied all images", () => {
         expect(existsSync(outputPath(IMAGE_NO_DATE_ORIGINAL))).toEqual(true);
         expect(existsSync(outputPath(IMAGE_NO_DATE))).toEqual(true);
         expect(existsSync(outputPath(IMAGE_WITH_DATE))).toEqual(true);
@@ -243,20 +243,20 @@ describe("setDatesInFolder", () => {
         });
       });
 
-      it("should have copied unresolved images to unresolved folder", async () => {
+      it("should have copied unresolved images to unresolved folder", () => {
         expect(existsSync(outputPath(UNRESOLVED_FOLDER, IMAGE_NO_DATE))).toEqual(true);
         expect(existsSync(outputPath(UNRESOLVED_FOLDER, IMAGE_NOT_SUPPORTED))).toEqual(true);
       });
 
-      it("should not have copied images with date to unresolved folder", async () => {
+      it("should not have copied images with date to unresolved folder", () => {
         expect(existsSync(outputPath(UNRESOLVED_FOLDER, IMAGE_WITH_DATE))).toEqual(false);
       });
 
-      it("should not have copied images with date to output folder", async () => {
+      it("should not have copied images with date to output folder", () => {
         expect(existsSync(outputPath(IMAGE_WITH_DATE))).toEqual(false);
       });
 
-      it("should have set DateTimeOriginal to image with DateTimeDigited", async () => {
+      it("should have set DateTimeOriginal to image with DateTimeDigited", () => {
         const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(
           outputPath(IMAGE_NO_DATE_ORIGINAL)
         );
@@ -385,4 +385,7 @@ describe("setDatesInFolder", () => {
       expect(DateTimeDigitized).toEqual("2021:05:01 00:00:00");
     });
   });
+
+  // TODO, test subfolders with file names in ISO
+  // TODO, test subfolders with file names with format, and copyAll
 });
