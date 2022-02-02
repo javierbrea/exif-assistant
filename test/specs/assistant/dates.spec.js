@@ -204,7 +204,7 @@ describe("Exif", () => {
           const result = await setDate(filePath, {
             date: "2022:06:16 12:00:00",
           });
-          expectLog(`date option is not a valid date. Skipping`, spy);
+          expectLog(`date option is not a valid date`, spy);
           expect(result).toBe(false);
         });
       });
@@ -217,7 +217,7 @@ describe("Exif", () => {
           const result = await setDate(filePath, {
             baseDate: "2022:06:16 12:00:00",
           });
-          expectLog(`baseDate option is not a valid date. Skipping`, spy);
+          expectLog(`baseDate option is not a valid date`, spy);
           expect(result).toBe(false);
         });
       });
@@ -262,7 +262,7 @@ describe("Exif", () => {
           const result = await setDate(filePath, {
             fromDigitized: false,
           });
-          expectLog(`${fileName}: No date was found to set. Skipping`, spy);
+          expectLog(`${fileName}: No date was found to set`, spy);
           expect(result).toBe(false);
         });
 
@@ -339,6 +339,79 @@ describe("Exif", () => {
           expect(
             fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))
           ).toBe(true);
+        });
+
+        it("should copy the file to outputFolder if copyAll is true and outputFolder is not the same in which the file is", async () => {
+          const spy = spyTracer("info");
+          const fileName = "gorilla.JPG";
+          const fileOrigin = tempPath(fileName);
+          const outputFolder = path.resolve(TEMP_PATH, "new-dates");
+
+          await copyAssetToTempPath(fileName);
+          await setDate(fileOrigin, {
+            outputFolder,
+            copyAll: true,
+          });
+          expectLog(`${fileName}: Copying to output folder`, spy);
+          expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+          expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
+        });
+
+        it("should not copy the file if copyAll is true but outputFolder is the same in which the file is", async () => {
+          const spy = spyTracer("verbose");
+          const fileName = "gorilla.JPG";
+          const fileOrigin = tempPath(fileName);
+          const outputFolder = TEMP_PATH;
+
+          await copyAssetToTempPath(fileName);
+          await setDate(fileOrigin, {
+            outputFolder,
+            copyAll: true,
+          });
+          expectLog(`${fileName}: No date was found to set`, spy);
+          expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+        });
+      });
+    });
+
+    describe("when is not supported", () => {
+      describe("when copyAll option is true", () => {
+        it("should copy the file if outputFolder is not the same in which the file is", async () => {
+          const spy = spyTracer("info");
+          const fileName = "wadi-rum.png";
+          const fileOrigin = tempPath(fileName);
+          const outputFolder = path.resolve(TEMP_PATH, "unsupported");
+
+          await copyAssetToTempPath(fileName);
+          await setDate(fileOrigin, {
+            outputFolder,
+            copyAll: true,
+          });
+          expectLog(`${fileName}: Copying to output folder`, spy);
+          expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+          expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
+        });
+      });
+
+      describe("when moveUnresolvedTo option is true", () => {
+        it("should copy the file if outputFolder is not the same in which the file is", async () => {
+          const spy = spyTracer("info");
+          const fileName = "wadi-rum.png";
+          const fileOrigin = tempPath(fileName);
+          const outputFolder = path.resolve(TEMP_PATH, "unsupported");
+          const unresolvedDir = "unresolved";
+
+          await copyAssetToTempPath(fileName);
+          await setDate(fileOrigin, {
+            outputFolder,
+            copyAll: true,
+            moveUnresolvedTo: unresolvedDir,
+          });
+          expectLog(`${fileName}: Moving to unresolved subfolder`, spy);
+          expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+          expect(fsExtra.existsSync(path.resolve(outputFolder, unresolvedDir, fileName))).toBe(
+            true
+          );
         });
       });
     });
@@ -567,7 +640,7 @@ describe("Exif", () => {
         const result = await setDate(fileOrigin, {
           dateRegex: "prefix(x)suffix",
         });
-        expectLog(`${newFileName}: No date was found to set. Skipping`, spy);
+        expectLog(`${newFileName}: No date was found to set`, spy);
         expect(result).toBe(false);
       });
     });

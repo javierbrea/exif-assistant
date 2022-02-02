@@ -1,6 +1,13 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const NO_COVERAGE_REQUIRED = {
+  functions: 0,
+  branches: 0,
+  statements: 0,
+  lines: 0,
+};
+
 module.exports = {
   // Automatically clear mock calls and instances between every test
   clearMocks: true,
@@ -22,6 +29,8 @@ module.exports = {
       lines: 100,
       statements: 100,
     },
+    "./src/index.js": NO_COVERAGE_REQUIRED,
+    "./src/program.js": NO_COVERAGE_REQUIRED,
   },
 
   // The test environment that will be used for testing
@@ -29,5 +38,5 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: ["<rootDir>/test/**/*.spec.js"],
-  // testMatch: ["<rootDir>/test/**/format.spec.js"],
+  // testMatch: ["<rootDir>/test/**/runner.spec.js"],
 };

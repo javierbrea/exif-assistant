@@ -47,7 +47,14 @@ function copyAssetToTempPath(fileName, newName) {
 }
 
 function copyAssetsToTempPath(fileNames) {
-  return Promise.all(fileNames.map(copyAssetToTempPath));
+  return Promise.all(
+    fileNames.map((fileName) => {
+      if (Array.isArray(fileName)) {
+        return copyAssetToTempPath(fileName[0], fileName[1]);
+      }
+      return copyAssetToTempPath(fileName);
+    })
+  );
 }
 
 module.exports = {

@@ -16,7 +16,6 @@ function SetDateToFile(options, inputFolder) {
       ...options,
       folderName: getFolderName(filePath),
       outputFolder: fileOutputFolderChangingBasePath(filePath, inputFolder, newBasePath),
-      isOverwrite: newBasePath !== inputFolder,
     };
     setDatesTracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
     return setDate(filePath, fileOptions);
@@ -28,7 +27,7 @@ function setDateToFiles(files, options, folderPath) {
   return Promise.all(files.map(setDateToFile));
 }
 
-function setDatesInFolder(inputFolder, options) {
+function setDatesInFolder(inputFolder, options = {}) {
   setDatesTracer.info(`Searching files in folder ${inputFolder}`);
   const files = findFolderFiles(inputFolder);
   setDatesTracer.info(`Files found:`, files.length);

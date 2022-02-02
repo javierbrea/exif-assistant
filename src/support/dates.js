@@ -10,7 +10,7 @@ function dateFromString(string, stringDateFormat, baseDate) {
   return parse(string, stringDateFormat, baseDate || new Date());
 }
 
-function isDate(string, stringDateFormat, baseDate) {
+function isValidDate(string, stringDateFormat, baseDate) {
   return isValid(dateFromString(string, stringDateFormat, baseDate));
 }
 
@@ -22,9 +22,18 @@ function formatForLogsFromExif(exifDate) {
   return format(dateFromString(exifDate, EXIF_DATE_FORMAT), LOGS_DATE_FORMAT);
 }
 
+function dateFromStringUsingRegex(string, dateRegex) {
+  if (!dateRegex) {
+    return string;
+  }
+  const regexResult = new RegExp(dateRegex).exec(string);
+  return regexResult && regexResult[1];
+}
+
 module.exports = {
   dateFromString,
   formatForExif,
   formatForLogsFromExif,
-  isDate,
+  isValidDate,
+  dateFromStringUsingRegex,
 };

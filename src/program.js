@@ -52,10 +52,7 @@ program
     "-u, --moveUnresolvedTo <moveUnresolvedTo>",
     "If no date is found for a file or it is not supported, create a subfolder with this name and move the file into it"
   )
-  .option(
-    "-c, --copyUnresolved",
-    "Copy also files with no date and not supported files to output folder"
-  )
+  .option("-c, --copyAll", "Copy also not modified files to outputFolder")
   .showHelpAfterError()
   .action((folderPath, options) => {
     setLogLevel(options.log);

@@ -1,42 +1,42 @@
-const { dateFromString, formatForExif, isDate } = require("../../../src/support/dates");
+const { dateFromString, formatForExif, isValidDate } = require("../../../src/support/dates");
 
 describe("Dates format", () => {
-  describe("isDate method", () => {
+  describe("isValidDate method", () => {
     describe("when no format is provided", () => {
       it("should return true when string is valid ISO date", () => {
-        expect(isDate("2022-11-25")).toBe(true);
+        expect(isValidDate("2022-11-25")).toBe(true);
       });
 
       it("should return true when string is valid ISO date and time", () => {
-        expect(isDate("2022-11-25 23:40:56")).toBe(true);
+        expect(isValidDate("2022-11-25 23:40:56")).toBe(true);
       });
 
       it("should return false when string is not valid ISO date", () => {
-        expect(isDate("2022-23-25")).toBe(false);
+        expect(isValidDate("2022-23-25")).toBe(false);
       });
 
       it("should return false when string is not valid ISO date and time", () => {
-        expect(isDate("2022-11-25 30:40:56")).toBe(false);
+        expect(isValidDate("2022-11-25 30:40:56")).toBe(false);
       });
     });
 
     describe("when format is provided", () => {
       it("should return true when string is valid date according to format", () => {
-        expect(isDate("2022_11_25", "yyyy_MM_dd")).toBe(true);
+        expect(isValidDate("2022_11_25", "yyyy_MM_dd")).toBe(true);
       });
 
       it("should return false when string is not valid date according to format", () => {
-        expect(isDate("2022-11-25", "yyyy_MM_dd")).toBe(false);
+        expect(isValidDate("2022-11-25", "yyyy_MM_dd")).toBe(false);
       });
 
       it("should return true when string is valid partial date according to format", () => {
-        expect(isDate("11", "dd")).toBe(true);
+        expect(isValidDate("11", "dd")).toBe(true);
       });
     });
 
     describe("when baseDate is provided", () => {
       it("should return true when string is valid partial date according to format", () => {
-        expect(isDate("11", "dd", new Date())).toBe(true);
+        expect(isValidDate("11", "dd", new Date())).toBe(true);
       });
     });
   });
