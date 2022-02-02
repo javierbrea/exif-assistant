@@ -256,7 +256,7 @@ describe("setDatesInFolder", () => {
         expect(existsSync(outputPath(IMAGE_WITH_DATE))).toEqual(false);
       });
 
-      it("should have set DateTimeOriginal to image with DateTimeDigited", () => {
+      it("should have set DateTimeOriginal to image with DateTimeDigited", async () => {
         const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(
           outputPath(IMAGE_NO_DATE_ORIGINAL)
         );
