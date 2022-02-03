@@ -71,8 +71,7 @@ describe("setDatesInFolder", () => {
         await setDatesInFolder(TEMP_PATH, { moveUnresolvedTo: UNRESOLVED_FOLDER });
       });
 
-      //eslint-disable-next-line
-      it.only("should have moved images with no date to unresolved folder", () => {
+      it("should have moved images with no date to unresolved folder", () => {
         expect(existsSync(unresolvedPath(IMAGE_NO_DATE))).toEqual(true);
         expect(existsSync(unresolvedPath(IMAGE_NOT_SUPPORTED))).toEqual(true);
         expect(existsSync(tempPath(IMAGE_NO_DATE))).toEqual(false);

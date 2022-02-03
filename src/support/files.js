@@ -27,13 +27,7 @@ async function copyFileToFolder(filePath, destFolder) {
 
 async function moveOrCopyFileToSubfolder(filePath, outputFolder, subfolder) {
   const fileFolder = dirName(filePath);
-  console.log({
-    filePath,
-    fileFolder,
-    outputFolder,
-  });
   if (fileFolder === outputFolder) {
-    console.log("moving!");
     return moveFileToFolder(filePath, resolve(outputFolder, subfolder));
   }
   return copyFileToFolder(filePath, resolve(outputFolder, subfolder));
