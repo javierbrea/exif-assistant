@@ -57,7 +57,8 @@ function findFolderFiles(folderPath) {
       srcBase: folderPath,
       prefixBase: true,
     })
-    .filter(isFile);
+    .filter(isFile)
+    .map(path.normalize);
 }
 
 function getFolderName(filePath) {
