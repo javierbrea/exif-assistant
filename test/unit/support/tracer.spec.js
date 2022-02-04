@@ -1,4 +1,4 @@
-const { _logger, _transports, tracer, Tracer, setLevel } = require("../../../../src/support/tracer");
+const { _logger, _transports, tracer, Tracer, setLevel } = require("../../../src/support/tracer");
 
 describe("Tracer", () => {
   describe("tracer object", () => {

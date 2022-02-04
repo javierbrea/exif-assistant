@@ -1,4 +1,4 @@
-const { setDatesInFolder } = require("../../../../src/assistant/runner");
+const { setDatesInFolder } = require("../../../src/assistant/runner");
 
 const {
   resetTempPath,
@@ -6,8 +6,8 @@ const {
   tempOutputPath,
   copyFixturesToTempPath,
   tempFixturesFolder,
-} = require("../../../support/assets");
-const { readExifDates } = require("../../../../src/exif/fileMethods");
+} = require("../../support/assets");
+const { readExifDates } = require("../../../src/exif/fileMethods");
 
 const FIXTURE = "one-partial-format";
 

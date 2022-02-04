@@ -1,5 +1,5 @@
 const { existsSync } = require("fs-extra");
-const { setDatesInFolder } = require("../../../../src/assistant/runner");
+const { setDatesInFolder } = require("../../../src/assistant/runner");
 
 const {
   resetTempPath,
@@ -11,8 +11,8 @@ const {
   addJPGExtension,
   tempUnresolvedPath,
   tempOutputPath,
-} = require("../../../support/assets");
-const { readExifDates } = require("../../../../src/exif/fileMethods");
+} = require("../../support/assets");
+const { readExifDates } = require("../../../src/exif/fileMethods");
 
 const IMAGE_NO_DATE_ORIGINAL = "sphinx-no-date-original.jpg";
 const IMAGE_NO_DATE = "gorilla.JPG";
