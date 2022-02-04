@@ -93,7 +93,7 @@ function OptionsAreValid({ isDate, baseDate, parsedBaseDate, date }) {
       tracer.warn(`date option is not a valid date`);
       return false;
     }
-
+    // TODO, throw error. Catch errors in bundle command
     return true;
   };
 }
@@ -169,7 +169,7 @@ function SkipOrGetFileDates({
 async function setDate(
   filePath,
   {
-    folderName, // TODO, accept array of folder names in order to check parent folder names
+    folderName, // TODO, accept array of folder names in order to check parent folder names. Rename into date-candidates
     outputFolder,
     date,
     dateFormat,
@@ -180,11 +180,13 @@ async function setDate(
     fallbackDateFormat,
     modify = false,
     fromDigitized = true,
-    fromFile = true,
-    fromFolder = true,
+    fromFile = true, // TODO, rename into fromFileName
+    fromFolder = true, // TODO, rename into fromDateCandidates
     setDigitized = true,
-    copyAll, // Copy also files not being modified
-    moveUnresolvedTo,
+    copyAll, // Copy also files not being modified //Rename into copyIfNotModified
+    moveUnresolvedTo, //Rename into moveToIfUnresolved
+    // TODO - baseDateFromDateCandidates?
+    // TODO - baseDateFallback?
   } = {}
 ) {
   const parsedBaseDate = getParsedBaseDate(baseDate, baseDateFormat);
@@ -269,5 +271,5 @@ async function setDate(
 }
 
 module.exports = {
-  setDate,
+  setDate, // TODO, rename file to setDate
 };

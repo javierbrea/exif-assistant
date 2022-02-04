@@ -23,11 +23,13 @@ function SetDateToFile(options, inputFolder) {
 }
 
 function setDateToFiles(files, options, folderPath) {
+  // TODO, validate options here
   const setDateToFile = SetDateToFile(options, folderPath);
   return Promise.all(files.map(setDateToFile));
 }
 
 function setDatesInFolder(inputFolder, options = {}) {
+  // TODO, rename to setDates. Also file
   setDatesTracer.info(`Searching files in folder ${inputFolder}`);
   const files = findFolderFiles(inputFolder);
   setDatesTracer.info(`Files found:`, files.length);
