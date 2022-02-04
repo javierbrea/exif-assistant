@@ -29,7 +29,7 @@ module.exports = {
       lines: 100,
       statements: 100,
     },
-    "./src/index.js": NO_COVERAGE_REQUIRED,
+    "./src/run.js": NO_COVERAGE_REQUIRED,
     "./src/program.js": NO_COVERAGE_REQUIRED,
   },
 
