@@ -169,7 +169,7 @@ function SkipOrGetFileDates({
 async function setDate(
   filePath,
   {
-    folderName, // TODO, accept array of folder names in order to check parent folder names. Rename into date-candidates
+    parentDateCandidates = [],
     outputFolder,
     date,
     dateFormat,
@@ -181,7 +181,7 @@ async function setDate(
     modify = false,
     fromDigitized = true,
     fromFile = true, // TODO, rename into fromFileName
-    fromFolder = true, // TODO, rename into fromDateCandidates
+    fromParentDates = true,
     setDigitized = true,
     copyAll, // Copy also files not being modified //Rename into copyIfNotModified
     moveUnresolvedTo, //Rename into moveToIfUnresolved
@@ -254,8 +254,8 @@ async function setDate(
   }
 
   // Set date from folder name
-  if (fromFolder && isDate(folderName)) {
-    return setDates(formatForExif(folderName), "folder name");
+  if (fromParentDates && isDate(parentDateCandidates[0])) {
+    return setDates(formatForExif(parentDateCandidates[0]), "parent date");
   }
 
   // Set date from fallbackDate
@@ -271,5 +271,5 @@ async function setDate(
 }
 
 module.exports = {
-  setDate, // TODO, rename file to setDate
+  setDate,
 };

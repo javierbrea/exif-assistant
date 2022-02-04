@@ -1,6 +1,6 @@
 const fsExtra = require("fs-extra");
 
-const { setDatesInFolder } = require("../../../src/assistant/runner");
+const { setDates } = require("../../../src/assistant/setDateMethods");
 
 const {
   resetTempPath,
@@ -23,7 +23,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDatesInFolder(tempFixturesFolder(FIXTURE), {
+      await setDates(tempFixturesFolder(FIXTURE), {
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
         modify: true,
@@ -75,7 +75,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDatesInFolder(tempFixturesFolder(FIXTURE), {
+      await setDates(tempFixturesFolder(FIXTURE), {
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
         copyAll: true,
@@ -149,7 +149,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDatesInFolder(tempFixturesFolder(FIXTURE), {
+      await setDates(tempFixturesFolder(FIXTURE), {
         outputFolder: TEMP_OUTPUT_FOLDER,
         copyAll: true,
         fromDigitized: false,

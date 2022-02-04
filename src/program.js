@@ -1,6 +1,6 @@
 const { Command, Option } = require("commander");
 
-const { setDatesInFolder } = require("./assistant/runner");
+const { setDates } = require("./assistant/setDateMethods");
 const { toAbsolute } = require("./support/files");
 const { setLevel } = require("./support/tracer");
 
@@ -46,7 +46,7 @@ program
     "Do not use DateTimeDigitized from file exif to set DateTimeOriginal"
   )
   .option("--no-fromFile", "Do not use file name to set date")
-  .option("--no-fromFolder", "Do not use folder name to set date")
+  .option("--no-fromFolders", "Do not use folder name to set date")
   .option("--no-setDigitized", "Do not set also DateTimeDigitized")
   .option(
     "-u, --moveUnresolvedTo <moveUnresolvedTo>",
@@ -56,7 +56,7 @@ program
   .showHelpAfterError()
   .action((folderPath, options) => {
     setLogLevel(options.log);
-    return setDatesInFolder(toAbsolute(folderPath), options);
+    return setDates(toAbsolute(folderPath), options);
   });
 
 module.exports = {

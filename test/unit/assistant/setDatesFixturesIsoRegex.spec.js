@@ -1,4 +1,4 @@
-const { setDatesInFolder } = require("../../../src/assistant/runner");
+const { setDates } = require("../../../src/assistant/setDateMethods");
 
 const {
   resetTempPath,
@@ -20,7 +20,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDatesInFolder(tempFixturesFolder(FIXTURE), {
+      await setDates(tempFixturesFolder(FIXTURE), {
         copyAll: true,
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,

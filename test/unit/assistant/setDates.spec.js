@@ -1,5 +1,5 @@
 const { existsSync } = require("fs-extra");
-const { setDatesInFolder } = require("../../../src/assistant/runner");
+const { setDates } = require("../../../src/assistant/setDateMethods");
 
 const {
   resetTempPath,
@@ -29,7 +29,7 @@ describe("setDates", () => {
       beforeAll(async () => {
         await resetTempPath();
         await copyAssetsToTempPath([IMAGE_NO_DATE_ORIGINAL, IMAGE_NO_DATE, IMAGE_WITH_DATE]);
-        await setDatesInFolder(TEMP_PATH);
+        await setDates(TEMP_PATH);
       });
 
       it("should have not set date to image with no date", async () => {
@@ -58,7 +58,7 @@ describe("setDates", () => {
           IMAGE_WITH_DATE,
           IMAGE_NOT_SUPPORTED,
         ]);
-        await setDatesInFolder(TEMP_PATH, { moveUnresolvedTo: UNRESOLVED_FOLDER });
+        await setDates(TEMP_PATH, { moveUnresolvedTo: UNRESOLVED_FOLDER });
       });
 
       it("should have moved images with no date to unresolved folder", () => {
@@ -96,7 +96,7 @@ describe("setDates", () => {
           IMAGE_WITH_DATE,
           IMAGE_NOT_SUPPORTED,
         ]);
-        await setDatesInFolder(TEMP_PATH, {
+        await setDates(TEMP_PATH, {
           date: "2009-12-22 12:30:00",
         });
       });
@@ -135,7 +135,7 @@ describe("setDates", () => {
           IMAGE_WITH_DATE,
           IMAGE_NOT_SUPPORTED,
         ]);
-        await setDatesInFolder(TEMP_PATH, {
+        await setDates(TEMP_PATH, {
           date: "2009-12-22 12:30:00",
           modify: true,
         });
@@ -170,7 +170,7 @@ describe("setDates", () => {
       beforeAll(async () => {
         await resetTempPath();
         await copyAssetsToTempPath([IMAGE_NO_DATE_ORIGINAL, IMAGE_NO_DATE, IMAGE_WITH_DATE]);
-        await setDatesInFolder(TEMP_PATH, { outputFolder: TEMP_OUTPUT_FOLDER });
+        await setDates(TEMP_PATH, { outputFolder: TEMP_OUTPUT_FOLDER });
       });
 
       it("should have not copied image with no date", () => {
@@ -199,7 +199,7 @@ describe("setDates", () => {
           IMAGE_WITH_DATE,
           IMAGE_NOT_SUPPORTED,
         ]);
-        await setDatesInFolder(TEMP_PATH, { outputFolder: TEMP_OUTPUT_FOLDER, copyAll: true });
+        await setDates(TEMP_PATH, { outputFolder: TEMP_OUTPUT_FOLDER, copyAll: true });
       });
 
       it("should have copied all images", () => {
@@ -227,7 +227,7 @@ describe("setDates", () => {
           IMAGE_WITH_DATE,
           IMAGE_NOT_SUPPORTED,
         ]);
-        await setDatesInFolder(TEMP_PATH, {
+        await setDates(TEMP_PATH, {
           outputFolder: TEMP_OUTPUT_FOLDER,
           moveUnresolvedTo: UNRESOLVED_FOLDER,
         });
@@ -268,7 +268,7 @@ describe("setDates", () => {
         [IMAGE_NO_DATE, NEW_IMAGE_NO_DATE],
         [IMAGE_WITH_DATE, NEW_IMAGE_WITH_DATE],
       ]);
-      await setDatesInFolder(TEMP_PATH);
+      await setDates(TEMP_PATH);
     });
 
     it("should have set date to image with no date", async () => {
@@ -308,7 +308,7 @@ describe("setDates", () => {
         [IMAGE_NO_DATE, NEW_IMAGE_NO_DATE],
         [IMAGE_WITH_DATE, NEW_IMAGE_WITH_DATE],
       ]);
-      await setDatesInFolder(TEMP_PATH, { fromDigitized: false });
+      await setDates(TEMP_PATH, { fromDigitized: false });
     });
 
     it("should have set date to image with no date", async () => {
@@ -348,7 +348,7 @@ describe("setDates", () => {
         [IMAGE_NO_DATE, NEW_IMAGE_NO_DATE],
         [IMAGE_WITH_DATE, NEW_IMAGE_WITH_DATE],
       ]);
-      await setDatesInFolder(TEMP_PATH, { fromDigitized: false, modify: true });
+      await setDates(TEMP_PATH, { fromDigitized: false, modify: true });
     });
 
     it("should have set date to image with no date", async () => {

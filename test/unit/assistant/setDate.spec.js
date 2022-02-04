@@ -2,7 +2,7 @@ const path = require("path");
 const fsExtra = require("fs-extra");
 const sinon = require("sinon");
 
-const { setDate } = require("../../../src/assistant/dates");
+const { setDate } = require("../../../src/assistant/setDate");
 const { readExifDates } = require("../../../src/exif/fileMethods");
 const { setLevel, _logger } = require("../../../src/support/tracer");
 const { formatForLogsFromExif } = require("../../../src/support/dates");
@@ -645,8 +645,8 @@ describe("Exif", () => {
       });
     });
 
-    describe("when folder name is a valid date", () => {
-      function testFolderName(folderName, dateFormat, date) {
+    describe("when parent date candidate is a valid date", () => {
+      function testParentDateCandidate(parentDateCandidate, dateFormat, date) {
         describe(`when folderName has format ${dateFormat} and outputFolder is different`, () => {
           it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
             const fileName = "gorilla.JPG";
@@ -659,11 +659,11 @@ describe("Exif", () => {
               fileName,
               setDateOptions: {
                 outputFolder,
-                folderName,
+                parentDateCandidates: [parentDateCandidate],
               },
               newDateExpected: date,
               dateTimeDigitedExpected: date,
-              expectedLog: "from folder name",
+              expectedLog: "from parent date",
             });
 
             // Check also original file
@@ -675,12 +675,12 @@ describe("Exif", () => {
         });
       }
 
-      testFolderName("2013-10-23 10:32:55", "YYYY-MM-dd hh:mm:ss", "2013:10:23 10:32:55");
-      testFolderName("2013-10-23 10:32", "YYYY-MM-dd hh:mm", "2013:10:23 10:32:00");
-      testFolderName("2013-10-23 10", "YYYY-MM-dd hh", "2013:10:23 10:00:00");
-      testFolderName("2013-10-23", "YYYY-MM-dd", "2013:10:23 00:00:00");
-      testFolderName("2013-10", "YYYY-MM", "2013:10:01 00:00:00");
-      testFolderName("2013", "YYYY", "2013:01:01 00:00:00");
+      testParentDateCandidate("2013-10-23 10:32:55", "YYYY-MM-dd hh:mm:ss", "2013:10:23 10:32:55");
+      testParentDateCandidate("2013-10-23 10:32", "YYYY-MM-dd hh:mm", "2013:10:23 10:32:00");
+      testParentDateCandidate("2013-10-23 10", "YYYY-MM-dd hh", "2013:10:23 10:00:00");
+      testParentDateCandidate("2013-10-23", "YYYY-MM-dd", "2013:10:23 00:00:00");
+      testParentDateCandidate("2013-10", "YYYY-MM", "2013:10:01 00:00:00");
+      testParentDateCandidate("2013", "YYYY", "2013:01:01 00:00:00");
 
       describe("when outputFolder is the same to file folder", () => {
         it("should add date to exif in original file", async () => {
@@ -693,11 +693,11 @@ describe("Exif", () => {
             inputPath: TEMP_PATH,
             fileName,
             setDateOptions: {
-              folderName,
+              parentDateCandidates: [folderName],
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
-            expectedLog: "from folder name",
+            expectedLog: "from parent date",
           });
         });
       });

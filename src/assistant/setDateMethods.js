@@ -5,16 +5,17 @@ const {
   fileOutputFolderChangingBasePath,
   toAbsolute,
 } = require("../support/files");
-const { setDate } = require("./dates");
+const { setDate } = require("./setDate");
 
 const setDatesTracer = new Tracer("Set Dates");
 
-function SetDateToFile(options, inputFolder) {
+function SetDateToFileInSubfolder(options, inputFolder) {
   return function (filePath) {
     const newBasePath = options.outputFolder ? toAbsolute(options.outputFolder) : inputFolder;
     const fileOptions = {
       ...options,
-      folderName: getFolderName(filePath),
+      parentDateCandidates: [getFolderName(filePath)],
+      fromParentDates: options.fromFolders,
       outputFolder: fileOutputFolderChangingBasePath(filePath, inputFolder, newBasePath),
     };
     setDatesTracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
@@ -24,12 +25,11 @@ function SetDateToFile(options, inputFolder) {
 
 function setDateToFiles(files, options, folderPath) {
   // TODO, validate options here
-  const setDateToFile = SetDateToFile(options, folderPath);
-  return Promise.all(files.map(setDateToFile));
+  const setDateToFileInSubfolder = SetDateToFileInSubfolder(options, folderPath);
+  return Promise.all(files.map(setDateToFileInSubfolder));
 }
 
-function setDatesInFolder(inputFolder, options = {}) {
-  // TODO, rename to setDates. Also file
+function setDates(inputFolder, options = {}) {
   setDatesTracer.info(`Searching files in folder ${inputFolder}`);
   const files = findFolderFiles(inputFolder);
   setDatesTracer.info(`Files found:`, files.length);
@@ -38,5 +38,5 @@ function setDatesInFolder(inputFolder, options = {}) {
 }
 
 module.exports = {
-  setDatesInFolder,
+  setDates,
 };

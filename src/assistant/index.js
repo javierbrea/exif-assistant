@@ -1,7 +1,5 @@
-const { setDatesInFolder } = require("./runner");
-const { setDate } = require("./dates");
+const { setDates } = require("./setDateMethods");
 
 module.exports = {
-  setDatesInFolder,
-  setDate,
+  setDates,
 };
