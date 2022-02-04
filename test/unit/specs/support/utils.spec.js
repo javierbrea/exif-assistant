@@ -1,4 +1,4 @@
-const { isString, isArray, isNumber, isUndefined } = require("../../../src/support/utils");
+const { isString, isArray, isNumber, isUndefined } = require("../../../../src/support/utils");
 
 describe("Utils", () => {
   describe("isUndefined method", () => {

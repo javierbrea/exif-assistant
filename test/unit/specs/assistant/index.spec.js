@@ -1,4 +1,4 @@
-const index = require("../../../src/assistant");
+const index = require("../../../../src/assistant");
 
 describe("assistant index", () => {
   describe("setDate method", () => {
