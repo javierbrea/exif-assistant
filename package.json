@@ -18,7 +18,11 @@
   "author": "Javier Brea",
   "license": "MIT",
   "repository": "https://github.com/javierbrea/exif-assistant",
-  "main": "src/index.js",
+  "files": [
+    "bin",
+    "src"
+  ],
+  "main": "index.js",
   "bin": {
     "exif-assistant": "./bin/exif-assistant"
   },
