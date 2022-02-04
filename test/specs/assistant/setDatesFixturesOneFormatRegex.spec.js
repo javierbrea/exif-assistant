@@ -16,7 +16,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     await resetTempPath();
   });
 
-  describe("when modify option is true, setDigited is false and format is provided", () => {
+  describe("when modify option is true, setDigited is false and format and regex are provided", () => {
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
@@ -70,11 +70,4 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
       expect(DateTimeOriginal).toEqual(`1979:05:01 00:00:00`);
     });
   });
-
-  // TODO, test subfolders with file names and folders with partial format and base date -one-partial-format
-  // TODO, make TODO refactors before implementing new features. Add linters
-  // TODO, test subfolders with file names and folders in many formats and regex -formats-regex TO IMPLEMENT
-  // TODO, test subfolders with file names and folders in many formats and many regex -formats-regexs TO IMPLEMENT
-  // TODO, test subfolders with file names and folders in many formats and many regex with base date -partial-formats-regexs TO IMPLEMENT
-  // TODO, test subfolders with file names and parent folders in many formats and many regex with base date from parents -parents-partial-formats-regexs TO IMPLEMENT
 });
