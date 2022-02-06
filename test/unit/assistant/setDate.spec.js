@@ -48,11 +48,13 @@ describe("setDate", () => {
     newDateExpected,
     dateTimeDigitedExpected,
     expectedLog,
+    noOutputFolder,
   }) {
     const spy = spyTracer("info");
     const filePath = inputPath ? path.resolve(inputPath, fileName) : assetPath(fileName);
+    const defaultOutputFolder = !noOutputFolder ? TEMP_PATH : null;
     const options = {
-      outputFolder: setDateOptions.outputFolder || TEMP_PATH,
+      outputFolder: setDateOptions.outputFolder || defaultOutputFolder,
       ...setDateOptions,
     };
     const result = await setDate(filePath, options);
@@ -536,6 +538,24 @@ describe("setDate", () => {
         await copyAssetToTempPath(fileName, newFileName);
 
         await expectModifiedDate({
+          inputPath: TEMP_PATH,
+          fileName: newFileName,
+          newDateExpected: date,
+          dateTimeDigitedExpected: date,
+          expectedLog: "from file name",
+        });
+      });
+    });
+
+    describe("when no outputFolder is provided", () => {
+      it("should add date to exif in original file", async () => {
+        const fileName = "gorilla.JPG";
+        const newFileName = "2013-10-23.jpg";
+        const date = "2013:10:23 00:00:00";
+        await copyAssetToTempPath(fileName, newFileName);
+
+        await expectModifiedDate({
+          noOutputFolder: true,
           inputPath: TEMP_PATH,
           fileName: newFileName,
           newDateExpected: date,

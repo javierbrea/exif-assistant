@@ -230,7 +230,6 @@ async function setDateToFile(
 
   // Set date from fallbackDate
   if (!!fallbackDate) {
-    // TODO, validate fallback date. Take into account also baseDate when formatting
     return setDates(formatDateForExif(fallbackDate, fallbackDateFormat), "fallbackDate option");
   }
 
