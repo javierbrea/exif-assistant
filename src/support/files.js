@@ -41,6 +41,14 @@ function toAbsolute(filePath) {
   return resolve(process.cwd(), filePath);
 }
 
+function existsSync(filePath) {
+  return fsExtra.existsSync(filePath);
+}
+
+function isFolder(folderPath) {
+  return fs.lstatSync(folderPath).isDirectory();
+}
+
 function isFile(filePath) {
   return fs.lstatSync(filePath).isFile();
 }
@@ -51,8 +59,8 @@ function findFolderFiles(folderPath) {
       srcBase: folderPath,
       prefixBase: true,
     })
-    .filter(isFile)
-    .map(path.normalize);
+    .map(path.normalize)
+    .filter(isFile);
 }
 
 function getFolderName(filePath) {
@@ -81,6 +89,9 @@ function ensureDir(dirPath) {
 }
 
 module.exports = {
+  existsSync,
+  isFolder,
+  isFile,
   moveFileToFolder,
   copyFileToFolder,
   moveOrCopyFileToSubfolder,

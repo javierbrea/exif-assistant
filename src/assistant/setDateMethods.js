@@ -1,35 +1,99 @@
 const { Tracer } = require("../support/tracer");
+const { isValidDate, dateFromString } = require("../support/dates");
 const {
   findFolderFiles,
   getFolderName,
   fileOutputFolderChangingBasePath,
   toAbsolute,
+  isFile,
+  isFolder,
 } = require("../support/files");
-const { setDate } = require("./setDate");
+const { setDateToFile } = require("./setDateToFile");
+const { existsSync } = require("fs-extra");
 
 const setDatesTracer = new Tracer("Set Dates");
+
+function validateInputPath(pathToValidate, isOfType, expectedType) {
+  if (!!pathToValidate) {
+    if (!existsSync(pathToValidate)) {
+      throw new Error(`input ${expectedType} does not exist`);
+    }
+    if (!isOfType(pathToValidate)) {
+      throw new Error(`input ${expectedType} must be a ${expectedType}`);
+    }
+  }
+}
+
+function validatePaths({ inputFolder, inputFile }) {
+  validateInputPath(inputFolder, isFolder, "folder");
+  validateInputPath(inputFile, isFile, "file");
+}
+
+function validateDates({
+  date,
+  dateFormat,
+  fallbackDate,
+  fallbackDateFormat,
+  baseDate,
+  baseDateFormat,
+}) {
+  let parsedBaseDate;
+  if (!!baseDate) {
+    if (!isValidDate(baseDate, baseDateFormat)) {
+      throw new Error(
+        "baseDate must be a valid date. Please check baseDate and baseDateFormat options"
+      );
+    }
+    parsedBaseDate = dateFromString(baseDate, baseDateFormat);
+  }
+  if (!!fallbackDate && !isValidDate(fallbackDate, fallbackDateFormat, parsedBaseDate)) {
+    throw new Error(
+      "fallbackDate must be a valid date. Please check fallbackDate and fallbackDateFormat options"
+    );
+  }
+  if (!!date && !isValidDate(date, dateFormat, parsedBaseDate)) {
+    throw new Error("date must be a valid date. Please check date and dateFormat options");
+  }
+}
+
+function validateOptions({
+  inputFolder,
+  inputFile,
+  outputFolder,
+  date,
+  dateFormat,
+  fallbackDate,
+  fallbackDateFormat,
+  baseDate,
+  baseDateFormat,
+}) {
+  validatePaths({ inputFolder, inputFile, outputFolder });
+  validateDates({ date, dateFormat, fallbackDate, fallbackDateFormat, baseDate, baseDateFormat });
+}
 
 function SetDateToFileInSubfolder(options, inputFolder) {
   return function (filePath) {
     const newBasePath = options.outputFolder ? toAbsolute(options.outputFolder) : inputFolder;
     const fileOptions = {
       ...options,
-      parentDateCandidates: [getFolderName(filePath)],
-      fromParentDates: options.fromFolders,
+      dateCandidates: [getFolderName(filePath)],
+      fromDateCandidates: options.fromFolderNames,
+      moveToIfUnresolved: options.moveUnresolvedTo,
+      copyIfNotModified: options.copyAll,
       outputFolder: fileOutputFolderChangingBasePath(filePath, inputFolder, newBasePath),
     };
     setDatesTracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
-    return setDate(filePath, fileOptions);
+    return setDateToFile(filePath, fileOptions);
   };
 }
 
 function setDateToFiles(files, options, folderPath) {
-  // TODO, validate options here
   const setDateToFileInSubfolder = SetDateToFileInSubfolder(options, folderPath);
   return Promise.all(files.map(setDateToFileInSubfolder));
 }
 
 function setDates(inputFolder, options = {}) {
+  validateOptions({ inputFolder, ...options });
   setDatesTracer.info(`Searching files in folder ${inputFolder}`);
   const files = findFolderFiles(inputFolder);
   setDatesTracer.info(`Files found:`, files.length);
@@ -37,6 +101,13 @@ function setDates(inputFolder, options = {}) {
   return setDateToFiles(files, options, inputFolder);
 }
 
+function setDate(inputFile, options = {}) {
+  // TODO, set outputFolder to same file folder if option is not received. Delegate to SetFileDate method
+  validateOptions({ inputFile, ...options });
+  return setDateToFile(inputFile, options);
+}
+
 module.exports = {
   setDates,
+  setDate,
 };

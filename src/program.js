@@ -40,13 +40,13 @@ program
   .option("--baseDateFormat <baseDateFormat>", "Format of baseDate")
   .option("-f, --fallbackDate <fallbackDate>", "Set this date when it is not found anywhere else")
   .option("--fallbackDateFormat <fallbackDateFormat>", "Format of fallbackDate")
-  .option("-m, --modify", "Modify already defined dates", false)
+  .option("-m, --modify", "Modify existent dates", false)
   .option(
     "--no-fromDigitized",
     "Do not use DateTimeDigitized from file exif to set DateTimeOriginal"
   )
-  .option("--no-fromFile", "Do not use file name to set date")
-  .option("--no-fromFolders", "Do not use folder name to set date")
+  .option("--no-fromFileName", "Do not use file name to set date")
+  .option("--no-fromFolderNames", "Do not use folder names to set date")
   .option("--no-setDigitized", "Do not set also DateTimeDigitized")
   .option(
     "-u, --moveUnresolvedTo <moveUnresolvedTo>",
