@@ -7,15 +7,15 @@ const {
   toAbsolute,
   isFile,
   isFolder,
+  exists,
 } = require("../support/files");
 const { setDateToFile } = require("./setDateToFile");
-const { existsSync } = require("fs-extra");
 
 const setDatesTracer = new Tracer("Set Dates");
 
 function validateInputPath(pathToValidate, isOfType, expectedType) {
   if (!!pathToValidate) {
-    if (!existsSync(pathToValidate)) {
+    if (!exists(pathToValidate)) {
       throw new Error(`input ${expectedType} does not exist`);
     }
     if (!isOfType(pathToValidate)) {

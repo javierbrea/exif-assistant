@@ -156,7 +156,7 @@ async function setDateToFile(
     moveToIfUnresolved,
     // TODO - baseDateFromDateCandidates?
     // TODO - baseDateFallback?
-  } = {}
+  }
 ) {
   const parsedBaseDate = getParsedBaseDate(baseDate, baseDateFormat);
   const fileName = getFileName(filePath);

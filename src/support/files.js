@@ -41,7 +41,7 @@ function toAbsolute(filePath) {
   return resolve(process.cwd(), filePath);
 }
 
-function existsSync(filePath) {
+function exists(filePath) {
   return fsExtra.existsSync(filePath);
 }
 
@@ -89,7 +89,7 @@ function ensureDir(dirPath) {
 }
 
 module.exports = {
-  existsSync,
+  exists,
   isFolder,
   isFile,
   moveFileToFolder,
