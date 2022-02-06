@@ -3,8 +3,7 @@ const { isValidDate, dateFromString } = require("../support/dates");
 const {
   findFolderFiles,
   getFolderName,
-  fileOutputFolderChangingBasePath,
-  toAbsolute,
+  changeFileBasePath,
   isFile,
   isFolder,
   exists,
@@ -71,16 +70,15 @@ function validateOptions({
   validateDates({ date, dateFormat, fallbackDate, fallbackDateFormat, baseDate, baseDateFormat });
 }
 
-function SetDateToFileInSubfolder(options, inputFolder) {
+function SetDateToFileUnderFolder(options, inputFolder) {
   return function (filePath) {
-    const newBasePath = options.outputFolder ? toAbsolute(options.outputFolder) : inputFolder;
     const fileOptions = {
       ...options,
       dateCandidates: [getFolderName(filePath)],
       fromDateCandidates: options.fromFolderNames,
       moveToIfUnresolved: options.moveUnresolvedTo,
       copyIfNotModified: options.copyAll,
-      outputFolder: fileOutputFolderChangingBasePath(filePath, inputFolder, newBasePath),
+      outputFolder: changeFileBasePath(filePath, inputFolder, options.outputFolder),
     };
     setDatesTracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
     return setDateToFile(filePath, fileOptions);
@@ -88,8 +86,8 @@ function SetDateToFileInSubfolder(options, inputFolder) {
 }
 
 function setDateToFiles(files, options, folderPath) {
-  const setDateToFileInSubfolder = SetDateToFileInSubfolder(options, folderPath);
-  return Promise.all(files.map(setDateToFileInSubfolder));
+  const setDateToFileUnderFolder = SetDateToFileUnderFolder(options, folderPath);
+  return Promise.all(files.map(setDateToFileUnderFolder));
 }
 
 function setDates(inputFolder, options = {}) {
@@ -102,7 +100,6 @@ function setDates(inputFolder, options = {}) {
 }
 
 function setDate(inputFile, options = {}) {
-  // TODO, set outputFolder to same file folder if option is not received. Delegate to SetFileDate method
   validateOptions({ inputFile, ...options });
   return setDateToFile(inputFile, options);
 }

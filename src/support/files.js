@@ -71,7 +71,10 @@ function getFileName(filePath) {
   return baseName(filePath);
 }
 
-function fileOutputFolderChangingBasePath(filePath, basePath, newBasePath) {
+function changeFileBasePath(filePath, basePath, newBasePath) {
+  if (!newBasePath) {
+    return dirName(filePath);
+  }
   const relativePath = path.relative(basePath, filePath);
   return dirName(resolve(newBasePath, relativePath));
 }
@@ -100,7 +103,7 @@ module.exports = {
   findFolderFiles,
   getFolderName,
   getFileName,
-  fileOutputFolderChangingBasePath,
+  changeFileBasePath,
   dirName,
   readFile,
   writeFile,

@@ -16,6 +16,7 @@ const {
   copyFileToFolder,
   getFileName,
   dirName,
+  toAbsolute,
   resolve,
 } = require("../support/files");
 const { Tracer } = require("../support/tracer");
@@ -56,17 +57,17 @@ function FormatForExif({ dateFormat, parsedBaseDate, dateRegex }) {
   };
 }
 
-function CopyToOutput({ fileName, filePath, outputFolder, copyIfNotModified }) {
-  const isSameOutputFolder = outputFolder === dirName(filePath);
+function CopyToOutput({ fileName, filePath, destFolder, fileFolder, copyIfNotModified }) {
+  const isSameOutputFolder = destFolder === fileFolder;
   return async function () {
     if (!!copyIfNotModified && !isSameOutputFolder) {
       tracer.info(`${fileName}: Copying to output folder`);
-      await copyFileToFolder(filePath, outputFolder);
+      await copyFileToFolder(filePath, destFolder);
     }
   };
 }
 
-function SetDates({ fileName, filePath, setDigitized, outputFolder }) {
+function SetDates({ fileName, filePath, setDigitized, destFolder }) {
   const traceSetDate = TraceSetDate({ fileName, setDigitized });
   return async function (dateOriginal, from) {
     const datesToSet = {
@@ -77,17 +78,17 @@ function SetDates({ fileName, filePath, setDigitized, outputFolder }) {
       datesToSet[HUMAN_DATE_TIME_DIGITIZED_PROPERTY] = dateOriginal;
     }
     traceSetDate(dateOriginal, from);
-    await moveAndUpdateExifDates(filePath, resolve(outputFolder, fileName), datesToSet);
+    await moveAndUpdateExifDates(filePath, resolve(destFolder, fileName), datesToSet);
     return true;
   };
 }
 
-function HandleUnresolved({ fileName, copyToOutput, moveToIfUnresolved, filePath, outputFolder }) {
+function HandleUnresolved({ fileName, copyToOutput, moveToIfUnresolved, filePath, destFolder }) {
   return async function () {
     tracer.warn(`${fileName}: File type is not supported`);
     if (!!moveToIfUnresolved) {
       tracer.info(`${fileName}: Moving to ${moveToIfUnresolved} subfolder`);
-      return moveOrCopyFileToSubfolder(filePath, outputFolder, moveToIfUnresolved);
+      return moveOrCopyFileToSubfolder(filePath, destFolder, moveToIfUnresolved);
     }
     return copyToOutput();
   };
@@ -158,12 +159,16 @@ async function setDateToFile(
     // TODO - baseDateFallback?
   }
 ) {
-  const parsedBaseDate = getParsedBaseDate(baseDate, baseDateFormat);
   const fileName = getFileName(filePath);
+  const fileFolder = dirName(filePath);
+  const destFolder = toAbsolute(outputFolder || fileFolder);
+  const parsedBaseDate = getParsedBaseDate(baseDate, baseDateFormat);
+
   const copyToOutput = CopyToOutput({
     fileName,
     filePath,
-    outputFolder,
+    destFolder,
+    fileFolder,
     copyIfNotModified,
   });
   const isDate = IsDate({ dateFormat, parsedBaseDate, dateRegex });
@@ -176,14 +181,14 @@ async function setDateToFile(
     fileName,
     filePath,
     setDigitized,
-    outputFolder,
+    destFolder,
   });
   const handleUnresolved = HandleUnresolved({
     fileName,
     copyToOutput,
     moveToIfUnresolved,
     filePath,
-    outputFolder,
+    destFolder,
   });
   const skipOrGetFileDates = SkipOrGetFileDates({
     handleUnresolved,
@@ -199,7 +204,7 @@ async function setDateToFile(
     return false;
   }
 
-  // Set date if present
+  // Set date if date option is present
   if (!!date) {
     return setDates(formatForExif(date), "date option");
   }
