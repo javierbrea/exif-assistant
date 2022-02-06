@@ -26,7 +26,7 @@ program.name("exif-assistant").description("Set exif data to image files").versi
 
 program
   .command("set-dates")
-  .description("Set exif date based on options, file name or parent folders names")
+  .description("Set exif date to all files in a folder")
   .argument("[folder]", "Folder containing images to set date", ".")
   .addOption(logOption)
   .option("-o, --outputFolder <outputFolder>", "Output folder", ".")

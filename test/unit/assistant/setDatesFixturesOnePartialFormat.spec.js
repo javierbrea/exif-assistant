@@ -70,7 +70,6 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     });
   });
 
-  // TODO, make TODO refactors before implementing new features. Add linters
   // TODO, test subfolders with file names and folders in many formats and regex -formats-regex TO IMPLEMENT
   // TODO, test subfolders with file names and folders in many formats and many regex -formats-regexs TO IMPLEMENT
   // TODO, test subfolders with file names and folders in many formats and many regex with base date -partial-formats-regexs TO IMPLEMENT

@@ -81,4 +81,6 @@ describe("set-dates command", () => {
       expect(DateTimeOriginal).toEqual(`1979:05:01 00:00:00`);
     });
   });
+
+  // TODO, test default folder
 });
