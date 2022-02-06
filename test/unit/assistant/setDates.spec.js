@@ -24,6 +24,86 @@ describe("setDates", () => {
     await resetTempPath();
   });
 
+  describe("validations", () => {
+    describe("input folder", () => {
+      it("should throw an error if input folder does not exist", async () => {
+        expect(() => setDates(tempPath("foo"))).toThrow("input folder does not exist");
+      });
+
+      it("should throw an error if input folder is a file", async () => {
+        await copyAssetsToTempPath([IMAGE_NO_DATE_ORIGINAL]);
+        expect(() => setDates(tempPath(IMAGE_NO_DATE_ORIGINAL))).toThrow(
+          "input folder must be a folder"
+        );
+      });
+    });
+
+    describe("when baseDate is provided", () => {
+      it("should throw an error if baseDate is invalid and no format is provided", async () => {
+        expect(() =>
+          setDates(TEMP_PATH, {
+            baseDate: "2022:06:16 12:00:00",
+          })
+        ).toThrow(
+          "baseDate must be a valid date. Please check baseDate and baseDateFormat options"
+        );
+      });
+
+      it("should throw an error if baseDate and baseDateFormat don't match", async () => {
+        expect(() =>
+          setDates(TEMP_PATH, {
+            baseDate: "2022-06-16 12:00:00",
+            baseDateFormat: "yyyy:MM:dd hh:mm:ss",
+          })
+        ).toThrow(
+          "baseDate must be a valid date. Please check baseDate and baseDateFormat options"
+        );
+      });
+    });
+
+    describe("when date is provided", () => {
+      it("should throw an error if date is not valid and no format is provided", async () => {
+        expect(() =>
+          setDates(TEMP_PATH, {
+            date: "2022:06:16 12:00:00",
+          })
+        ).toThrow("date must be a valid date. Please check date and dateFormat options");
+      });
+
+      it("should throw an error if date and dateFormat don't match", async () => {
+        expect(() =>
+          setDates(TEMP_PATH, {
+            date: "2022-06-16 12:00:00",
+            dateFormat: "yyyy:MM:dd hh:mm:ss",
+          })
+        ).toThrow("date must be a valid date. Please check date and dateFormat options");
+      });
+    });
+
+    describe("when fallbackDate is provided", () => {
+      it("should throw an error if fallbackDate is not valid and no format is provided", async () => {
+        expect(() =>
+          setDates(TEMP_PATH, {
+            fallbackDate: "2022:06:16 12:00:00",
+          })
+        ).toThrow(
+          "fallbackDate must be a valid date. Please check fallbackDate and fallbackDateFormat options"
+        );
+      });
+
+      it("should throw an error if fallbackDate and fallbackDate don't match", async () => {
+        expect(() =>
+          setDates(TEMP_PATH, {
+            fallbackDate: "2022-06-16 12:00:00",
+            fallbackDateFormat: "yyyy:MM:dd hh:mm:ss",
+          })
+        ).toThrow(
+          "fallbackDate must be a valid date. Please check fallbackDate and fallbackDateFormat options"
+        );
+      });
+    });
+  });
+
   describe("when no files nor folders have valid date name", () => {
     describe("when no options are provided", () => {
       beforeAll(async () => {
