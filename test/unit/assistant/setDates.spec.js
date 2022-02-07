@@ -80,25 +80,25 @@ describe("setDates", () => {
       });
     });
 
-    describe("when fallbackDate is provided", () => {
-      it("should throw an error if fallbackDate is not valid and no format is provided", async () => {
+    describe("when dateFallback is provided", () => {
+      it("should throw an error if dateFallback is not valid and no format is provided", async () => {
         expect(() =>
           setDates(TEMP_PATH, {
-            fallbackDate: "2022:06:16 12:00:00",
+            dateFallback: "2022:06:16 12:00:00",
           })
         ).toThrow(
-          "fallbackDate must be a valid date. Please check fallbackDate and fallbackDateFormat options"
+          "dateFallback must be a valid date. Please check dateFallback and dateFallbackFormat options"
         );
       });
 
-      it("should throw an error if fallbackDate and fallbackDate don't match", async () => {
+      it("should throw an error if dateFallback and dateFallback don't match", async () => {
         expect(() =>
           setDates(TEMP_PATH, {
-            fallbackDate: "2022-06-16 12:00:00",
-            fallbackDateFormat: "yyyy:MM:dd hh:mm:ss",
+            dateFallback: "2022-06-16 12:00:00",
+            dateFallbackFormat: "yyyy:MM:dd hh:mm:ss",
           })
         ).toThrow(
-          "fallbackDate must be a valid date. Please check fallbackDate and fallbackDateFormat options"
+          "dateFallback must be a valid date. Please check dateFallback and dateFallbackFormat options"
         );
       });
     });

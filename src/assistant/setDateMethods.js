@@ -31,8 +31,8 @@ function validatePaths({ inputFolder, inputFile }) {
 function validateDates({
   date,
   dateFormat,
-  fallbackDate,
-  fallbackDateFormat,
+  dateFallback,
+  dateFallbackFormat,
   baseDate,
   baseDateFormat,
 }) {
@@ -45,9 +45,9 @@ function validateDates({
     }
     parsedBaseDate = dateFromString(baseDate, baseDateFormat);
   }
-  if (!!fallbackDate && !isValidDate(fallbackDate, fallbackDateFormat, parsedBaseDate)) {
+  if (!!dateFallback && !isValidDate(dateFallback, dateFallbackFormat, parsedBaseDate)) {
     throw new Error(
-      "fallbackDate must be a valid date. Please check fallbackDate and fallbackDateFormat options"
+      "dateFallback must be a valid date. Please check dateFallback and dateFallbackFormat options"
     );
   }
   if (!!date && !isValidDate(date, dateFormat, parsedBaseDate)) {
@@ -61,13 +61,13 @@ function validateOptions({
   outputFolder,
   date,
   dateFormat,
-  fallbackDate,
-  fallbackDateFormat,
+  dateFallback,
+  dateFallbackFormat,
   baseDate,
   baseDateFormat,
 }) {
   validatePaths({ inputFolder, inputFile, outputFolder });
-  validateDates({ date, dateFormat, fallbackDate, fallbackDateFormat, baseDate, baseDateFormat });
+  validateDates({ date, dateFormat, dateFallback, dateFallbackFormat, baseDate, baseDateFormat });
 }
 
 function SetDateToFileUnderFolder(options, inputFolder) {
@@ -76,6 +76,7 @@ function SetDateToFileUnderFolder(options, inputFolder) {
       ...options,
       dateCandidates: [getFolderName(filePath)],
       fromDateCandidates: options.fromFolderNames,
+      baseDateFromDateCandidates: options.baseDatefromFolderNames,
       moveToIfUnresolved: options.moveUnresolvedTo,
       copyIfNotModified: options.copyAll,
       outputFolder: changeFileBasePath(filePath, inputFolder, options.outputFolder),

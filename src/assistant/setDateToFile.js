@@ -29,14 +29,14 @@ function getParsedBaseDate({
   dateCandidates,
   baseDateFromDateCandidates,
   dateRegex,
-  fallbackBaseDate,
+  baseDateFallback,
 }) {
   let parsedFallbackBaseDate = null;
   if (!!baseDate) {
     return dateFromString(baseDate, baseDateFormat);
   }
-  if (!!fallbackBaseDate) {
-    parsedFallbackBaseDate = dateFromString(fallbackBaseDate, baseDateFormat);
+  if (!!baseDateFallback) {
+    parsedFallbackBaseDate = dateFromString(baseDateFallback, baseDateFormat);
   }
   if (!!baseDateFromDateCandidates) {
     const validDateString = dateCandidates.find((date) => {
@@ -173,14 +173,14 @@ async function setDateToFile(
     dateCandidates = [],
     outputFolder,
     date,
-    dateFormat,
+    dateFormat, // TODO, support array
     dateRegex, // TODO, support array
     baseDate,
     baseDateFormat, // TODO, support array in dateFormat. Remove this one
     baseDateFromDateCandidates = true,
-    fallbackBaseDate, // TODO, rename into baseDateFallback
-    fallbackDate, // TODO, rename into dateFallback
-    fallbackDateFormat, // TODO, support array in dateFormat. Remove this one
+    baseDateFallback,
+    dateFallback,
+    dateFallbackFormat, // TODO, support array in dateFormat. Remove this one
     modify = false,
     fromDigitized = true,
     fromFileName = true,
@@ -198,7 +198,7 @@ async function setDateToFile(
     baseDateFormat,
     dateCandidates,
     baseDateFromDateCandidates,
-    fallbackBaseDate,
+    baseDateFallback,
     dateRegex,
   });
 
@@ -268,9 +268,9 @@ async function setDateToFile(
     return setDates(formatForExif(validDateFromCandidates), "date candidate");
   }
 
-  // Set date from fallbackDate
-  if (!!fallbackDate) {
-    return setDates(formatDateForExif(fallbackDate, fallbackDateFormat), "fallbackDate option");
+  // Set date from dateFallback
+  if (!!dateFallback) {
+    return setDates(formatDateForExif(dateFallback, dateFallbackFormat), "dateFallback option");
   }
 
   tracer.verbose(`${fileName}: No date was found to set`);
