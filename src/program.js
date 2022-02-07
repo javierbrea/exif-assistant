@@ -26,38 +26,34 @@ program.name("exif-assistant").description("Set exif data to image files").versi
 
 program
   .command("set-dates")
-  .description("Set exif date to all files in a folder")
+  .description("Set exif date to all files in a folder recursively")
   .argument("[folder]", "Folder containing images to set date", ".")
   .addOption(logOption)
   .option("-o, --outputFolder <outputFolder>", "Output folder", ".")
   .option("-d, --date <date>", "Date to set")
-  .option(
-    "-f, --dateFormat <dateFormat>",
-    "Format of dates from date option, file or folder names"
-  )
+  .option("-f, --dateFormats <dateFormats>", "Date formats in files, folder names or date options") // TODO, support array
   .option("-r, --dateRegex <dateRegex>", "Regex used to get date from file or folder names")
   .option(
     "--baseDateFallback <baseDateFallback>",
     "Use this date as baseDate when it is not found anywhere else"
   )
   .option("-b, --baseDate <baseDate>", "Date used to complete dates when they are partial")
-  .option("--baseDateFormat <baseDateFormat>", "Format of baseDate")
   .option("-f, --dateFallback <dateFallback>", "Set this date when it is not found anywhere else")
-  .option("--dateFallbackFormat <dateFallbackFormat>", "Format of dateFallback")
   .option("-m, --modify", "Modify existent dates", false)
   .option(
     "--no-fromDigitized",
     "Do not use DateTimeDigitized from file exif to set DateTimeOriginal"
   )
-  .option("--no-fromFileName", "Do not use file name to set date")
-  .option("--no-baseDatefromFolderNames", "Do not use folder names to set baseDate")
-  .option("--no-fromFolderNames", "Do not use folder names to set date")
-  .option("--no-setDigitized", "Do not set also DateTimeDigitized")
+  .option("--no-fromFileName", "Do not use file names to set dates")
+  .option("--no-baseDatefromFolderNames", "Do not use folder names to set base dates")
+  .option("--no-fromFolderNames", "Do not use folder names to set dates")
+  .option("--no-setDigitized", "Do not set DateTimeDigitized exif property")
   .option(
     "-u, --moveUnresolvedTo <moveUnresolvedTo>",
     "If no date is found for a file or it is not supported, create a subfolder with this name and move the file into it"
   )
-  .option("-c, --copyAll", "Copy also not modified files to outputFolder")
+  .option("-c, --copyAll", "Copy also unsupported and not modified files to outputFolder")
+  // TODO, add dry-run option
   .showHelpAfterError()
   .action((folderPath, options) => {
     setLogLevel(options.log);

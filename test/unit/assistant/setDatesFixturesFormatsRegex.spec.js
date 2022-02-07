@@ -104,5 +104,4 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
   });
 
   // TODO, test subfolders with file names and parent folders in many formats and many regex -formats-regexs TO IMPLEMENT
-  // TODO, test subfolders with file names and parent folders in many formats and many regex with base date from parents -parents-partial-formats-regexs TO IMPLEMENT
 });
