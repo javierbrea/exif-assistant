@@ -23,11 +23,34 @@ const { Tracer } = require("../support/tracer");
 
 const tracer = new Tracer("Set Date");
 
-function getParsedBaseDate(baseDate, baseDateFormat) {
+function getParsedBaseDate({
+  baseDate,
+  baseDateFormat,
+  dateCandidates,
+  baseDateFromDateCandidates,
+  dateRegex,
+  fallbackBaseDate,
+}) {
+  let parsedFallbackBaseDate = null;
   if (!!baseDate) {
     return dateFromString(baseDate, baseDateFormat);
   }
-  return null;
+  if (!!fallbackBaseDate) {
+    parsedFallbackBaseDate = dateFromString(fallbackBaseDate, baseDateFormat);
+  }
+  if (!!baseDateFromDateCandidates) {
+    const validDateString = dateCandidates.find((date) => {
+      return isValidDate(
+        dateFromStringUsingRegex(date, dateRegex),
+        baseDateFormat,
+        parsedFallbackBaseDate
+      );
+    });
+    if (!!validDateString) {
+      return dateFromString(validDateString, baseDateFormat, parsedFallbackBaseDate);
+    }
+  }
+  return parsedFallbackBaseDate;
 }
 
 function TraceSetDate({ fileName, setDigitized }) {
@@ -136,6 +159,14 @@ function SkipOrGetFileDates({ handleUnresolved, filePath, copyToOutput, fileName
   };
 }
 
+function FindFirstValidDate(isDate) {
+  return function (dateCandidates) {
+    return dateCandidates.find((date) => {
+      return isDate(date);
+    });
+  };
+}
+
 async function setDateToFile(
   filePath,
   {
@@ -143,11 +174,13 @@ async function setDateToFile(
     outputFolder,
     date,
     dateFormat,
-    dateRegex,
+    dateRegex, // TODO, support array
     baseDate,
-    baseDateFormat,
-    fallbackDate,
-    fallbackDateFormat,
+    baseDateFormat, // TODO, support array in dateFormat. Remove this one
+    baseDateFromDateCandidates = true,
+    fallbackBaseDate, // TODO, rename into baseDateFallback
+    fallbackDate, // TODO, rename into dateFallback
+    fallbackDateFormat, // TODO, support array in dateFormat. Remove this one
     modify = false,
     fromDigitized = true,
     fromFileName = true,
@@ -155,14 +188,19 @@ async function setDateToFile(
     setDigitized = true,
     copyIfNotModified,
     moveToIfUnresolved,
-    // TODO - baseDateFromDateCandidates?
-    // TODO - baseDateFallback?
   }
 ) {
   const fileName = getFileName(filePath);
   const fileFolder = dirName(filePath);
   const destFolder = toAbsolute(outputFolder || fileFolder);
-  const parsedBaseDate = getParsedBaseDate(baseDate, baseDateFormat);
+  const parsedBaseDate = getParsedBaseDate({
+    baseDate,
+    baseDateFormat,
+    dateCandidates,
+    baseDateFromDateCandidates,
+    fallbackBaseDate,
+    dateRegex,
+  });
 
   const copyToOutput = CopyToOutput({
     fileName,
@@ -172,6 +210,7 @@ async function setDateToFile(
     copyIfNotModified,
   });
   const isDate = IsDate({ dateFormat, parsedBaseDate, dateRegex });
+  const findFirstValidDate = FindFirstValidDate(isDate);
   const formatForExif = FormatForExif({
     dateFormat,
     parsedBaseDate,
@@ -223,9 +262,10 @@ async function setDateToFile(
     return setDates(formatForExif(fileNameWithoutExtension), "file name");
   }
 
-  // Set date from folder name
-  if (fromDateCandidates && isDate(dateCandidates[0])) {
-    return setDates(formatForExif(dateCandidates[0]), "date candidate");
+  // Set date from date candidates
+  const validDateFromCandidates = findFirstValidDate(dateCandidates);
+  if (fromDateCandidates && !!validDateFromCandidates) {
+    return setDates(formatForExif(validDateFromCandidates), "date candidate");
   }
 
   // Set date from fallbackDate

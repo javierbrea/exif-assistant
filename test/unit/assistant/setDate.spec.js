@@ -604,6 +604,164 @@ describe("setDate", () => {
     testFileName("17_30.jpg", "HH_mm", "2015-10-23", "yyyy-MM-dd", "2015:10:23 17:30:00");
   });
 
+  describe("when fileName is a valid partial date and dateCandidates are provided", () => {
+    function testFileName(
+      newFileName,
+      dateFormat,
+      dateCandidates,
+      baseDateFormat,
+      fallbackBaseDate,
+      date
+    ) {
+      describe(`when fileName has format ${dateFormat}, date candidates are ${dateCandidates}, baseDate has format ${baseDateFormat} and fallbackBaseDate is ${fallbackBaseDate}`, () => {
+        it("should add date to exif using baseDate from dateCandidates and save the file to output folder", async () => {
+          const fileName = "gorilla.JPG";
+          const outputFolder = path.resolve(TEMP_PATH, "modified");
+          await copyAssetToTempPath(fileName, newFileName);
+          const fileOrigin = tempPath(newFileName);
+
+          await expectModifiedDate({
+            inputPath: TEMP_PATH,
+            fileName: newFileName,
+            setDateOptions: {
+              outputFolder,
+              dateFormat,
+              fallbackBaseDate,
+              dateCandidates,
+              baseDateFormat,
+            },
+            newDateExpected: date,
+            dateTimeDigitedExpected: date,
+            expectedLog: "from file name",
+          });
+
+          // Check also original file
+          expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+          const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
+          expect(DateTimeOriginal).toBe(undefined);
+          expect(DateTimeDigitized).toBe(undefined);
+        });
+      });
+    }
+
+    testFileName(
+      "10-23.jpg",
+      "MM-dd",
+      ["foo", "2015", "1979"],
+      "yyyy",
+      null,
+      "2015:10:23 00:00:00"
+    );
+    testFileName("10-23.jpg", "MM-dd", ["foo", "var", "x"], "yyyy", "2015", "2015:10:23 00:00:00");
+    testFileName(
+      "18.jpg",
+      "dd",
+      ["invalid", "2015", "2015-10"],
+      "yyyy-MM",
+      null,
+      "2015:10:18 00:00:00"
+    );
+    testFileName(
+      "18.jpg",
+      "dd",
+      ["invalid", "2015", "foo"],
+      "yyyy-MM",
+      "2015-10", // TODO, test fallbackBaseDate acting as baseDate of dateCandidates when array of formats is supported
+      "2015:10:18 00:00:00"
+    );
+    testFileName(
+      "18_13_24.jpg",
+      "HH_mm_ss",
+      ["2015-10-23"],
+      "yyyy-MM-dd",
+      null,
+      "2015:10:23 18:13:24"
+    );
+    testFileName(
+      "17_30.jpg",
+      "HH_mm",
+      ["no-date", "foo", "invalid", "2015-10-23", "2015-10-24"],
+      "yyyy-MM-dd",
+      null,
+      "2015:10:23 17:30:00"
+    );
+  });
+
+  describe("when fileName is a valid partial date, dateCandidates are provided but baseDateFromDateCandidates is false", () => {
+    function testFileName(
+      newFileName,
+      dateFormat,
+      dateCandidates,
+      baseDateFormat,
+      fallbackBaseDate,
+      date
+    ) {
+      describe(`when fileName has format ${dateFormat}, fallbackBaseDate is ${fallbackBaseDate} and baseDateFormat is ${baseDateFormat}`, () => {
+        it("should add date to exif using baseDate from fallbackBaseDate and save the file to output folder", async () => {
+          const fileName = "gorilla.JPG";
+          const outputFolder = path.resolve(TEMP_PATH, "modified");
+          await copyAssetToTempPath(fileName, newFileName);
+          const fileOrigin = tempPath(newFileName);
+
+          await expectModifiedDate({
+            inputPath: TEMP_PATH,
+            fileName: newFileName,
+            setDateOptions: {
+              outputFolder,
+              dateFormat,
+              dateCandidates,
+              baseDateFromDateCandidates: false,
+              fallbackBaseDate,
+              baseDateFormat,
+            },
+            newDateExpected: date,
+            dateTimeDigitedExpected: date,
+            expectedLog: "from file name",
+          });
+
+          // Check also original file
+          expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+          const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
+          expect(DateTimeOriginal).toBe(undefined);
+          expect(DateTimeDigitized).toBe(undefined);
+        });
+      });
+    }
+
+    testFileName(
+      "10-23.jpg",
+      "MM-dd",
+      ["foo", "2015", "1979"],
+      "yyyy",
+      "2016",
+      "2016:10:23 00:00:00"
+    );
+    testFileName(
+      "18.jpg",
+      "dd",
+      ["invalid", "2015", "2015-10"],
+      "yyyy-MM",
+      "2016-10",
+      "2016:10:18 00:00:00"
+    );
+    testFileName(
+      "18_13_24.jpg",
+      "HH_mm_ss",
+      ["2015-10-23"],
+      "yyyy-MM-dd",
+      "2017-11-24",
+      "2017:11:24 18:13:24"
+    );
+    testFileName(
+      "17_30.jpg",
+      "HH_mm",
+      ["no-date", "foo", "invalid", "2015-10-23", "2015-10-24"],
+      "yyyy-MM-dd",
+      "2018-12-15",
+      "2018:12:15 17:30:00"
+    );
+  });
+
   describe("when fileName contains a valid date and dateRegex is provided", () => {
     function testFileName(newFileName, dateFormat, dateRegex, date) {
       describe(`when fileName has name ${newFileName}, and dateRegex is ${dateRegex}`, () => {

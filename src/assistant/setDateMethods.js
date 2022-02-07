@@ -85,8 +85,8 @@ function SetDateToFileUnderFolder(options, inputFolder) {
   };
 }
 
-function setDateToFiles(files, options, folderPath) {
-  const setDateToFileUnderFolder = SetDateToFileUnderFolder(options, folderPath);
+function setDateToFiles(files, options, inputFolder) {
+  const setDateToFileUnderFolder = SetDateToFileUnderFolder(options, inputFolder);
   return Promise.all(files.map(setDateToFileUnderFolder));
 }
 
