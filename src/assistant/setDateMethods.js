@@ -2,7 +2,7 @@ const { Tracer } = require("../support/tracer");
 const { isValidDate, dateFromString } = require("../support/dates");
 const {
   findFolderFiles,
-  getFolderName,
+  getFolderNamesFromBase,
   changeFileBasePath,
   isFile,
   isFolder,
@@ -67,7 +67,7 @@ function SetDateToFileUnderFolder(options, inputFolder) {
   return function (filePath) {
     const fileOptions = {
       ...options,
-      dateCandidates: [getFolderName(filePath)],
+      dateCandidates: getFolderNamesFromBase(filePath, inputFolder).reverse(),
       fromDateCandidates: options.fromFolderNames,
       baseDateFromDateCandidates: options.baseDatefromFolderNames,
       moveToIfUnresolved: options.moveUnresolvedTo,

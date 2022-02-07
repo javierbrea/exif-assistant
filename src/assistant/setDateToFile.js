@@ -39,19 +39,22 @@ function getParsedBaseDate({
     parsedBaseDateFallback = dateFromString(baseDateFallback, dateFormats);
   }
   if (!!baseDateFromDateCandidates) {
-    const validDateString = dateCandidates.find((date) => {
-      return isValidDate(
-        findDateStringUsingRegex(date, dateRegex),
-        dateFormats,
-        parsedBaseDateFallback // TODO, get baseDate also from other candidates?
-      );
-    });
-    if (!!validDateString) {
-      return dateFromString(
-        findDateStringUsingRegex(validDateString, dateRegex),
-        dateFormats,
-        parsedBaseDateFallback
-      );
+    // Parse dates from the end, using previous valid date as baseDate, so baseDates are nested
+    const parsedDateCandidates = [...dateCandidates]
+      .reverse()
+      .reduce((validDates, dateCandidate) => {
+        const dateStringUsingRegex = findDateStringUsingRegex(dateCandidate, dateRegex);
+        const parsedBaseDate = validDates.at(-1) || parsedBaseDateFallback;
+        if (isValidDate(dateStringUsingRegex, dateFormats, parsedBaseDate)) {
+          validDates.push(dateFromString(dateStringUsingRegex, dateFormats, parsedBaseDate));
+        }
+        return validDates;
+      }, []);
+
+    const firstValidDate = parsedDateCandidates.at(-1);
+
+    if (!!firstValidDate) {
+      return firstValidDate;
     }
   }
   return parsedBaseDateFallback;

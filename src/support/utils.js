@@ -14,9 +14,14 @@ function isUndefined(value) {
   return typeof value === "undefined";
 }
 
+function compactArray(arr) {
+  return arr.filter((item) => !!item);
+}
+
 module.exports = {
   isString,
   isNumber,
   isArray,
   isUndefined,
+  compactArray,
 };

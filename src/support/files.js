@@ -3,6 +3,8 @@ const fsExtra = require("fs-extra");
 const fs = require("fs");
 const globule = require("globule");
 
+const { compactArray } = require("./utils");
+
 function dirName(filePath) {
   return path.dirname(filePath);
 }
@@ -91,6 +93,13 @@ function ensureDir(dirPath) {
   return fsExtra.ensureDir(dirPath);
 }
 
+function getFolderNamesFromBase(filePath, basePath) {
+  const folderNames = compactArray(filePath.replace(basePath, "").split(path.sep));
+  folderNames.splice(-1);
+  folderNames.unshift(baseName(basePath));
+  return folderNames;
+}
+
 module.exports = {
   exists,
   isFolder,
@@ -109,4 +118,5 @@ module.exports = {
   writeFile,
   ensureDir,
   resolve,
+  getFolderNamesFromBase,
 };

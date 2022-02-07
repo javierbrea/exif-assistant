@@ -19,7 +19,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     await resetTempPath();
   });
 
-  describe("when modify option is true and setDigited is false", () => {
+  describe("when modify option is true and fromDigited is false", () => {
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
