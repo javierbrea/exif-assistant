@@ -15,7 +15,7 @@ function isThumbnailProperty(property) {
 function exifTagFromHumanTag(ifd, humanTag) {
   return Object.keys(piexif.TAGS[ifd]).find((exifTag) => {
     return piexif.TAGS[ifd][exifTag].name === humanTag;
-  });
+  })
 }
 
 function humanTagFromExifTag(ifd, exifTag) {
