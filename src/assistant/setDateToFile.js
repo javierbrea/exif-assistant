@@ -19,6 +19,7 @@ const {
   toAbsolute,
   resolve,
 } = require("../support/files");
+const { lastItem } = require("../support/utils");
 const { Tracer } = require("../support/tracer");
 
 const tracer = new Tracer("Set Date");
@@ -44,14 +45,14 @@ function getParsedBaseDate({
       .reverse()
       .reduce((validDates, dateCandidate) => {
         const dateStringUsingRegex = findDateStringUsingRegex(dateCandidate, dateRegex);
-        const parsedBaseDate = validDates.at(-1) || parsedBaseDateFallback;
+        const parsedBaseDate = lastItem(validDates) || parsedBaseDateFallback;
         if (isValidDate(dateStringUsingRegex, dateFormats, parsedBaseDate)) {
           validDates.push(dateFromString(dateStringUsingRegex, dateFormats, parsedBaseDate));
         }
         return validDates;
       }, []);
 
-    const firstValidDate = parsedDateCandidates.at(-1);
+    const firstValidDate = lastItem(parsedDateCandidates);
 
     if (!!firstValidDate) {
       return firstValidDate;

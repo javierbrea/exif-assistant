@@ -18,10 +18,15 @@ function compactArray(arr) {
   return arr.filter((item) => !!item);
 }
 
+function lastItem(arr) {
+  return arr[arr.length - 1];
+}
+
 module.exports = {
   isString,
   isNumber,
   isArray,
   isUndefined,
   compactArray,
+  lastItem,
 };
