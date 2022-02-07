@@ -25,7 +25,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
         modify: true,
-        dateFormat: "dd_MM_yyyy",
+        dateFormats: ["dd_MM_yyyy"],
       });
     });
 

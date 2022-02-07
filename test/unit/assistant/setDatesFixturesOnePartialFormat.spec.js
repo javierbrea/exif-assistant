@@ -25,9 +25,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
         modify: true,
-        dateFormat: "dd_MM",
+        dateFormats: ["dd_MM", "yyyy"],
         baseDate: "2022",
-        baseDateFormat: "yyyy",
       });
     });
 
@@ -70,8 +69,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     });
   });
 
-  // TODO, test subfolders with file names and folders in many formats and regex -formats-regex TO IMPLEMENT
-  // TODO, test subfolders with file names and folders in many formats and many regex -formats-regexs TO IMPLEMENT
-  // TODO, test subfolders with file names and folders in many formats and many regex with base date -partial-formats-regexs TO IMPLEMENT
+  // TODO, test subfolders with file names and parent folders in many formats and regex -formats-regex TO IMPLEMENT
+  // TODO, test subfolders with file names and parent folders in many formats and many regex -formats-regexs TO IMPLEMENT
   // TODO, test subfolders with file names and parent folders in many formats and many regex with base date from parents -parents-partial-formats-regexs TO IMPLEMENT
 });

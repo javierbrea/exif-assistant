@@ -8,7 +8,7 @@ const {
   isValidDate,
   dateFromString,
   formatForLogsFromExif,
-  dateFromStringUsingRegex,
+  findDateStringUsingRegex,
 } = require("../support/dates");
 const {
   moveOrCopyFileToSubfolder,
@@ -25,32 +25,36 @@ const tracer = new Tracer("Set Date");
 
 function getParsedBaseDate({
   baseDate,
-  baseDateFormat,
+  dateFormats,
   dateCandidates,
   baseDateFromDateCandidates,
   dateRegex,
   baseDateFallback,
 }) {
-  let parsedFallbackBaseDate = null;
+  let parsedBaseDateFallback = null;
   if (!!baseDate) {
-    return dateFromString(baseDate, baseDateFormat);
+    return dateFromString(baseDate, dateFormats);
   }
   if (!!baseDateFallback) {
-    parsedFallbackBaseDate = dateFromString(baseDateFallback, baseDateFormat);
+    parsedBaseDateFallback = dateFromString(baseDateFallback, dateFormats);
   }
   if (!!baseDateFromDateCandidates) {
     const validDateString = dateCandidates.find((date) => {
       return isValidDate(
-        dateFromStringUsingRegex(date, dateRegex),
-        baseDateFormat,
-        parsedFallbackBaseDate
+        findDateStringUsingRegex(date, dateRegex),
+        dateFormats,
+        parsedBaseDateFallback // TODO, get baseDate also from other candidates?
       );
     });
     if (!!validDateString) {
-      return dateFromString(validDateString, baseDateFormat, parsedFallbackBaseDate);
+      return dateFromString(
+        findDateStringUsingRegex(validDateString, dateRegex),
+        dateFormats,
+        parsedBaseDateFallback
+      );
     }
   }
-  return parsedFallbackBaseDate;
+  return parsedBaseDateFallback;
 }
 
 function TraceSetDate({ fileName, setDigitized }) {
@@ -64,17 +68,17 @@ function TraceSetDate({ fileName, setDigitized }) {
   };
 }
 
-function IsDate({ dateFormat, parsedBaseDate, dateRegex }) {
+function IsDate({ dateFormats, parsedBaseDate, dateRegex }) {
   return function (date) {
-    return isValidDate(dateFromStringUsingRegex(date, dateRegex), dateFormat, parsedBaseDate);
+    return isValidDate(findDateStringUsingRegex(date, dateRegex), dateFormats, parsedBaseDate);
   };
 }
 
-function FormatForExif({ dateFormat, parsedBaseDate, dateRegex }) {
+function FormatForExif({ dateFormats, parsedBaseDate, dateRegex }) {
   return function (date) {
     return formatDateForExif(
-      dateFromStringUsingRegex(date, dateRegex),
-      dateFormat,
+      findDateStringUsingRegex(date, dateRegex),
+      dateFormats,
       parsedBaseDate
     );
   };
@@ -108,7 +112,6 @@ function SetDates({ fileName, filePath, setDigitized, destFolder }) {
 
 function HandleUnresolved({ fileName, copyToOutput, moveToIfUnresolved, filePath, destFolder }) {
   return async function () {
-    tracer.warn(`${fileName}: File type is not supported`);
     if (!!moveToIfUnresolved) {
       tracer.info(`${fileName}: Moving to ${moveToIfUnresolved} subfolder`);
       return moveOrCopyFileToSubfolder(filePath, destFolder, moveToIfUnresolved);
@@ -122,6 +125,7 @@ function FileIsNotSupported({ handleUnresolved, filePath }) {
     if (await isSupportedFile(filePath)) {
       return false;
     }
+    tracer.warn(`${filePath}: File type is not supported`);
     await handleUnresolved();
     return true;
   };
@@ -173,14 +177,12 @@ async function setDateToFile(
     dateCandidates = [],
     outputFolder,
     date,
-    dateFormat, // TODO, support array
+    dateFormats,
     dateRegex, // TODO, support array
     baseDate,
-    baseDateFormat, // TODO, support array in dateFormat. Remove this one
     baseDateFromDateCandidates = true,
     baseDateFallback,
     dateFallback,
-    dateFallbackFormat, // TODO, support array in dateFormat. Remove this one
     modify = false,
     fromDigitized = true,
     fromFileName = true,
@@ -195,7 +197,7 @@ async function setDateToFile(
   const destFolder = toAbsolute(outputFolder || fileFolder);
   const parsedBaseDate = getParsedBaseDate({
     baseDate,
-    baseDateFormat,
+    dateFormats,
     dateCandidates,
     baseDateFromDateCandidates,
     baseDateFallback,
@@ -209,10 +211,10 @@ async function setDateToFile(
     fileFolder,
     copyIfNotModified,
   });
-  const isDate = IsDate({ dateFormat, parsedBaseDate, dateRegex });
+  const isDate = IsDate({ dateFormats, parsedBaseDate, dateRegex });
   const findFirstValidDate = FindFirstValidDate(isDate);
   const formatForExif = FormatForExif({
-    dateFormat,
+    dateFormats,
     parsedBaseDate,
     dateRegex,
   });
@@ -270,10 +272,10 @@ async function setDateToFile(
 
   // Set date from dateFallback
   if (!!dateFallback) {
-    return setDates(formatDateForExif(dateFallback, dateFallbackFormat), "dateFallback option");
+    return setDates(formatDateForExif(dateFallback, dateFormats), "dateFallback option");
   }
 
-  tracer.verbose(`${fileName}: No date was found to set`);
+  tracer.info(`${fileName}: No date was found to set`);
   await handleUnresolved();
 
   return false;

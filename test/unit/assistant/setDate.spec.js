@@ -21,8 +21,8 @@ setLevel("silent");
 describe("setDate", () => {
   let sandbox;
 
-  function expectLog(log, spy) {
-    const firstSpyCall = spy.getCall(0);
+  function expectLog(log, spy, callIndex = 0) {
+    const firstSpyCall = spy.getCall(callIndex);
     const args = firstSpyCall && firstSpyCall.args;
     const firstArg = (args && args[0]) || "";
     expect(firstArg).toEqual(expect.stringContaining(log));
@@ -83,6 +83,13 @@ describe("setDate", () => {
   }
 
   describe("validations", () => {
+    let imagePath;
+    beforeEach(async () => {
+      const image = "gorilla.JPG";
+      await copyAssetToTempPath(image);
+      imagePath = tempPath(image);
+    });
+
     describe("input file", () => {
       it("should throw an error if input file does not exist", async () => {
         const fileName = "foo.JPG";
@@ -105,77 +112,70 @@ describe("setDate", () => {
 
     describe("when baseDate is provided", () => {
       it("should throw an error if baseDate is invalid and no format is provided", async () => {
-        const fileName = "gorilla.JPG";
-        const filePath = assetPath(fileName);
         expect(() =>
-          setDate(filePath, {
+          setDate(imagePath, {
             baseDate: "2022:06:16 12:00:00",
           })
-        ).toThrow(
-          "baseDate must be a valid date. Please check baseDate and baseDateFormat options"
-        );
+        ).toThrow("baseDate must be a valid date. Please check baseDate and dateFormats options");
       });
 
-      it("should throw an error if baseDate and baseDateFormat don't match", async () => {
-        const fileName = "gorilla.JPG";
-        const filePath = assetPath(fileName);
+      it("should throw an error if baseDate and dateFormats don't match", async () => {
         expect(() =>
-          setDate(filePath, {
-            baseDate: "2022-06-16 12:00:00",
+          setDate(imagePath, {
+            baseDate: "2022_06_16 12:00:00",
             baseDateFormat: "yyyy:MM:dd hh:mm:ss",
           })
-        ).toThrow(
-          "baseDate must be a valid date. Please check baseDate and baseDateFormat options"
-        );
+        ).toThrow("baseDate must be a valid date. Please check baseDate and dateFormats options");
       });
     });
 
     describe("when date is provided", () => {
       it("should throw an error if date is not valid and no format is provided", async () => {
-        const fileName = "gorilla.JPG";
-        const filePath = assetPath(fileName);
         expect(() =>
-          setDate(filePath, {
+          setDate(imagePath, {
             date: "2022:06:16 12:00:00",
           })
-        ).toThrow("date must be a valid date. Please check date and dateFormat options");
+        ).toThrow("date must be a valid date. Please check date and dateFormats options");
       });
 
-      it("should throw an error if date and dateFormat don't match", async () => {
-        const fileName = "gorilla.JPG";
-        const filePath = assetPath(fileName);
+      it("should throw an error if date and dateFormats don't match", async () => {
         expect(() =>
-          setDate(filePath, {
-            date: "2022-06-16 12:00:00",
-            dateFormat: "yyyy:MM:dd hh:mm:ss",
+          setDate(imagePath, {
+            date: "2022_06_16 12:00:00",
+            dateFormats: ["yyyy:MM:dd hh:mm:ss"],
           })
-        ).toThrow("date must be a valid date. Please check date and dateFormat options");
+        ).toThrow("date must be a valid date. Please check date and dateFormats options");
+      });
+
+      it("should not throw an error if date and dateFormats don't match but date is ISO", async () => {
+        const spy = spyTracer("info");
+        await setDate(imagePath, {
+          date: "2022-06-16 12:00:00",
+          dateFormats: ["yyyy:MM:dd hh:mm:ss"],
+        });
+        expectLog(`Setting DateTimeOriginal`, spy);
       });
     });
 
     describe("when dateFallback is provided", () => {
       it("should throw an error if dateFallback is not valid and no format is provided", async () => {
-        const fileName = "gorilla.JPG";
-        const filePath = assetPath(fileName);
         expect(() =>
-          setDate(filePath, {
+          setDate(imagePath, {
             dateFallback: "2022:06:16 12:00:00",
           })
         ).toThrow(
-          "dateFallback must be a valid date. Please check dateFallback and dateFallbackFormat options"
+          "dateFallback must be a valid date. Please check dateFallback and dateFormats options"
         );
       });
 
-      it("should throw an error if dateFallback and dateFallback don't match", async () => {
-        const fileName = "gorilla.JPG";
-        const filePath = assetPath(fileName);
+      it("should throw an error if dateFallback and dateFormats don't match", async () => {
         expect(() =>
-          setDate(filePath, {
-            dateFallback: "2022-06-16 12:00:00",
-            dateFallbackFormat: "yyyy:MM:dd hh:mm:ss",
+          setDate(imagePath, {
+            dateFallback: "2022--06_16 12:00:00",
+            dateFormats: ["yyyy:MM:dd hh:mm:ss"],
           })
         ).toThrow(
-          "dateFallback must be a valid date. Please check dateFallback and dateFallbackFormat options"
+          "dateFallback must be a valid date. Please check dateFallback and dateFormats options"
         );
       });
     });
@@ -331,7 +331,7 @@ describe("setDate", () => {
     describe("when fromDigitized option is false", () => {
       it("should not add DateTimeOriginal, trace and return false", async () => {
         const fileName = "sphinx-no-date-original.jpg";
-        const spy = spyTracer("verbose");
+        const spy = spyTracer("info");
         const filePath = assetPath(fileName);
         const result = await setDate(filePath, {
           fromDigitized: false,
@@ -389,7 +389,7 @@ describe("setDate", () => {
           outputFolder,
           moveToIfUnresolved: unknownDatesSubDir,
         });
-        expectLog(`${fileName}: Moving to unknown subfolder`, spy);
+        expectLog(`${fileName}: Moving to unknown subfolder`, spy, 1);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
         expect(fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))).toBe(
           true
@@ -408,7 +408,7 @@ describe("setDate", () => {
           outputFolder,
           moveToIfUnresolved: unknownDatesSubDir,
         });
-        expectLog(`${fileName}: Moving to unknown subfolder`, spy);
+        expectLog(`${fileName}: Moving to unknown subfolder`, spy, 1);
         expect(fsExtra.existsSync(fileOrigin)).toBe(false);
         expect(fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))).toBe(
           true
@@ -426,13 +426,13 @@ describe("setDate", () => {
           outputFolder,
           copyIfNotModified: true,
         });
-        expectLog(`${fileName}: Copying to output folder`, spy);
+        expectLog(`${fileName}: Copying to output folder`, spy, 1);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
         expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
       });
 
       it("should not copy the file if copyIfNotModified is true but outputFolder is the same in which the file is", async () => {
-        const spy = spyTracer("verbose");
+        const spy = spyTracer("info");
         const fileName = "gorilla.JPG";
         const fileOrigin = tempPath(fileName);
         const outputFolder = TEMP_PATH;
@@ -489,10 +489,10 @@ describe("setDate", () => {
   });
 
   describe("when fileName is a valid date", () => {
-    function testFileName(newFileName, dateFormat, date, passFormat) {
-      describe(`when fileName has format ${dateFormat}, dateFormat is ${
-        passFormat ? "" : "not"
-      } defined and outputFolder is different`, () => {
+    function testFileName(newFileName, dateFormats, date, passFormat) {
+      describe(`when fileName is ${newFileName} and dateFormats are ${
+        passFormat ? dateFormats : "not defined"
+      }`, () => {
         it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -504,7 +504,7 @@ describe("setDate", () => {
             fileName: newFileName,
             setDateOptions: {
               outputFolder,
-              dateFormat: passFormat && dateFormat,
+              dateFormats: passFormat && dateFormats,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
@@ -520,15 +520,15 @@ describe("setDate", () => {
       });
     }
 
-    testFileName("2013-10-23-10_32-55.jpg", "yyyy-MM-dd-hh_mm-ss", "2013:10:23 10:32:55", true);
-    testFileName("23_10_2013-10_32_55.jpg", "dd_MM_yyyy-hh_mm_ss", "2013:10:23 10:32:55", true);
-    testFileName("2013-10-23 10-32-55.jpg", "yyyy-MM-dd HH-mm-ss", "2013:10:23 10:32:55", true);
-    testFileName("2013-10-23 10_32.jpg", "yyyy-MM-dd HH_mm", "2013:10:23 10:32:00", true);
-    testFileName("2013-10-23 10.jpg", "yyyy-MM-dd HH", "2013:10:23 10:00:00");
-    testFileName("2013-10-23 5.jpg", "yyyy-MM-dd h", "2013:10:23 05:00:00", true);
-    testFileName("2013-10-23.jpg", "yyyy-MM-dd", "2013:10:23 00:00:00");
-    testFileName("2013-10.jpg", "yyyy-MM", "2013:10:01 00:00:00");
-    testFileName("2013.jpg", "yyyy", "2013:01:01 00:00:00");
+    testFileName("2013-10-23-10_32-55.jpg", ["yyyy-MM-dd-hh_mm-ss"], "2013:10:23 10:32:55", true);
+    testFileName("23_10_2013-10_32_55.jpg", ["dd_MM_yyyy-hh_mm_ss"], "2013:10:23 10:32:55", true);
+    testFileName("2013-10-23 10-32-55.jpg", ["yyyy-MM-dd HH-mm-ss"], "2013:10:23 10:32:55", true);
+    testFileName("2013-10-23 10_32.jpg", ["yyyy-MM-dd HH_mm"], "2013:10:23 10:32:00", true);
+    testFileName("2013-10-23 10.jpg", ["yyyy-MM-dd HH"], "2013:10:23 10:00:00");
+    testFileName("2013-10-23 5.jpg", ["yyyy-MM-dd h"], "2013:10:23 05:00:00", true);
+    testFileName("2013-10-23.jpg", ["yyyy-MM-dd"], "2013:10:23 00:00:00");
+    testFileName("2013-10.jpg", ["yyyy-MM"], "2013:10:01 00:00:00");
+    testFileName("2013.jpg", ["yyyy"], "2013:01:01 00:00:00");
 
     describe("when outputFolder is the same to file folder", () => {
       it("should add date to exif in original file", async () => {
@@ -567,8 +567,8 @@ describe("setDate", () => {
   });
 
   describe("when fileName is a valid partial date and baseDate is provided", () => {
-    function testFileName(newFileName, dateFormat, baseDate, baseDateFormat, date) {
-      describe(`when fileName has format ${dateFormat} and baseDate has format ${baseDateFormat} and outputFolder is different`, () => {
+    function testFileName(newFileName, dateFormats, baseDate, date) {
+      describe(`when fileName is ${newFileName}, baseDate is ${baseDate} and dateFormats are ${dateFormats}`, () => {
         it("should add date to exif and save the file to output folder", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -580,9 +580,8 @@ describe("setDate", () => {
             fileName: newFileName,
             setDateOptions: {
               outputFolder,
-              dateFormat,
+              dateFormats,
               baseDate,
-              baseDateFormat,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
@@ -598,22 +597,15 @@ describe("setDate", () => {
       });
     }
 
-    testFileName("10-23.jpg", "MM-dd", "2015", "yyyy", "2015:10:23 00:00:00");
-    testFileName("18.jpg", "dd", "2015-10", "yyyy-MM", "2015:10:18 00:00:00");
-    testFileName("18_13_24.jpg", "HH_mm_ss", "2015-10-23", "yyyy-MM-dd", "2015:10:23 18:13:24");
-    testFileName("17_30.jpg", "HH_mm", "2015-10-23", "yyyy-MM-dd", "2015:10:23 17:30:00");
+    testFileName("10-23.jpg", ["MM-dd", "yyyy"], "2015", "2015:10:23 00:00:00");
+    testFileName("18.jpg", ["dd", "yyyy-MM"], "2015-10", "2015:10:18 00:00:00");
+    testFileName("18_13_24.jpg", ["HH_mm_ss", "yyyy-MM-dd"], "2015-10-23", "2015:10:23 18:13:24");
+    testFileName("17_30.jpg", ["HH_mm", "yyyy-MM-dd"], "2015-10-23", "2015:10:23 17:30:00");
   });
 
   describe("when fileName is a valid partial date and dateCandidates are provided", () => {
-    function testFileName(
-      newFileName,
-      dateFormat,
-      dateCandidates,
-      baseDateFormat,
-      baseDateFallback,
-      date
-    ) {
-      describe(`when fileName has format ${dateFormat}, date candidates are ${dateCandidates}, baseDate has format ${baseDateFormat} and baseDateFallback is ${baseDateFallback}`, () => {
+    function testFileName(newFileName, dateFormats, dateCandidates, baseDateFallback, date) {
+      describe(`when fileName is ${newFileName}, dateFormats are ${dateFormats}, date candidates are ${dateCandidates}, and baseDateFallback is ${baseDateFallback}`, () => {
         it("should add date to exif using baseDate from dateCandidates and save the file to output folder", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -625,10 +617,9 @@ describe("setDate", () => {
             fileName: newFileName,
             setDateOptions: {
               outputFolder,
-              dateFormat,
+              dateFormats,
               baseDateFallback,
               dateCandidates,
-              baseDateFormat,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
@@ -646,57 +637,59 @@ describe("setDate", () => {
 
     testFileName(
       "10-23.jpg",
-      "MM-dd",
+      ["MM-dd", "yyyy"],
       ["foo", "2015", "1979"],
-      "yyyy",
       null,
       "2015:10:23 00:00:00"
     );
-    testFileName("10-23.jpg", "MM-dd", ["foo", "var", "x"], "yyyy", "2015", "2015:10:23 00:00:00");
+    testFileName(
+      "10-23.jpg",
+      ["MM-dd", "yyyy"],
+      ["foo", "var", "x"],
+      "2015",
+      "2015:10:23 00:00:00"
+    );
     testFileName(
       "18.jpg",
-      "dd",
-      ["invalid", "2015", "2015-10"],
-      "yyyy-MM",
+      ["dd", "yyyy-MM"],
+      ["invalid", "2015-10", "2015"],
       null,
       "2015:10:18 00:00:00"
     );
     testFileName(
       "18.jpg",
-      "dd",
-      ["invalid", "2015", "foo"],
-      "yyyy-MM",
-      "2015-10", // TODO, test baseDateFallback acting as baseDate of dateCandidates when array of formats is supported
+      ["dd", "yyyy-MM"],
+      ["invalid", "foo2", "foo"],
+      "2015-10",
       "2015:10:18 00:00:00"
     );
     testFileName(
+      "18.jpg",
+      ["dd", "MM_dd"],
+      ["invalid", "10_01", "foo"],
+      "2015",
+      "2015:10:18 00:00:00"
+    );
+    testFileName("19.jpg", ["MM", "dd"], ["invalid", "11", "foo"], "2016", "2016:11:19 00:00:00");
+    testFileName(
       "18_13_24.jpg",
-      "HH_mm_ss",
+      ["yyyy-MM-dd", "HH_mm_ss"],
       ["2015-10-23"],
-      "yyyy-MM-dd",
       null,
       "2015:10:23 18:13:24"
     );
     testFileName(
       "17_30.jpg",
-      "HH_mm",
+      ["yyyy-MM-dd", "HH_mm"],
       ["no-date", "foo", "invalid", "2015-10-23", "2015-10-24"],
-      "yyyy-MM-dd",
       null,
       "2015:10:23 17:30:00"
     );
   });
 
   describe("when fileName is a valid partial date, dateCandidates are provided but baseDateFromDateCandidates is false", () => {
-    function testFileName(
-      newFileName,
-      dateFormat,
-      dateCandidates,
-      baseDateFormat,
-      baseDateFallback,
-      date
-    ) {
-      describe(`when fileName has format ${dateFormat}, baseDateFallback is ${baseDateFallback} and baseDateFormat is ${baseDateFormat}`, () => {
+    function testFileName(newFileName, dateFormats, dateCandidates, baseDateFallback, date) {
+      describe(`when fileName is ${newFileName}, formats are ${dateFormats}, and baseDateFallback is ${baseDateFallback}`, () => {
         it("should add date to exif using baseDate from baseDateFallback and save the file to output folder", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -708,11 +701,10 @@ describe("setDate", () => {
             fileName: newFileName,
             setDateOptions: {
               outputFolder,
-              dateFormat,
+              dateFormats,
               dateCandidates,
               baseDateFromDateCandidates: false,
               baseDateFallback,
-              baseDateFormat,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
@@ -730,40 +722,36 @@ describe("setDate", () => {
 
     testFileName(
       "10-23.jpg",
-      "MM-dd",
+      ["MM-dd", "yyyy"],
       ["foo", "2015", "1979"],
-      "yyyy",
       "2016",
       "2016:10:23 00:00:00"
     );
     testFileName(
       "18.jpg",
-      "dd",
+      ["dd", "yyyy-MM"],
       ["invalid", "2015", "2015-10"],
-      "yyyy-MM",
       "2016-10",
       "2016:10:18 00:00:00"
     );
     testFileName(
       "18_13_24.jpg",
-      "HH_mm_ss",
+      ["HH_mm_ss", "yyyy-MM-dd"],
       ["2015-10-23"],
-      "yyyy-MM-dd",
       "2017-11-24",
       "2017:11:24 18:13:24"
     );
     testFileName(
       "17_30.jpg",
-      "HH_mm",
+      ["HH_mm", "yyyy-MM-dd"],
       ["no-date", "foo", "invalid", "2015-10-23", "2015-10-24"],
-      "yyyy-MM-dd",
       "2018-12-15",
       "2018:12:15 17:30:00"
     );
   });
 
   describe("when fileName contains a valid date and dateRegex is provided", () => {
-    function testFileName(newFileName, dateFormat, dateRegex, date) {
+    function testFileName(newFileName, dateFormats, dateRegex, date) {
       describe(`when fileName has name ${newFileName}, and dateRegex is ${dateRegex}`, () => {
         it("should add date to exif and save the file to output folder", async () => {
           const fileName = "gorilla.JPG";
@@ -776,7 +764,7 @@ describe("setDate", () => {
             fileName: newFileName,
             setDateOptions: {
               outputFolder,
-              dateFormat,
+              dateFormats,
               dateRegex,
             },
             newDateExpected: date,
@@ -797,8 +785,8 @@ describe("setDate", () => {
   });
 
   describe("when fileName contains a valid partial date and dateRegex and baseDate are provided", () => {
-    function testFileName(newFileName, dateFormat, dateRegex, baseDate, baseDateFormat, date) {
-      describe(`when fileName has name ${newFileName}, dateRegex is ${dateRegex}, baseDate is ${baseDate} and baseDateFormat is ${baseDateFormat}`, () => {
+    function testFileName(newFileName, dateFormats, dateRegex, baseDate, date) {
+      describe(`when fileName has name ${newFileName}, dateRegex is ${dateRegex}, baseDate is ${baseDate} and dateFormats are ${dateFormats}`, () => {
         it("should add date to exif and save the file to output folder", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -810,10 +798,9 @@ describe("setDate", () => {
             fileName: newFileName,
             setDateOptions: {
               outputFolder,
-              dateFormat,
+              dateFormats,
               dateRegex,
               baseDate,
-              baseDateFormat,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
@@ -829,14 +816,13 @@ describe("setDate", () => {
       });
     }
 
-    testFileName("day_23.jpg", "dd", "day_(\\S*)", "10-2013", "MM-yyyy", "2013:10:23 00:00:00");
-    testFileName("DAY_26.jpg", "dd", "DAY_(\\S*)", "11-2015", "MM-yyyy", "2015:11:26 00:00:00");
+    testFileName("day_23.jpg", ["dd", "MM-yyyy"], "day_(\\S*)", "10-2013", "2013:10:23 00:00:00");
+    testFileName("DAY_26.jpg", ["MM-yyyy", "dd"], "DAY_(\\S*)", "11-2015", "2015:11:26 00:00:00");
     testFileName(
       "DAY_HOUR-21-13.jpg",
-      "dd-HH",
+      ["dd-HH", "MM-yyyy"],
       "DAY_HOUR-(\\S*)",
       "07-2020",
-      "MM-yyyy",
       "2020:07:21 13:00:00"
     );
   });
@@ -854,10 +840,9 @@ describe("setDate", () => {
         fileName: newFileName,
         setDateOptions: {
           outputFolder,
-          dateFormat: "dd-HH",
+          dateFormats: ["dd-HH", "MM-yyyy"],
           dateRegex: "DAY_HOUR_(\\S*)",
           dateFallback: "07-2020",
-          dateFallbackFormat: "MM-yyyy",
         },
         newDateExpected: "2020:07:01 00:00:00",
         dateTimeDigitedExpected: "2020:07:01 00:00:00",
@@ -877,7 +862,7 @@ describe("setDate", () => {
       const fileName = "gorilla.JPG";
       const newFileName = "DAC-2013-10-23-foo.jpg";
       const fileOrigin = tempPath(newFileName);
-      const spy = spyTracer("verbose");
+      const spy = spyTracer("info");
       await copyAssetToTempPath(fileName, newFileName);
 
       const result = await setDate(fileOrigin, {
@@ -889,8 +874,8 @@ describe("setDate", () => {
   });
 
   describe("when first date candidate is a valid date", () => {
-    function testParentDateCandidate(dateCandidate, dateFormat, date) {
-      describe(`when folderName has format ${dateFormat} and outputFolder is different`, () => {
+    function testDateCandidates(dateCandidates, dateFormats, date) {
+      describe(`when dateCandidates are ${dateCandidates} and dateFormats are ${dateFormats}`, () => {
         it("should add date to exif and save the file to output folder, without modifying the original file", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -902,7 +887,7 @@ describe("setDate", () => {
             fileName,
             setDateOptions: {
               outputFolder,
-              dateCandidates: [dateCandidate],
+              dateCandidates,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
@@ -918,12 +903,12 @@ describe("setDate", () => {
       });
     }
 
-    testParentDateCandidate("2013-10-23 10:32:55", "YYYY-MM-dd hh:mm:ss", "2013:10:23 10:32:55");
-    testParentDateCandidate("2013-10-23 10:32", "YYYY-MM-dd hh:mm", "2013:10:23 10:32:00");
-    testParentDateCandidate("2013-10-23 10", "YYYY-MM-dd hh", "2013:10:23 10:00:00");
-    testParentDateCandidate("2013-10-23", "YYYY-MM-dd", "2013:10:23 00:00:00");
-    testParentDateCandidate("2013-10", "YYYY-MM", "2013:10:01 00:00:00");
-    testParentDateCandidate("2013", "YYYY", "2013:01:01 00:00:00");
+    testDateCandidates(["2013-10-23 10:32:55"], ["YYYY-MM-dd hh:mm:ss"], "2013:10:23 10:32:55");
+    testDateCandidates(["2013-10-23 10:32"], ["YYYY-MM-dd hh:mm"], "2013:10:23 10:32:00");
+    testDateCandidates(["2013-10-23 10"], ["YYYY-MM-dd hh"], "2013:10:23 10:00:00");
+    testDateCandidates(["2013-10-23"], ["YYYY-MM-dd"], "2013:10:23 00:00:00");
+    testDateCandidates(["2013-10"], ["YYYY-MM"], "2013:10:01 00:00:00");
+    testDateCandidates(["2013"], ["YYYY"], "2013:01:01 00:00:00");
 
     describe("when outputFolder is the same to file folder", () => {
       it("should add date to exif in original file", async () => {

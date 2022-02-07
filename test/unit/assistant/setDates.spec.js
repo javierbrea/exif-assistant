@@ -3,6 +3,7 @@ const { setDates } = require("../../../src/assistant/setDateMethods");
 
 const {
   resetTempPath,
+  copyAssetToTempPath,
   copyAssetsToTempPath,
   TEMP_PATH,
   UNRESOLVED_FOLDER,
@@ -44,20 +45,16 @@ describe("setDates", () => {
           setDates(TEMP_PATH, {
             baseDate: "2022:06:16 12:00:00",
           })
-        ).toThrow(
-          "baseDate must be a valid date. Please check baseDate and baseDateFormat options"
-        );
+        ).toThrow("baseDate must be a valid date. Please check baseDate and dateFormats options");
       });
 
-      it("should throw an error if baseDate and baseDateFormat don't match", async () => {
+      it("should throw an error if baseDate and dateFormats don't match", async () => {
         expect(() =>
           setDates(TEMP_PATH, {
-            baseDate: "2022-06-16 12:00:00",
-            baseDateFormat: "yyyy:MM:dd hh:mm:ss",
+            baseDate: "2022_06_16 12:00:00",
+            dateFormats: ["yyyy:MM:dd hh:mm:ss"],
           })
-        ).toThrow(
-          "baseDate must be a valid date. Please check baseDate and baseDateFormat options"
-        );
+        ).toThrow("baseDate must be a valid date. Please check baseDate and dateFormats options");
       });
     });
 
@@ -67,16 +64,16 @@ describe("setDates", () => {
           setDates(TEMP_PATH, {
             date: "2022:06:16 12:00:00",
           })
-        ).toThrow("date must be a valid date. Please check date and dateFormat options");
+        ).toThrow("date must be a valid date. Please check date and dateFormats options");
       });
 
-      it("should throw an error if date and dateFormat don't match", async () => {
+      it("should throw an error if date and dateFormats don't match", async () => {
         expect(() =>
           setDates(TEMP_PATH, {
-            date: "2022-06-16 12:00:00",
-            dateFormat: "yyyy:MM:dd hh:mm:ss",
+            date: "2022_06_16 12:00:00",
+            dateFormats: ["yyyy:MM:dd hh:mm:ss"],
           })
-        ).toThrow("date must be a valid date. Please check date and dateFormat options");
+        ).toThrow("date must be a valid date. Please check date and dateFormats options");
       });
     });
 
@@ -87,18 +84,18 @@ describe("setDates", () => {
             dateFallback: "2022:06:16 12:00:00",
           })
         ).toThrow(
-          "dateFallback must be a valid date. Please check dateFallback and dateFallbackFormat options"
+          "dateFallback must be a valid date. Please check dateFallback and dateFormats options"
         );
       });
 
-      it("should throw an error if dateFallback and dateFallback don't match", async () => {
+      it("should throw an error if dateFallback and dateFormats don't match", async () => {
         expect(() =>
           setDates(TEMP_PATH, {
-            dateFallback: "2022-06-16 12:00:00",
-            dateFallbackFormat: "yyyy:MM:dd hh:mm:ss",
+            dateFallback: "2022_06_16 12:00:00",
+            dateFormats: ["yyyy:MM:dd hh:mm:ss"],
           })
         ).toThrow(
-          "dateFallback must be a valid date. Please check dateFallback and dateFallbackFormat options"
+          "dateFallback must be a valid date. Please check dateFallback and dateFormats options"
         );
       });
     });
