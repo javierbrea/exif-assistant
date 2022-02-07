@@ -3,7 +3,6 @@ const { setDates } = require("../../../src/assistant/setDateMethods");
 
 const {
   resetTempPath,
-  copyAssetToTempPath,
   copyAssetsToTempPath,
   TEMP_PATH,
   UNRESOLVED_FOLDER,
