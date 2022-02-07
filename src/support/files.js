@@ -65,10 +65,6 @@ function findFolderFiles(folderPath) {
     .filter(isFile);
 }
 
-function getFolderName(filePath) {
-  return baseName(dirName(filePath));
-}
-
 function getFileName(filePath) {
   return baseName(filePath);
 }
@@ -110,7 +106,6 @@ module.exports = {
   removeExtension,
   toAbsolute,
   findFolderFiles,
-  getFolderName,
   getFileName,
   changeFileBasePath,
   dirName,
