@@ -17,7 +17,7 @@ const { readExifDates } = require("../../../src/exif/fileMethods");
 const IMAGE_NO_DATE_ORIGINAL = "sphinx-no-date-original.jpg";
 const IMAGE_NO_DATE = "gorilla.JPG";
 const IMAGE_WITH_DATE = "sphinx.jpg";
-const IMAGE_NOT_SUPPORTED = "wadi-rum.png"
+const IMAGE_NOT_SUPPORTED = "wadi-rum.png";
 
 describe("setDates", () => {
   beforeAll(async () => {
