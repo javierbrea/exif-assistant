@@ -37,13 +37,14 @@ function findDateStringUsingRegexs(string, dateRegexs = []) {
   if (isEmpty(dateRegexs)) {
     return string;
   }
-  return dateRegexs.reduce((previousResult, dateRegex) => {
+  const firstMatch = dateRegexs.reduce((previousResult, dateRegex) => {
     if (!!previousResult) {
       return previousResult;
     }
     const regexResult = new RegExp(dateRegex).exec(string);
     return regexResult && regexResult[1];
   }, null);
+  return firstMatch || string;
 }
 
 module.exports = {
