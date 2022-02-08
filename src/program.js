@@ -4,6 +4,8 @@ const { setDates } = require("./assistant/setDateMethods");
 const { toAbsolute } = require("./support/files");
 const { setLevel } = require("./support/tracer");
 
+const { version } = require("../package.json");
+
 const program = new Command();
 
 const logOption = new Option("-l, --log <logLevel>", "Log level").choices([
@@ -22,7 +24,7 @@ function setLogLevel(level) {
   }
 }
 
-program.name("exif-assistant").description("Set exif data to image files").version("0.0.1-beta.1");
+program.name("exif-assistant").description("Set exif data to image files").version(version);
 
 program
   .command("set-dates")
@@ -34,11 +36,11 @@ program
   .option(
     "-f, --dateFormat <dateFormats...>",
     "Date format in files, folder names or date options. Supports multiple values"
-  ) // TODO, support array
+  )
   .option(
     "-r, --dateRegex <dateRegexs...>",
     "Regex used to get date from file or folder names. Supports multiple values"
-  ) // TODO, support array
+  )
   .option(
     "--baseDateFallback <baseDateFallback>",
     "Use this date as baseDate when it is not found anywhere else"
