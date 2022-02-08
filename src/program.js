@@ -31,8 +31,14 @@ program
   .addOption(logOption)
   .option("-o, --outputFolder <outputFolder>", "Output folder", ".")
   .option("-d, --date <date>", "Date to set")
-  .option("-f, --dateFormats <dateFormats>", "Date formats in files, folder names or date options") // TODO, support array
-  .option("-r, --dateRegex <dateRegex>", "Regex used to get date from file or folder names")
+  .option(
+    "-f, --dateFormat <dateFormats...>",
+    "Date format in files, folder names or date options. Supports multiple values"
+  ) // TODO, support array
+  .option(
+    "-r, --dateRegex <dateRegexs...>",
+    "Regex used to get date from file or folder names. Supports multiple values"
+  ) // TODO, support array
   .option(
     "--baseDateFallback <baseDateFallback>",
     "Use this date as baseDate when it is not found anywhere else"
@@ -57,7 +63,11 @@ program
   .showHelpAfterError()
   .action((folderPath, options) => {
     setLogLevel(options.log);
-    return setDates(toAbsolute(folderPath), options);
+    return setDates(toAbsolute(folderPath), {
+      ...options,
+      dateFormats: options.dateFormat, // convert singular option from command line into plural
+      dateRegexs: options.dateRegex, // convert singular option from command line into plural
+    });
   });
 
 module.exports = {

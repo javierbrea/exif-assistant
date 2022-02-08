@@ -1,6 +1,6 @@
 const { format, isValid, isMatch, parseISO, parse } = require("date-fns");
 
-const { isArray } = require("./utils");
+const { isArray, isEmpty } = require("./utils");
 
 const EXIF_DATE_FORMAT = "yyyy:MM:dd HH:mm:ss";
 const LOGS_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -33,12 +33,17 @@ function formatForLogsFromExif(exifDate) {
   return format(dateFromString(exifDate, EXIF_DATE_FORMAT), LOGS_DATE_FORMAT);
 }
 
-function findDateStringUsingRegex(string, dateRegex) {
-  if (!dateRegex) {
+function findDateStringUsingRegexs(string, dateRegexs = []) {
+  if (isEmpty(dateRegexs)) {
     return string;
   }
-  const regexResult = new RegExp(dateRegex).exec(string);
-  return regexResult && regexResult[1];
+  return dateRegexs.reduce((previousResult, dateRegex) => {
+    if (!!previousResult) {
+      return previousResult;
+    }
+    const regexResult = new RegExp(dateRegex).exec(string);
+    return regexResult && regexResult[1];
+  }, null);
 }
 
 module.exports = {
@@ -46,5 +51,5 @@ module.exports = {
   formatForExif,
   formatForLogsFromExif,
   isValidDate,
-  findDateStringUsingRegex,
+  findDateStringUsingRegexs,
 };

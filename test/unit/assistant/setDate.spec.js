@@ -750,9 +750,9 @@ describe("setDate", () => {
     );
   });
 
-  describe("when fileName contains a valid date and dateRegex is provided", () => {
-    function testFileName(newFileName, dateFormats, dateRegex, date) {
-      describe(`when fileName has name ${newFileName}, and dateRegex is ${dateRegex}`, () => {
+  describe("when fileName contains a valid date and dateRegexs are provided", () => {
+    function testFileName(newFileName, dateFormats, dateRegexs, date) {
+      describe(`when fileName has name ${newFileName}, and dateRegexs are ${dateRegexs}`, () => {
         it("should add date to exif and save the file to output folder", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -765,7 +765,7 @@ describe("setDate", () => {
             setDateOptions: {
               outputFolder,
               dateFormats,
-              dateRegex,
+              dateRegexs,
             },
             newDateExpected: date,
             dateTimeDigitedExpected: date,
@@ -781,12 +781,23 @@ describe("setDate", () => {
       });
     }
 
-    testFileName("DAC-2013-10-23-foo.jpg", "yyyy-MM-dd", "DAC-(\\S*)-foo", "2013:10:23 00:00:00");
+    testFileName(
+      "DAC-2013-10-23-foo.jpg",
+      ["yyyy-MM-dd"],
+      ["DAC-(\\S*)-foo", "foo-(\\S*)-foo"],
+      "2013:10:23 00:00:00"
+    );
+    testFileName(
+      "DAC-2013-10-23-foo.jpg",
+      ["yyyy-MM-dd"],
+      ["foo-(\\S*)-foo", "DAC-(\\S*)-foo"],
+      "2013:10:23 00:00:00"
+    );
   });
 
-  describe("when fileName contains a valid partial date and dateRegex and baseDate are provided", () => {
-    function testFileName(newFileName, dateFormats, dateRegex, baseDate, date) {
-      describe(`when fileName has name ${newFileName}, dateRegex is ${dateRegex}, baseDate is ${baseDate} and dateFormats are ${dateFormats}`, () => {
+  describe("when fileName contains a valid partial date and dateRegexs and baseDate are provided", () => {
+    function testFileName(newFileName, dateFormats, dateRegexs, baseDate, date) {
+      describe(`when fileName has name ${newFileName}, dateRegexs are ${dateRegexs}, baseDate is ${baseDate} and dateFormats are ${dateFormats}`, () => {
         it("should add date to exif and save the file to output folder", async () => {
           const fileName = "gorilla.JPG";
           const outputFolder = path.resolve(TEMP_PATH, "modified");
@@ -799,7 +810,7 @@ describe("setDate", () => {
             setDateOptions: {
               outputFolder,
               dateFormats,
-              dateRegex,
+              dateRegexs,
               baseDate,
             },
             newDateExpected: date,
@@ -816,18 +827,30 @@ describe("setDate", () => {
       });
     }
 
-    testFileName("day_23.jpg", ["dd", "MM-yyyy"], "day_(\\S*)", "10-2013", "2013:10:23 00:00:00");
-    testFileName("DAY_26.jpg", ["MM-yyyy", "dd"], "DAY_(\\S*)", "11-2015", "2015:11:26 00:00:00");
+    testFileName(
+      "day_23.jpg",
+      ["dd", "MM-yyyy"],
+      ["day_(\\S*)"],
+      "10-2013",
+      "2013:10:23 00:00:00"
+    );
+    testFileName(
+      "DAY_26.jpg",
+      ["MM-yyyy", "dd"],
+      ["DAY_(\\S*)"],
+      "11-2015",
+      "2015:11:26 00:00:00"
+    );
     testFileName(
       "DAY_HOUR-21-13.jpg",
       ["dd-HH", "MM-yyyy"],
-      "DAY_HOUR-(\\S*)",
+      ["DAY_HOUR-(\\S*)"],
       "07-2020",
       "2020:07:21 13:00:00"
     );
   });
 
-  describe("when dateRegex does not capture anything from fileName but dateFallback is provided", () => {
+  describe("when dateRegexs does not capture anything from fileName but dateFallback is provided", () => {
     it("should add dateFallback to file", async () => {
       const fileName = "gorilla.JPG";
       const newFileName = "DAY_HOUR-21-13.jpg";
@@ -841,7 +864,7 @@ describe("setDate", () => {
         setDateOptions: {
           outputFolder,
           dateFormats: ["dd-HH", "MM-yyyy"],
-          dateRegex: "DAY_HOUR_(\\S*)",
+          dateRegexs: ["DAY_HOUR_(\\S*)"],
           dateFallback: "07-2020",
         },
         newDateExpected: "2020:07:01 00:00:00",
@@ -857,7 +880,7 @@ describe("setDate", () => {
     });
   });
 
-  describe("when dateRegex does not capture anything from fileName", () => {
+  describe("when dateRegexs does not capture anything from fileName", () => {
     it("should trace warn and return false", async () => {
       const fileName = "gorilla.JPG";
       const newFileName = "DAC-2013-10-23-foo.jpg";
@@ -866,7 +889,7 @@ describe("setDate", () => {
       await copyAssetToTempPath(fileName, newFileName);
 
       const result = await setDate(fileOrigin, {
-        dateRegex: "prefix(x)suffix",
+        dateRegexs: ["prefix(x)suffix"],
       });
       expectLog(`${newFileName}: No date was found to set`, spy);
       expect(result).toBe(false);

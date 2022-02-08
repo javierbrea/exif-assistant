@@ -8,7 +8,7 @@ const {
   isValidDate,
   dateFromString,
   formatForLogsFromExif,
-  findDateStringUsingRegex,
+  findDateStringUsingRegexs,
 } = require("../support/dates");
 const {
   moveOrCopyFileToSubfolder,
@@ -29,7 +29,7 @@ function getParsedBaseDate({
   dateFormats,
   dateCandidates,
   baseDateFromDateCandidates,
-  dateRegex,
+  dateRegexs,
   baseDateFallback,
 }) {
   let parsedBaseDateFallback = null;
@@ -44,7 +44,7 @@ function getParsedBaseDate({
     const parsedDateCandidates = [...dateCandidates]
       .reverse()
       .reduce((validDates, dateCandidate) => {
-        const dateStringUsingRegex = findDateStringUsingRegex(dateCandidate, dateRegex);
+        const dateStringUsingRegex = findDateStringUsingRegexs(dateCandidate, dateRegexs);
         const parsedBaseDate = lastItem(validDates) || parsedBaseDateFallback;
         if (isValidDate(dateStringUsingRegex, dateFormats, parsedBaseDate)) {
           validDates.push(dateFromString(dateStringUsingRegex, dateFormats, parsedBaseDate));
@@ -72,16 +72,16 @@ function TraceSetDate({ fileName, setDigitized }) {
   };
 }
 
-function IsDate({ dateFormats, parsedBaseDate, dateRegex }) {
+function IsDate({ dateFormats, parsedBaseDate, dateRegexs }) {
   return function (date) {
-    return isValidDate(findDateStringUsingRegex(date, dateRegex), dateFormats, parsedBaseDate);
+    return isValidDate(findDateStringUsingRegexs(date, dateRegexs), dateFormats, parsedBaseDate);
   };
 }
 
-function FormatForExif({ dateFormats, parsedBaseDate, dateRegex }) {
+function FormatForExif({ dateFormats, parsedBaseDate, dateRegexs }) {
   return function (date) {
     return formatDateForExif(
-      findDateStringUsingRegex(date, dateRegex),
+      findDateStringUsingRegexs(date, dateRegexs),
       dateFormats,
       parsedBaseDate
     );
@@ -182,7 +182,7 @@ async function setDateToFile(
     outputFolder,
     date,
     dateFormats,
-    dateRegex, // TODO, support array
+    dateRegexs,
     baseDate,
     baseDateFromDateCandidates = true,
     baseDateFallback,
@@ -205,7 +205,7 @@ async function setDateToFile(
     dateCandidates,
     baseDateFromDateCandidates,
     baseDateFallback,
-    dateRegex,
+    dateRegexs,
   });
 
   const copyToOutput = CopyToOutput({
@@ -215,12 +215,12 @@ async function setDateToFile(
     fileFolder,
     copyIfNotModified,
   });
-  const isDate = IsDate({ dateFormats, parsedBaseDate, dateRegex });
+  const isDate = IsDate({ dateFormats, parsedBaseDate, dateRegexs });
   const findFirstValidDate = FindFirstValidDate(isDate);
   const formatForExif = FormatForExif({
     dateFormats,
     parsedBaseDate,
-    dateRegex,
+    dateRegexs,
   });
   const setDates = SetDates({
     fileName,

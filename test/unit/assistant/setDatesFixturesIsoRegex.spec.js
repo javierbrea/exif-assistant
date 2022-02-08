@@ -16,7 +16,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     await resetTempPath();
   });
 
-  describe("when modify option is true, fromDigited is false and dateRegex is provided", () => {
+  describe("when modify option is true, fromDigited is false and dateRegexs are provided", () => {
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
@@ -25,7 +25,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
         modify: true,
-        dateRegex: /^date\-(\S*)/,
+        dateRegexs: [/^date\-(\S*)/],
       });
     });
 

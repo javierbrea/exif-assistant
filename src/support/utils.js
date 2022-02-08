@@ -22,6 +22,10 @@ function lastItem(arr) {
   return arr[arr.length - 1];
 }
 
+function isEmpty(arr) {
+  return arr.length === 0;
+}
+
 module.exports = {
   isString,
   isNumber,
@@ -29,4 +33,5 @@ module.exports = {
   isUndefined,
   compactArray,
   lastItem,
+  isEmpty,
 };
