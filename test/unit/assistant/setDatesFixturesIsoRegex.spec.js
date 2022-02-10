@@ -17,10 +17,12 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
   });
 
   describe("when modify option is true, fromDigited is false and dateRegexs are provided", () => {
+    let result;
+
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDates(tempFixturesFolder(FIXTURE), {
+      result = await setDates(tempFixturesFolder(FIXTURE), {
         copyAll: true,
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
@@ -74,6 +76,33 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
         tempOutputPath("subfolder", "date-2013-10-23T124015", "date-1979-05", "gorilla.JPG")
       );
       expect(DateTimeOriginal).toEqual(`1979:05:01 00:00:00`);
+    });
+
+    it("should return report data", async () => {
+      expect(result).toEqual({
+        after: {
+          copied: 4,
+          files: 10,
+          modified: 6,
+          moved: 0,
+          path: "test/assets/.tmp/output",
+          supported: 7,
+          unsupported: 3,
+          with_date: 7,
+          without_date: 0,
+        },
+        before: {
+          copied: null,
+          files: 10,
+          modified: null,
+          moved: null,
+          path: "test/assets/.tmp/iso-regex",
+          supported: 7,
+          unsupported: 3,
+          with_date: 5,
+          without_date: 2,
+        },
+      });
     });
   });
 });

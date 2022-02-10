@@ -36,6 +36,8 @@
     "prepare": "is-ci || husky install"
   },
   "dependencies": {
+    "chalk": "4.0.0",
+    "console-table-printer": "2.10.0",
     "date-fns": "2.28.0",
     "deepmerge": "4.2.2",
     "fs-extra": "10.0.0",
@@ -47,8 +49,8 @@
     "eslint": "8.3.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-boundaries": "2.8.0",
-    "eslint-plugin-jest": "25.3.0",
     "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-jest": "25.3.0",
     "eslint-plugin-mocha": "10.0.3",
     "eslint-plugin-no-only-tests": "2.6.0",
     "eslint-plugin-prettier": "4.0.0",

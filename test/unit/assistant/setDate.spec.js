@@ -79,7 +79,7 @@ describe("setDate", () => {
     } else {
       expect(DateTimeDigitized).toEqual(dateTimeDigitedExpected);
     }
-    expect(result).toBe(true);
+    return result;
   }
 
   describe("validations", () => {
@@ -94,57 +94,61 @@ describe("setDate", () => {
       it("should throw an error if input file does not exist", async () => {
         const fileName = "foo.JPG";
         const filePath = assetPath(fileName);
-        expect(() =>
+        await expect(() =>
           setDate(filePath, {
             baseDate: "2022:06:16 12:00:00",
           })
-        ).toThrow("input file does not exist");
+        ).rejects.toThrow("input file does not exist");
       });
 
       it("should throw an error if input file is a folder", async () => {
-        expect(() =>
+        await expect(() =>
           setDate(TEMP_PATH, {
             baseDate: "2022:06:16 12:00:00",
           })
-        ).toThrow("input file must be a file");
+        ).rejects.toThrow("input file must be a file");
       });
     });
 
     describe("when baseDate is provided", () => {
       it("should throw an error if baseDate is invalid and no format is provided", async () => {
-        expect(() =>
+        await expect(() =>
           setDate(imagePath, {
             baseDate: "2022:06:16 12:00:00",
           })
-        ).toThrow("baseDate must be a valid date. Please check baseDate and dateFormats options");
+        ).rejects.toThrow(
+          "baseDate must be a valid date. Please check baseDate and dateFormats options"
+        );
       });
 
       it("should throw an error if baseDate and dateFormats don't match", async () => {
-        expect(() =>
-          setDate(imagePath, {
+        await expect(async () => {
+          await setDate(imagePath, {
             baseDate: "2022_06_16 12:00:00",
             baseDateFormat: "yyyy:MM:dd hh:mm:ss",
-          })
-        ).toThrow("baseDate must be a valid date. Please check baseDate and dateFormats options");
+          });
+        }).rejects.toThrow(
+          "baseDate must be a valid date. Please check baseDate and dateFormats options"
+        );
       });
     });
 
     describe("when date is provided", () => {
       it("should throw an error if date is not valid and no format is provided", async () => {
-        expect(() =>
+        await expect(() =>
           setDate(imagePath, {
             date: "2022:06:16 12:00:00",
           })
-        ).toThrow("date must be a valid date. Please check date and dateFormats options");
+        ).rejects.toThrow("date must be a valid date. Please check date and dateFormats options");
       });
 
       it("should throw an error if date and dateFormats don't match", async () => {
-        expect(() =>
+        await expect(() =>
           setDate(imagePath, {
             date: "2022_06_16 12:00:00",
             dateFormats: ["yyyy:MM:dd hh:mm:ss"],
           })
-        ).toThrow("date must be a valid date. Please check date and dateFormats options");
+        ).rejects.toThrow("date must be a valid date. Please check date and dateFormats options");
       });
 
       it("should not throw an error if date and dateFormats don't match but date is ISO", async () => {
@@ -159,22 +163,22 @@ describe("setDate", () => {
 
     describe("when dateFallback is provided", () => {
       it("should throw an error if dateFallback is not valid and no format is provided", async () => {
-        expect(() =>
+        await expect(() =>
           setDate(imagePath, {
             dateFallback: "2022:06:16 12:00:00",
           })
-        ).toThrow(
+        ).rejects.toThrow(
           "dateFallback must be a valid date. Please check dateFallback and dateFormats options"
         );
       });
 
       it("should throw an error if dateFallback and dateFormats don't match", async () => {
-        expect(() =>
+        await expect(() =>
           setDate(imagePath, {
             dateFallback: "2022--06_16 12:00:00",
             dateFormats: ["yyyy:MM:dd hh:mm:ss"],
           })
-        ).toThrow(
+        ).rejects.toThrow(
           "dateFallback must be a valid date. Please check dateFallback and dateFormats options"
         );
       });
@@ -182,34 +186,44 @@ describe("setDate", () => {
   });
 
   describe("when file is not supported", () => {
-    it("should trace warning and return false", async () => {
+    it("should trace warning and return correspondent report", async () => {
       const fileName = "wadi-rum.png";
       const spy = spyTracer("warn");
       const filePath = assetPath(fileName);
       const result = await setDate(filePath);
       expectLog(`${fileName}: File type is not supported`, spy);
-      expect(result).toBe(false);
+      expect(result.before.files).toEqual(1);
+      expect(result.before.supported).toEqual(0);
+      expect(result.before.unsupported).toEqual(1);
+      expect(result.after.files).toEqual(1);
+      expect(result.after.supported).toEqual(0);
+      expect(result.after.unsupported).toEqual(1);
+      expect(result.after.modified).toEqual(0);
     });
   });
 
   describe("when file has already date", () => {
     describe("when no modify option is provided", () => {
-      it("should trace verbose and return false", async () => {
+      it("should trace verbose and return correspondent report", async () => {
         const fileName = "sphinx.jpg";
         const spy = spyTracer("verbose");
         const filePath = assetPath(fileName);
         const result = await setDate(filePath);
         expectLog(`${fileName}: Already has DateTimeOriginal`, spy);
-        expect(result).toBe(false);
+        expect(result.before.supported).toEqual(1);
+        expect(result.before.with_date).toEqual(1);
+        expect(result.after.supported).toEqual(1);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.modified).toEqual(0);
       });
     });
 
     describe("when modify option is true", () => {
       describe("when date is provided", () => {
-        it("should set DateTimeOriginal, DateTimeDigitized and return true", async () => {
+        it("should set DateTimeOriginal, DateTimeDigitized and return report", async () => {
           const dateOption = "2022-07-12 13:00:00";
           const date = "2022:07:12 13:00:00";
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             fileName: "sphinx.jpg",
             setDateOptions: {
               date: dateOption,
@@ -218,6 +232,9 @@ describe("setDate", () => {
             newDateExpected: date,
             expectedLog: "from date option",
           });
+          expect(result.before.with_date).toEqual(1);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
 
@@ -227,7 +244,7 @@ describe("setDate", () => {
           const { metadata } = assetData(fileName);
           const dateOption = "2009-09-09 09:00:00";
           const date = "2009:09:09 09:00:00";
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             fileName,
             setDateOptions: {
               date: dateOption,
@@ -238,6 +255,9 @@ describe("setDate", () => {
             dateTimeDigitedExpected: metadata.DateTimeDigitized,
             expectedLog: "from date option",
           });
+          expect(result.before.with_date).toEqual(1);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
 
@@ -246,7 +266,7 @@ describe("setDate", () => {
           const fileName = "sphinx.jpg";
           const dateFallback = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             fileName,
             setDateOptions: {
               dateFallback,
@@ -256,6 +276,9 @@ describe("setDate", () => {
             newDateExpected: date,
             expectedLog: "from dateFallback option",
           });
+          expect(result.before.with_date).toEqual(1);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
 
         it("should add DateTimeOriginal and not modify DateTimeDigitized if setDigitized is false", async () => {
@@ -263,7 +286,7 @@ describe("setDate", () => {
           const { metadata } = assetData(fileName);
           const dateFallback = "2009-09-09 09:30:00";
           const date = "2009:09:09 09:30:00";
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             fileName,
             setDateOptions: {
               dateFallback,
@@ -275,6 +298,9 @@ describe("setDate", () => {
             dateTimeDigitedExpected: metadata.DateTimeDigitized,
             expectedLog: "from dateFallback option",
           });
+          expect(result.before.with_date).toEqual(1);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
     });
@@ -285,7 +311,7 @@ describe("setDate", () => {
       it("should add DateTimeOriginal, DateTimeDigitized and return true", async () => {
         const inputDate = "2022-06-16 12:00:00";
         const date = "2022:06:16 12:00:00";
-        await expectModifiedDate({
+        const result = await expectModifiedDate({
           fileName: "gorilla.JPG",
           setDateOptions: {
             date: inputDate,
@@ -293,6 +319,9 @@ describe("setDate", () => {
           newDateExpected: date,
           expectedLog: "from date option",
         });
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.modified).toEqual(1);
       });
     });
 
@@ -316,20 +345,23 @@ describe("setDate", () => {
 
   describe("when file has only DateTimeDigitized", () => {
     describe("when no fromDigitized option is provided", () => {
-      it("should add DateTimeOriginal from DateTimeDigitized and return true", async () => {
+      it("should add DateTimeOriginal from DateTimeDigitized and return report", async () => {
         const fileName = "sphinx-no-date-original.jpg";
         const { metadata } = assetData(fileName);
-        await expectModifiedDate({
+        const result = await expectModifiedDate({
           fileName,
           setDateOptions: {},
           newDateExpected: metadata.DateTimeDigitized,
           expectedLog: "from DateTimeDigitized",
         });
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.modified).toEqual(1);
       });
     });
 
     describe("when fromDigitized option is false", () => {
-      it("should not add DateTimeOriginal, trace and return false", async () => {
+      it("should not add DateTimeOriginal, trace and return report", async () => {
         const fileName = "sphinx-no-date-original.jpg";
         const spy = spyTracer("info");
         const filePath = assetPath(fileName);
@@ -337,14 +369,16 @@ describe("setDate", () => {
           fromDigitized: false,
         });
         expectLog(`${fileName}: No date was found to set`, spy);
-        expect(result).toBe(false);
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(0);
+        expect(result.after.modified).toEqual(0);
       });
 
       it("should add DateTimeOriginal and modify DateTimeDigitized if dateFallback is provided", async () => {
         const fileName = "sphinx-no-date-original.jpg";
         const dateFallback = "2009-09-09 09:30:00";
         const date = "2009:09:09 09:30:00";
-        await expectModifiedDate({
+        const result = await expectModifiedDate({
           fileName,
           setDateOptions: {
             dateFallback,
@@ -353,6 +387,9 @@ describe("setDate", () => {
           newDateExpected: date,
           expectedLog: "from dateFallback option",
         });
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.modified).toEqual(1);
       });
 
       it("should add DateTimeOriginal and not modify DateTimeDigitized if dateFallback is provided but setDigitized is false", async () => {
@@ -360,7 +397,7 @@ describe("setDate", () => {
         const { metadata } = assetData(fileName);
         const dateFallback = "2009-09-09 09:30:00";
         const date = "2009:09:09 09:30:00";
-        await expectModifiedDate({
+        const result = await expectModifiedDate({
           fileName,
           setDateOptions: {
             dateFallback,
@@ -371,6 +408,9 @@ describe("setDate", () => {
           dateTimeDigitedExpected: metadata.DateTimeDigitized,
           expectedLog: "from dateFallback option",
         });
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.modified).toEqual(1);
       });
     });
   });
@@ -385,7 +425,7 @@ describe("setDate", () => {
         const unknownDatesSubDir = "unknown";
 
         await copyAssetToTempPath(fileName);
-        await setDate(fileOrigin, {
+        const result = await setDate(fileOrigin, {
           outputFolder,
           moveToIfUnresolved: unknownDatesSubDir,
         });
@@ -394,6 +434,10 @@ describe("setDate", () => {
         expect(fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))).toBe(
           true
         );
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(0);
+        expect(result.after.modified).toEqual(0);
+        expect(result.after.moved).toEqual(1);
       });
 
       it("should move the file to a subfolder if outputFolder is the same in which the file is", async () => {
@@ -404,7 +448,7 @@ describe("setDate", () => {
         const unknownDatesSubDir = "unknown";
 
         await copyAssetToTempPath(fileName);
-        await setDate(fileOrigin, {
+        const result = await setDate(fileOrigin, {
           outputFolder,
           moveToIfUnresolved: unknownDatesSubDir,
         });
@@ -413,6 +457,10 @@ describe("setDate", () => {
         expect(fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))).toBe(
           true
         );
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(0);
+        expect(result.after.modified).toEqual(0);
+        expect(result.after.moved).toEqual(1);
       });
 
       it("should copy the file to outputFolder if copyIfNotModified is true and outputFolder is not the same in which the file is", async () => {
@@ -422,13 +470,19 @@ describe("setDate", () => {
         const outputFolder = path.resolve(TEMP_PATH, "new-dates");
 
         await copyAssetToTempPath(fileName);
-        await setDate(fileOrigin, {
+        const result = await setDate(fileOrigin, {
           outputFolder,
           copyIfNotModified: true,
         });
         expectLog(`${fileName}: Copying to output folder`, spy, 1);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
         expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(0);
+        expect(result.before.without_date).toEqual(1);
+        expect(result.after.without_date).toEqual(1);
+        expect(result.after.modified).toEqual(0);
+        expect(result.after.copied).toEqual(1);
       });
 
       it("should not copy the file if copyIfNotModified is true but outputFolder is the same in which the file is", async () => {
@@ -438,12 +492,18 @@ describe("setDate", () => {
         const outputFolder = TEMP_PATH;
 
         await copyAssetToTempPath(fileName);
-        await setDate(fileOrigin, {
+        const result = await setDate(fileOrigin, {
           outputFolder,
           copyIfNotModified: true,
         });
         expectLog(`${fileName}: No date was found to set`, spy);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(0);
+        expect(result.before.without_date).toEqual(1);
+        expect(result.after.without_date).toEqual(1);
+        expect(result.after.modified).toEqual(0);
+        expect(result.after.copied).toEqual(0);
       });
     });
   });
@@ -457,13 +517,22 @@ describe("setDate", () => {
         const outputFolder = path.resolve(TEMP_PATH, "unsupported");
 
         await copyAssetToTempPath(fileName);
-        await setDate(fileOrigin, {
+        const result = await setDate(fileOrigin, {
           outputFolder,
           copyIfNotModified: true,
         });
         expectLog(`${fileName}: Copying to output folder`, spy);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
         expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
+        expect(result.before.supported).toEqual(0);
+        expect(result.before.unsupported).toEqual(1);
+        expect(result.before.with_date).toEqual(0);
+        expect(result.before.without_date).toEqual(0);
+        expect(result.after.supported).toEqual(0);
+        expect(result.after.unsupported).toEqual(1);
+        expect(result.after.with_date).toEqual(0);
+        expect(result.after.without_date).toEqual(0);
+        expect(result.after.copied).toEqual(1);
       });
     });
 
@@ -476,7 +545,7 @@ describe("setDate", () => {
         const unresolvedDir = "unresolved";
 
         await copyAssetToTempPath(fileName);
-        await setDate(fileOrigin, {
+        const result = await setDate(fileOrigin, {
           outputFolder,
           copyIfNotModified: true,
           moveToIfUnresolved: unresolvedDir,
@@ -484,6 +553,10 @@ describe("setDate", () => {
         expectLog(`${fileName}: Moving to unresolved subfolder`, spy);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
         expect(fsExtra.existsSync(path.resolve(outputFolder, unresolvedDir, fileName))).toBe(true);
+        expect(result.before.unsupported).toEqual(1);
+        expect(result.after.unsupported).toEqual(1);
+        expect(result.after.copied).toEqual(0);
+        expect(result.after.moved).toEqual(1);
       });
     });
   });
@@ -499,7 +572,7 @@ describe("setDate", () => {
           await copyAssetToTempPath(fileName, newFileName);
           const fileOrigin = tempPath(newFileName);
 
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             inputPath: TEMP_PATH,
             fileName: newFileName,
             setDateOptions: {
@@ -516,6 +589,9 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
+          expect(result.before.with_date).toEqual(0);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
     }
@@ -537,13 +613,17 @@ describe("setDate", () => {
         const date = "2013:10:23 00:00:00";
         await copyAssetToTempPath(fileName, newFileName);
 
-        await expectModifiedDate({
+        const result = await expectModifiedDate({
           inputPath: TEMP_PATH,
           fileName: newFileName,
           newDateExpected: date,
           dateTimeDigitedExpected: date,
           expectedLog: "from file name",
         });
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.modified).toEqual(1);
+        expect(result.before.path).toEqual(result.after.path);
       });
     });
 
@@ -554,7 +634,7 @@ describe("setDate", () => {
         const date = "2013:10:23 00:00:00";
         await copyAssetToTempPath(fileName, newFileName);
 
-        await expectModifiedDate({
+        const result = await expectModifiedDate({
           noOutputFolder: true,
           inputPath: TEMP_PATH,
           fileName: newFileName,
@@ -562,6 +642,10 @@ describe("setDate", () => {
           dateTimeDigitedExpected: date,
           expectedLog: "from file name",
         });
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.modified).toEqual(1);
+        expect(result.before.path).toEqual(result.after.path);
       });
     });
   });
@@ -575,7 +659,7 @@ describe("setDate", () => {
           await copyAssetToTempPath(fileName, newFileName);
           const fileOrigin = tempPath(newFileName);
 
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             inputPath: TEMP_PATH,
             fileName: newFileName,
             setDateOptions: {
@@ -593,6 +677,9 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
+          expect(result.before.with_date).toEqual(0);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
     }
@@ -612,7 +699,7 @@ describe("setDate", () => {
           await copyAssetToTempPath(fileName, newFileName);
           const fileOrigin = tempPath(newFileName);
 
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             inputPath: TEMP_PATH,
             fileName: newFileName,
             setDateOptions: {
@@ -631,6 +718,9 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
+          expect(result.before.with_date).toEqual(0);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
     }
@@ -696,7 +786,7 @@ describe("setDate", () => {
           await copyAssetToTempPath(fileName, newFileName);
           const fileOrigin = tempPath(newFileName);
 
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             inputPath: TEMP_PATH,
             fileName: newFileName,
             setDateOptions: {
@@ -716,6 +806,9 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
+          expect(result.before.with_date).toEqual(0);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
     }
@@ -759,7 +852,7 @@ describe("setDate", () => {
           await copyAssetToTempPath(fileName, newFileName);
           const fileOrigin = tempPath(newFileName);
 
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             inputPath: TEMP_PATH,
             fileName: newFileName,
             setDateOptions: {
@@ -777,6 +870,9 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
+          expect(result.before.with_date).toEqual(0);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
     }
@@ -804,7 +900,7 @@ describe("setDate", () => {
           await copyAssetToTempPath(fileName, newFileName);
           const fileOrigin = tempPath(newFileName);
 
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             inputPath: TEMP_PATH,
             fileName: newFileName,
             setDateOptions: {
@@ -823,6 +919,9 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
+          expect(result.before.with_date).toEqual(0);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.modified).toEqual(1);
         });
       });
     }
@@ -858,7 +957,7 @@ describe("setDate", () => {
       await copyAssetToTempPath(fileName, newFileName);
       const fileOrigin = tempPath(newFileName);
 
-      await expectModifiedDate({
+      const result = await expectModifiedDate({
         inputPath: TEMP_PATH,
         fileName: newFileName,
         setDateOptions: {
@@ -877,11 +976,14 @@ describe("setDate", () => {
       const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
       expect(DateTimeOriginal).toBe(undefined);
       expect(DateTimeDigitized).toBe(undefined);
+      expect(result.before.with_date).toEqual(0);
+      expect(result.after.with_date).toEqual(1);
+      expect(result.after.modified).toEqual(1);
     });
   });
 
   describe("when dateRegexs does not capture anything from fileName", () => {
-    it("should trace warn and return false", async () => {
+    it("should trace warn and return report", async () => {
       const fileName = "gorilla.JPG";
       const newFileName = "DAC-2013-10-23-foo.jpg";
       const fileOrigin = tempPath(newFileName);
@@ -892,7 +994,11 @@ describe("setDate", () => {
         dateRegexs: ["prefix(x)suffix"],
       });
       expectLog(`${newFileName}: No date was found to set`, spy);
-      expect(result).toBe(false);
+      expect(result.before.with_date).toEqual(0);
+      expect(result.after.with_date).toEqual(0);
+      expect(result.after.copied).toEqual(0);
+      expect(result.after.moved).toEqual(0);
+      expect(result.after.modified).toEqual(0);
     });
   });
 
@@ -905,7 +1011,7 @@ describe("setDate", () => {
           await copyAssetToTempPath(fileName, fileName);
           const fileOrigin = tempPath(fileName);
 
-          await expectModifiedDate({
+          const result = await expectModifiedDate({
             inputPath: TEMP_PATH,
             fileName,
             setDateOptions: {
@@ -922,6 +1028,11 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
+          expect(result.before.with_date).toEqual(0);
+          expect(result.after.with_date).toEqual(1);
+          expect(result.after.copied).toEqual(0);
+          expect(result.after.moved).toEqual(0);
+          expect(result.after.modified).toEqual(1);
         });
       });
     }
@@ -940,7 +1051,7 @@ describe("setDate", () => {
         const date = "2013:10:23 10:32:55";
         await copyAssetToTempPath(fileName, fileName);
 
-        await expectModifiedDate({
+        const result = await expectModifiedDate({
           inputPath: TEMP_PATH,
           fileName,
           setDateOptions: {
@@ -950,6 +1061,12 @@ describe("setDate", () => {
           dateTimeDigitedExpected: date,
           expectedLog: "from date candidate",
         });
+        expect(result.before.with_date).toEqual(0);
+        expect(result.after.with_date).toEqual(1);
+        expect(result.after.copied).toEqual(0);
+        expect(result.after.moved).toEqual(0);
+        expect(result.after.modified).toEqual(1);
+        expect(result.after.path).toEqual(result.before.path);
       });
     });
   });

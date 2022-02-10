@@ -61,10 +61,11 @@ program
     "If no date is found for a file or it is not supported, create a subfolder with this name and move the file into it"
   )
   .option("-c, --copyAll", "Copy also unsupported and not modified files to outputFolder")
-  // TODO, add dry-run option
+  .option("--dryRun", "Print report only. Do not modify any file")
   .showHelpAfterError()
   .action((folderPath, options) => {
     setLogLevel(options.log);
+    // TODO, prompt for confirmation if input and output are equal
     return setDates(toAbsolute(folderPath), {
       ...options,
       dateFormats: options.dateFormat, // convert singular option from command line into plural

@@ -20,10 +20,12 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
   });
 
   describe("when modify option is true and fromDigited is false", () => {
+    let result;
+
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDates(tempFixturesFolder(FIXTURE), {
+      result = await setDates(tempFixturesFolder(FIXTURE), {
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
         modify: true,
@@ -69,13 +71,42 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
       );
       expect(DateTimeOriginal).toEqual(`1979:05:01 00:00:00`);
     });
+
+    it("should return report data", async () => {
+      expect(result).toEqual({
+        before: {
+          copied: null,
+          files: 10,
+          modified: null,
+          moved: null,
+          path: `test/assets/.tmp/${FIXTURE}`,
+          supported: 7,
+          unsupported: 3,
+          with_date: 5,
+          without_date: 2,
+        },
+        after: {
+          copied: 0,
+          files: 6,
+          modified: 6,
+          moved: 0,
+          path: "test/assets/.tmp/output",
+          supported: 6,
+          unsupported: 0,
+          with_date: 6,
+          without_date: 0,
+        },
+      });
+    });
   });
 
   describe("when copyAll option is true and fromDigitized is false", () => {
+    let result;
+
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDates(tempFixturesFolder(FIXTURE), {
+      result = await setDates(tempFixturesFolder(FIXTURE), {
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
         copyAll: true,
@@ -143,13 +174,42 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
       );
       expect(DateTimeOriginal).toEqual(`1979:05:01 00:00:00`);
     });
+
+    it("should return report data", async () => {
+      expect(result).toEqual({
+        after: {
+          copied: 8,
+          files: 10,
+          modified: 2,
+          moved: 0,
+          path: "test/assets/.tmp/output",
+          supported: 7,
+          unsupported: 3,
+          with_date: 7,
+          without_date: 0,
+        },
+        before: {
+          copied: null,
+          files: 10,
+          modified: null,
+          moved: null,
+          path: `test/assets/.tmp/${FIXTURE}`,
+          supported: 7,
+          unsupported: 3,
+          with_date: 5,
+          without_date: 2,
+        },
+      });
+    });
   });
 
   describe("when copyAll and moveUnresolved to options are true", () => {
+    let result;
+
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDates(tempFixturesFolder(FIXTURE), {
+      result = await setDates(tempFixturesFolder(FIXTURE), {
         outputFolder: TEMP_OUTPUT_FOLDER,
         copyAll: true,
         fromDigitized: false,
@@ -231,6 +291,33 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
         tempOutputPath("subfolder", "2013-10-23T124015", "1979-05", "gorilla.JPG")
       );
       expect(DateTimeOriginal).toEqual(`1979:05:01 00:00:00`);
+    });
+
+    it("should return report data", async () => {
+      expect(result).toEqual({
+        after: {
+          copied: 5,
+          files: 10,
+          modified: 2,
+          moved: 3,
+          path: "test/assets/.tmp/output",
+          supported: 7,
+          unsupported: 3,
+          with_date: 7,
+          without_date: 0,
+        },
+        before: {
+          copied: null,
+          files: 10,
+          modified: null,
+          moved: null,
+          path: `test/assets/.tmp/${FIXTURE}`,
+          supported: 7,
+          unsupported: 3,
+          with_date: 5,
+          without_date: 2,
+        },
+      });
     });
   });
 });

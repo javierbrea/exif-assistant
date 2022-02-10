@@ -1,8 +1,11 @@
-const { isSupportedFile, readExifDates, moveAndUpdateExifDates } = require("../exif/fileMethods");
 const {
   HUMAN_DATE_TIME_ORIGINAL_PROPERTY,
   HUMAN_DATE_TIME_DIGITIZED_PROPERTY,
-} = require("../exif/data");
+  isSupportedFile,
+  readExifDates,
+  moveAndUpdateExifDates,
+} = require("../exif");
+
 const {
   formatForExif: formatDateForExif,
   isValidDate,
@@ -88,49 +91,78 @@ function FormatForExif({ dateFormats, parsedBaseDate, dateRegexs }) {
   };
 }
 
-function CopyToOutput({ fileName, filePath, destFolder, fileFolder, copyIfNotModified }) {
+function CopyToOutput({
+  fileName,
+  filePath,
+  destFolder,
+  fileFolder,
+  copyIfNotModified,
+  report,
+  dryRun,
+}) {
   const isSameOutputFolder = destFolder === fileFolder;
   return async function () {
     if (!!copyIfNotModified && !isSameOutputFolder) {
       tracer.info(`${fileName}: Copying to output folder`);
-      await copyFileToFolder(filePath, destFolder);
+      const newFilePath = await copyFileToFolder(filePath, destFolder, dryRun);
+      report.copied(newFilePath);
     }
   };
 }
 
-function SetDates({ fileName, filePath, setDigitized, destFolder }) {
+function SetDates({ fileName, filePath, setDigitized, destFolder, report, dryRun }) {
   const traceSetDate = TraceSetDate({ fileName, setDigitized });
   return async function (dateOriginal, from) {
     const datesToSet = {
       [HUMAN_DATE_TIME_ORIGINAL_PROPERTY]: dateOriginal,
     };
-    // Set also DateTimeDigitized if setDigited option is enabled
+    // Set also DateTimeDigitized if setDigited option is enabledx
     if (setDigitized) {
       datesToSet[HUMAN_DATE_TIME_DIGITIZED_PROPERTY] = dateOriginal;
     }
+
     traceSetDate(dateOriginal, from);
-    await moveAndUpdateExifDates(filePath, resolve(destFolder, fileName), datesToSet);
-    return true;
+    const newFilePath = resolve(destFolder, fileName);
+
+    report.modified(newFilePath, datesToSet, from);
+
+    if (!dryRun) {
+      await moveAndUpdateExifDates(filePath, newFilePath, datesToSet);
+    }
   };
 }
 
-function HandleUnresolved({ fileName, copyToOutput, moveToIfUnresolved, filePath, destFolder }) {
+function HandleUnresolved({
+  fileName,
+  copyToOutput,
+  moveToIfUnresolved,
+  filePath,
+  destFolder,
+  report,
+  dryRun,
+}) {
   return async function () {
     if (!!moveToIfUnresolved) {
       tracer.info(`${fileName}: Moving to ${moveToIfUnresolved} subfolder`);
-      return moveOrCopyFileToSubfolder(filePath, destFolder, moveToIfUnresolved);
+      const newFilePath = await moveOrCopyFileToSubfolder(
+        filePath,
+        destFolder,
+        moveToIfUnresolved,
+        dryRun
+      );
+      report.moved(newFilePath);
+      return;
     }
     return copyToOutput();
   };
 }
 
-function FileIsNotSupported({ handleUnresolved, filePath }) {
+function FileIsNotSupported({ filePath }) {
   return async function () {
     if (await isSupportedFile(filePath)) {
       return false;
     }
     tracer.warn(`${filePath}: File type is not supported`);
-    await handleUnresolved();
     return true;
   };
 }
@@ -146,8 +178,15 @@ function DateOriginalHasToBeModified({ fileName, copyToOutput, modify }) {
   };
 }
 
-function SkipOrGetFileDates({ handleUnresolved, filePath, copyToOutput, fileName, modify }) {
-  const fileIsNotSupported = FileIsNotSupported({ handleUnresolved, filePath });
+function SkipOrGetFileDates({
+  handleUnresolved,
+  filePath,
+  copyToOutput,
+  fileName,
+  modify,
+  report,
+}) {
+  const fileIsNotSupported = FileIsNotSupported({ filePath });
   const dateOriginalHasToBeModified = DateOriginalHasToBeModified({
     copyToOutput,
     fileName,
@@ -155,13 +194,16 @@ function SkipOrGetFileDates({ handleUnresolved, filePath, copyToOutput, fileName
   });
   return async function () {
     if (await fileIsNotSupported(filePath)) {
-      return false;
+      report.notSupported();
+      await handleUnresolved();
+      return;
     }
 
-    const dates = await readExifDates(filePath);
+    const dates = await readExifDates(filePath); // TODO, file is read twice
+    report.supported(dates);
 
     if (!(await dateOriginalHasToBeModified(dates))) {
-      return false;
+      return;
     }
     return dates;
   };
@@ -175,6 +217,7 @@ function FindFirstValidDate(isDate) {
   };
 }
 
+// TODO, split into two methods. One should calculate what to do and write report. Another should make modifications based on report. So, a confirm prompt can be implemented
 async function setDateToFile(
   filePath,
   {
@@ -194,7 +237,9 @@ async function setDateToFile(
     setDigitized = true,
     copyIfNotModified,
     moveToIfUnresolved,
-  }
+    dryRun,
+  },
+  report
 ) {
   const fileName = getFileName(filePath);
   const fileFolder = dirName(filePath);
@@ -214,6 +259,8 @@ async function setDateToFile(
     destFolder,
     fileFolder,
     copyIfNotModified,
+    report,
+    dryRun,
   });
   const isDate = IsDate({ dateFormats, parsedBaseDate, dateRegexs });
   const findFirstValidDate = FindFirstValidDate(isDate);
@@ -227,6 +274,8 @@ async function setDateToFile(
     filePath,
     setDigitized,
     destFolder,
+    report,
+    dryRun,
   });
   const handleUnresolved = HandleUnresolved({
     fileName,
@@ -234,6 +283,8 @@ async function setDateToFile(
     moveToIfUnresolved,
     filePath,
     destFolder,
+    report,
+    dryRun,
   });
   const skipOrGetFileDates = SkipOrGetFileDates({
     handleUnresolved,
@@ -241,12 +292,13 @@ async function setDateToFile(
     copyToOutput,
     fileName,
     modify,
+    report,
   });
 
   const fileDates = await skipOrGetFileDates();
 
   if (!fileDates) {
-    return false;
+    return;
   }
 
   // Set date if date option is present
@@ -281,8 +333,6 @@ async function setDateToFile(
 
   tracer.info(`${fileName}: No date was found to set`);
   await handleUnresolved();
-
-  return false;
 }
 
 module.exports = {

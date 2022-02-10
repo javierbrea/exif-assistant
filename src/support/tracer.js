@@ -14,6 +14,16 @@ const levels = {
   SILENT: "silent",
 };
 
+const levelsOrder = [
+  levels.SILLY,
+  levels.DEBUG,
+  levels.VERBOSE,
+  levels.INFO,
+  levels.WARN,
+  levels.ERROR,
+  levels.SILENT,
+];
+
 const format = winston.format.printf((info) => {
   return `${info.timestamp} [exif-assistant][${info.level}]${info.message}`;
 });
@@ -52,6 +62,15 @@ function setLevel(level) {
   }
 }
 
+function getLevel() {
+  return transports.console.silent ? levels.SILENT : transports.console.level;
+}
+
+function currentLevelPrints(level) {
+  const currentLevel = getLevel();
+  return levelsOrder.indexOf(currentLevel) <= levelsOrder.indexOf(level);
+}
+
 function addNamespace(namespace, message) {
   return `[${namespace}] ${message}`;
 }
@@ -73,7 +92,11 @@ function concatInNewLineWithDash(str, str2) {
 }
 
 function traceObject(obj) {
-  return printInNewLine(JSON.stringify(obj, null, 2));
+  return JSON.stringify(obj, null, 2);
+}
+
+function traceObjectInNewLine(obj) {
+  return printInNewLine(traceObject(obj));
 }
 
 function traceArray(listElements) {
@@ -92,7 +115,7 @@ function addDataToMessage(message, data) {
   if (isArray(data)) {
     return `${message}${traceArray(data)}`;
   }
-  return `${message}${traceObject(data)}`;
+  return `${message}${traceObjectInNewLine(data)}`;
 }
 
 class Tracer {
@@ -145,5 +168,7 @@ module.exports = {
   _logger: logger, // exported only for testing purposes
   Tracer,
   tracer,
+  levels,
   setLevel,
+  currentLevelPrints,
 };

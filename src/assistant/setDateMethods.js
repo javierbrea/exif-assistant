@@ -1,3 +1,5 @@
+const { SetDatesReport } = require("../reports");
+
 const { Tracer } = require("../support/tracer");
 const { isValidDate, dateFromString } = require("../support/dates");
 const {
@@ -7,7 +9,12 @@ const {
   isFile,
   isFolder,
   exists,
+  toRelative,
+  resolve,
+  toAbsolute,
+  getFileName,
 } = require("../support/files");
+
 const { setDateToFile } = require("./setDateToFile");
 
 const setDatesTracer = new Tracer("Set Dates");
@@ -63,7 +70,7 @@ function validateOptions({
   validateDates({ date, dateFormats, dateFallback, dateFallbackFormat, baseDate, baseDateFormat });
 }
 
-function SetDateToFileUnderFolder(options, inputFolder) {
+function SetDateToFileUnderFolder(options, inputFolder, setDatesReport) {
   return function (filePath) {
     const fileOptions = {
       ...options,
@@ -75,27 +82,39 @@ function SetDateToFileUnderFolder(options, inputFolder) {
       outputFolder: changeFileBasePath(filePath, inputFolder, options.outputFolder),
     };
     setDatesTracer.silly(`Calling to setDate for ${filePath} with options:`, fileOptions);
-    return setDateToFile(filePath, fileOptions);
+    return setDateToFile(filePath, fileOptions, setDatesReport.newFile(filePath));
   };
 }
 
-function setDateToFiles(files, options, inputFolder) {
-  const setDateToFileUnderFolder = SetDateToFileUnderFolder(options, inputFolder);
+function setDateToFiles(files, options, inputFolder, setDatesReport) {
+  const setDateToFileUnderFolder = SetDateToFileUnderFolder(options, inputFolder, setDatesReport);
   return Promise.all(files.map(setDateToFileUnderFolder));
 }
 
-function setDates(inputFolder, options = {}) {
+async function setDates(inputFolder, options = {}) {
+  const setDatesReport = new SetDatesReport({
+    input: toRelative(inputFolder),
+    output: toRelative(options.outputFolder || inputFolder),
+  });
   validateOptions({ inputFolder, ...options });
-  setDatesTracer.info(`Searching files in folder ${inputFolder}`);
+  setDatesTracer.debug(`Searching files in folder ${inputFolder}`);
   const files = findFolderFiles(inputFolder);
-  setDatesTracer.info(`Files found:`, files.length);
-  setDatesTracer.debug(`Files found list:`, files);
-  return setDateToFiles(files, options, inputFolder);
+  setDatesTracer.debug(`Files found:`, files.length);
+  setDatesTracer.silly(`Files found list:`, files);
+  await setDateToFiles(files, options, inputFolder, setDatesReport);
+  return setDatesReport.getSummaryAndPrint();
 }
 
-function setDate(inputFile, options = {}) {
+async function setDate(inputFile, options = {}) {
   validateOptions({ inputFile, ...options });
-  return setDateToFile(inputFile, options);
+  const setDatesReport = new SetDatesReport({
+    input: toRelative(inputFile),
+    output: options.outputFolder
+      ? toRelative(resolve(toAbsolute(options.outputFolder), getFileName(inputFile)))
+      : toRelative(inputFile),
+  });
+  await setDateToFile(inputFile, options, setDatesReport.newFile(inputFile));
+  return setDatesReport.getSummaryAndPrint();
 }
 
 module.exports = {

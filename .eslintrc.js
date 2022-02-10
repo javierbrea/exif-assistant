@@ -28,15 +28,18 @@ module.exports = {
         capture: ["elementName"],
       },
       {
-        type: "exifHelpers",
-        pattern: "src/exif/*",
-        mode: "full",
-        capture: ["elementName"],
+        type: "exif",
+        pattern: "src/exif",
+        mode: "folder",
+      },
+      {
+        type: "reports",
+        pattern: "src/reports",
+        mode: "folder",
       },
       {
         type: "assistant",
         pattern: "src/assistant",
-        capture: ["elementName"],
         mode: "folder",
       },
       {

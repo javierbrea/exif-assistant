@@ -17,22 +17,42 @@ function resolve(basePath, relativePath) {
   return path.resolve(basePath, relativePath);
 }
 
-async function moveFileToFolder(filePath, destFolder) {
+function filePathChangingFolder(filePath, destFolder) {
   const fileName = baseName(filePath);
-  return fsExtra.move(filePath, resolve(destFolder, fileName), { overwrite: true });
+  return resolve(destFolder, fileName);
 }
 
-async function copyFileToFolder(filePath, destFolder) {
-  const fileName = baseName(filePath);
-  return fsExtra.copy(filePath, resolve(destFolder, fileName));
+async function copyFile(fileOrigin, fileDest) {
+  await fsExtra.copy(fileOrigin, fileDest);
 }
 
-async function moveOrCopyFileToSubfolder(filePath, outputFolder, subfolder) {
-  const fileFolder = dirName(filePath);
-  if (fileFolder === outputFolder) {
-    return moveFileToFolder(filePath, resolve(outputFolder, subfolder));
+async function moveFile(fileOrigin, fileDest) {
+  await fsExtra.move(fileOrigin, fileDest, { overwrite: true });
+}
+
+async function moveFileToFolder(filePath, destFolder, dryRun) {
+  const destPath = filePathChangingFolder(filePath, destFolder);
+  if (!dryRun) {
+    await moveFile(filePath, destPath);
   }
-  return copyFileToFolder(filePath, resolve(outputFolder, subfolder));
+  return destPath;
+}
+
+async function copyFileToFolder(filePath, destFolder, dryRun) {
+  const destPath = filePathChangingFolder(filePath, destFolder);
+  if (!dryRun) {
+    await copyFile(filePath, destPath);
+  }
+  return destPath;
+}
+
+async function moveOrCopyFileToSubfolder(filePath, outputFolder, subfolder, dryRun) {
+  const fileFolder = dirName(filePath);
+  const newFolder = resolve(outputFolder, subfolder);
+  if (fileFolder === outputFolder) {
+    return moveFileToFolder(filePath, newFolder, dryRun);
+  }
+  return copyFileToFolder(filePath, newFolder, dryRun);
 }
 
 function removeExtension(fileName) {
@@ -96,6 +116,10 @@ function getFolderNamesFromBase(filePath, basePath) {
   return folderNames;
 }
 
+function toRelative(filePath) {
+  return path.relative(process.cwd(), filePath);
+}
+
 module.exports = {
   exists,
   isFolder,
@@ -114,4 +138,5 @@ module.exports = {
   ensureDir,
   resolve,
   getFolderNamesFromBase,
+  toRelative,
 };

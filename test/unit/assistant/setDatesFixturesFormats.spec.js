@@ -17,10 +17,11 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
   });
 
   describe("when modify option is true, fromDigited is false and formats are provided", () => {
+    let result;
     beforeAll(async () => {
       await resetTempPath();
       await copyFixturesToTempPath(FIXTURE);
-      await setDates(tempFixturesFolder(FIXTURE), {
+      result = await setDates(tempFixturesFolder(FIXTURE), {
         copyAll: true,
         outputFolder: TEMP_OUTPUT_FOLDER,
         fromDigitized: false,
@@ -100,6 +101,33 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
         tempOutputPath("2021", "23_10_2020", "2022", "17.JPG")
       );
       expect(DateTimeOriginal).toEqual(`2022:01:17 00:00:00`);
+    });
+
+    it("should return report data", async () => {
+      expect(result).toEqual({
+        before: {
+          copied: null,
+          files: 14,
+          modified: null,
+          moved: null,
+          path: `test/assets/.tmp/${FIXTURE}`,
+          supported: 11,
+          unsupported: 3,
+          with_date: 7,
+          without_date: 4,
+        },
+        after: {
+          copied: 3,
+          files: 14,
+          modified: 11,
+          moved: 0,
+          path: "test/assets/.tmp/output",
+          supported: 11,
+          unsupported: 3,
+          with_date: 11,
+          without_date: 0,
+        },
+      });
     });
   });
 });

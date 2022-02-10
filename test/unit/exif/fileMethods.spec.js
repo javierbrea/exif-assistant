@@ -1,8 +1,5 @@
 const deepMerge = require("deepmerge");
 
-const { readExifDates, moveAndUpdateExifDates } = require("../../../src/exif/fileMethods");
-const { setLevel } = require("../../../src/support/tracer");
-
 const {
   assetData,
   resetTempPath,
@@ -12,6 +9,10 @@ const {
 } = require("../../support/assets");
 const { readExifFromFile } = require("../../support/exif");
 const { isApproximatelyEqual } = require("../../support/math");
+
+const { readExifDates, moveAndUpdateExifDates } = require("../../../src/exif");
+
+const { setLevel } = require("../../../src/support/tracer");
 
 setLevel("silent");
 
