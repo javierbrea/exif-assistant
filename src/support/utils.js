@@ -10,6 +10,14 @@ function isNumber(value) {
   return typeof value === "number" && isFinite(value);
 }
 
+function isNull(value) {
+  return value === null;
+}
+
+function isBoolean(value) {
+  return value === false || value === true;
+}
+
 function isUndefined(value) {
   return typeof value === "undefined";
 }
@@ -27,7 +35,9 @@ function isEmpty(arr) {
 }
 
 module.exports = {
+  isBoolean,
   isString,
+  isNull,
   isNumber,
   isArray,
   isUndefined,

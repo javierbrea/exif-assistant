@@ -82,8 +82,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: `test/assets/.tmp/${FIXTURE}`,
           supported: 7,
           unsupported: 3,
-          with_date: 5,
-          without_date: 2,
+          withDate: 5,
+          withoutDate: 2,
         },
         after: {
           copied: 0,
@@ -93,8 +93,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: "test/assets/.tmp/output",
           supported: 6,
           unsupported: 0,
-          with_date: 6,
-          without_date: 0,
+          withDate: 6,
+          withoutDate: 0,
         },
       });
     });
@@ -185,8 +185,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: "test/assets/.tmp/output",
           supported: 7,
           unsupported: 3,
-          with_date: 7,
-          without_date: 0,
+          withDate: 7,
+          withoutDate: 0,
         },
         before: {
           copied: null,
@@ -196,8 +196,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: `test/assets/.tmp/${FIXTURE}`,
           supported: 7,
           unsupported: 3,
-          with_date: 5,
-          without_date: 2,
+          withDate: 5,
+          withoutDate: 2,
         },
       });
     });
@@ -303,8 +303,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: "test/assets/.tmp/output",
           supported: 7,
           unsupported: 3,
-          with_date: 7,
-          without_date: 0,
+          withDate: 7,
+          withoutDate: 0,
         },
         before: {
           copied: null,
@@ -314,8 +314,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: `test/assets/.tmp/${FIXTURE}`,
           supported: 7,
           unsupported: 3,
-          with_date: 5,
-          without_date: 2,
+          withDate: 5,
+          withoutDate: 2,
         },
       });
     });

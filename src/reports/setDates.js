@@ -1,6 +1,8 @@
 const { Table } = require("console-table-printer");
 
 const { currentLevelPrints, levels } = require("../support/tracer");
+const { toRelative } = require("../support/files");
+
 const {
   normal,
   accent,
@@ -9,6 +11,7 @@ const {
   strongNeutral,
   strongConditional,
   formatAll,
+  shortPath,
 } = require("./tableFormats");
 
 function addSupportedAmount(reportOrigin, dataDest) {
@@ -21,7 +24,7 @@ function addSupportedAmount(reportOrigin, dataDest) {
 
 function addWithDateAmount(reportOrigin, dataDest) {
   if (reportOrigin.exif.DateTimeOriginal) {
-    dataDest.with_date++;
+    dataDest.withDate++;
   }
 }
 
@@ -153,7 +156,7 @@ class SetDatesReport {
     const defaultData = {
       files: 0,
       supported: 0,
-      with_date: 0,
+      withDate: 0,
       modified: 0,
       unsupported: 0,
       moved: 0,
@@ -161,14 +164,14 @@ class SetDatesReport {
     };
     const before = {
       ...defaultData,
-      path: this._input,
+      path: toRelative(this._input),
       modified: null,
       moved: null,
       copied: null,
     };
     const after = {
       ...defaultData,
-      path: this._output,
+      path: toRelative(this._output),
     };
     data.forEach((fileReport) => {
       before.files++;
@@ -188,12 +191,52 @@ class SetDatesReport {
       addCopiedAmount(fileReport, after);
     });
 
-    before.without_date = before.supported - before.with_date;
-    after.without_date = after.supported - after.with_date;
+    before.withoutDate = before.supported - before.withDate;
+    after.withoutDate = after.supported - after.withDate;
     return {
       before,
       after,
     };
+  }
+
+  getDataAndPrint() {
+    const table = new Table({
+      columns: [
+        { name: "beforeFile", alignment: "left", title: "File path" },
+        { name: "afterFile", alignment: "left", title: "New file path" },
+        { name: "supported", alignment: "center", title: "Supported" },
+        { name: "beforeDate", alignment: "left", title: "Date before" },
+        { name: "afterDate", alignment: "left", title: "Date after" },
+        { name: "modified", alignment: "center", title: "Modified" },
+        { name: "moved", alignment: "center", title: normal("Moved to subfolder") },
+        { name: "copied", alignment: "center", title: normal("Copied") },
+      ],
+    });
+    const data = this.data;
+
+    data.forEach((fileReport) => {
+      table.addRow(
+        formatAll({
+          beforeFile: shortPath(toRelative(fileReport.before.filePath)),
+          afterFile:
+            !fileReport.after.filePath || fileReport.before.filePath === fileReport.after.filePath
+              ? null
+              : shortPath(toRelative(fileReport.after.filePath)),
+          supported: accent(fileReport.before.supported),
+          beforeDate: neutral(fileReport.before.exif.DateTimeOriginal),
+          afterDate: strongConditional(fileReport.after.exif.DateTimeOriginal),
+          modified: strongNeutral(fileReport.actions.modified),
+          moved: fileReport.actions.moved,
+          copied: fileReport.actions.copied,
+        })
+      );
+    });
+
+    if (currentLevelPrints(levels.INFO)) {
+      table.printTable();
+    }
+
+    return data;
   }
 
   getSummaryAndPrint() {
@@ -204,8 +247,8 @@ class SetDatesReport {
         { name: "files", title: "Files" },
         { name: "unsupported", title: normal("Unsupported") },
         { name: "supported", title: "Supported" },
-        { name: "with_date", title: "With Date" },
-        { name: "without_date", title: "Without Date" },
+        { name: "withDate", title: "With Date" },
+        { name: "withoutDate", title: "Without Date" },
         { name: "modified", title: "Modified" },
         { name: "moved", title: normal("Moved to subfolder") },
         { name: "copied", title: normal("Copied") },
@@ -216,20 +259,22 @@ class SetDatesReport {
     table.addRow(
       formatAll({
         ...summary.before,
+        path: shortPath(summary.before.path),
         concept: strongAccent("Before"),
         supported: accent(summary.before.supported),
-        with_date: neutral(summary.before.with_date),
-        without_date: neutral(summary.before.without_date),
+        withDate: neutral(summary.before.withDate),
+        withoutDate: neutral(summary.before.withoutDate),
       })
     );
 
     table.addRow(
       formatAll({
         ...summary.after,
+        path: shortPath(summary.after.path),
         concept: strongAccent("After"),
         supported: accent(summary.after.supported),
-        with_date: strongConditional(summary.after.with_date),
-        without_date: strongConditional(summary.after.without_date, true),
+        withDate: strongConditional(summary.after.withDate),
+        withoutDate: strongConditional(summary.after.withoutDate, true),
         modified: strongNeutral(summary.after.modified),
       })
     );

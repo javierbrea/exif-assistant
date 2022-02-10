@@ -88,8 +88,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: "test/assets/.tmp/output",
           supported: 7,
           unsupported: 3,
-          with_date: 7,
-          without_date: 0,
+          withDate: 7,
+          withoutDate: 0,
         },
         before: {
           copied: null,
@@ -99,8 +99,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: "test/assets/.tmp/iso-regex",
           supported: 7,
           unsupported: 3,
-          with_date: 5,
-          without_date: 2,
+          withDate: 5,
+          withoutDate: 2,
         },
       });
     });

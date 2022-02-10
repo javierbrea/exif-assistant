@@ -113,8 +113,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: `test/assets/.tmp/${FIXTURE}`,
           supported: 11,
           unsupported: 3,
-          with_date: 7,
-          without_date: 4,
+          withDate: 7,
+          withoutDate: 4,
         },
         after: {
           copied: 3,
@@ -124,8 +124,8 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           path: "test/assets/.tmp/output",
           supported: 11,
           unsupported: 3,
-          with_date: 11,
-          without_date: 0,
+          withDate: 11,
+          withoutDate: 0,
         },
       });
     });

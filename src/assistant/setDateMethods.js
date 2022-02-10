@@ -9,7 +9,6 @@ const {
   isFile,
   isFolder,
   exists,
-  toRelative,
   resolve,
   toAbsolute,
   getFileName,
@@ -93,8 +92,8 @@ function setDateToFiles(files, options, inputFolder, setDatesReport) {
 
 async function setDates(inputFolder, options = {}) {
   const setDatesReport = new SetDatesReport({
-    input: toRelative(inputFolder),
-    output: toRelative(options.outputFolder || inputFolder),
+    input: inputFolder,
+    output: options.outputFolder || inputFolder,
   });
   validateOptions({ inputFolder, ...options });
   setDatesTracer.debug(`Searching files in folder ${inputFolder}`);
@@ -102,18 +101,20 @@ async function setDates(inputFolder, options = {}) {
   setDatesTracer.debug(`Files found:`, files.length);
   setDatesTracer.silly(`Files found list:`, files);
   await setDateToFiles(files, options, inputFolder, setDatesReport);
+  setDatesReport.getDataAndPrint();
   return setDatesReport.getSummaryAndPrint();
 }
 
 async function setDate(inputFile, options = {}) {
   validateOptions({ inputFile, ...options });
   const setDatesReport = new SetDatesReport({
-    input: toRelative(inputFile),
+    input: inputFile,
     output: options.outputFolder
-      ? toRelative(resolve(toAbsolute(options.outputFolder), getFileName(inputFile)))
-      : toRelative(inputFile),
+      ? resolve(toAbsolute(options.outputFolder), getFileName(inputFile))
+      : inputFile,
   });
   await setDateToFile(inputFile, options, setDatesReport.newFile(inputFile));
+  setDatesReport.getDataAndPrint();
   return setDatesReport.getSummaryAndPrint();
 }
 

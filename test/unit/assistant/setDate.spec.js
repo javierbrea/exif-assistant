@@ -211,9 +211,9 @@ describe("setDate", () => {
         const result = await setDate(filePath);
         expectLog(`${fileName}: Already has DateTimeOriginal`, spy);
         expect(result.before.supported).toEqual(1);
-        expect(result.before.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(1);
         expect(result.after.supported).toEqual(1);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.modified).toEqual(0);
       });
     });
@@ -232,8 +232,8 @@ describe("setDate", () => {
             newDateExpected: date,
             expectedLog: "from date option",
           });
-          expect(result.before.with_date).toEqual(1);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(1);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -255,8 +255,8 @@ describe("setDate", () => {
             dateTimeDigitedExpected: metadata.DateTimeDigitized,
             expectedLog: "from date option",
           });
-          expect(result.before.with_date).toEqual(1);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(1);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -276,8 +276,8 @@ describe("setDate", () => {
             newDateExpected: date,
             expectedLog: "from dateFallback option",
           });
-          expect(result.before.with_date).toEqual(1);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(1);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
 
@@ -298,8 +298,8 @@ describe("setDate", () => {
             dateTimeDigitedExpected: metadata.DateTimeDigitized,
             expectedLog: "from dateFallback option",
           });
-          expect(result.before.with_date).toEqual(1);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(1);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -319,8 +319,8 @@ describe("setDate", () => {
           newDateExpected: date,
           expectedLog: "from date option",
         });
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.modified).toEqual(1);
       });
     });
@@ -354,8 +354,8 @@ describe("setDate", () => {
           newDateExpected: metadata.DateTimeDigitized,
           expectedLog: "from DateTimeDigitized",
         });
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.modified).toEqual(1);
       });
     });
@@ -369,8 +369,8 @@ describe("setDate", () => {
           fromDigitized: false,
         });
         expectLog(`${fileName}: No date was found to set`, spy);
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(0);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(0);
         expect(result.after.modified).toEqual(0);
       });
 
@@ -387,8 +387,8 @@ describe("setDate", () => {
           newDateExpected: date,
           expectedLog: "from dateFallback option",
         });
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.modified).toEqual(1);
       });
 
@@ -408,8 +408,8 @@ describe("setDate", () => {
           dateTimeDigitedExpected: metadata.DateTimeDigitized,
           expectedLog: "from dateFallback option",
         });
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.modified).toEqual(1);
       });
     });
@@ -434,8 +434,8 @@ describe("setDate", () => {
         expect(fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))).toBe(
           true
         );
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(0);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(0);
         expect(result.after.modified).toEqual(0);
         expect(result.after.moved).toEqual(1);
       });
@@ -457,8 +457,8 @@ describe("setDate", () => {
         expect(fsExtra.existsSync(path.resolve(outputFolder, unknownDatesSubDir, fileName))).toBe(
           true
         );
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(0);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(0);
         expect(result.after.modified).toEqual(0);
         expect(result.after.moved).toEqual(1);
       });
@@ -477,10 +477,10 @@ describe("setDate", () => {
         expectLog(`${fileName}: Copying to output folder`, spy, 1);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
         expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(0);
-        expect(result.before.without_date).toEqual(1);
-        expect(result.after.without_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(0);
+        expect(result.before.withoutDate).toEqual(1);
+        expect(result.after.withoutDate).toEqual(1);
         expect(result.after.modified).toEqual(0);
         expect(result.after.copied).toEqual(1);
       });
@@ -498,10 +498,10 @@ describe("setDate", () => {
         });
         expectLog(`${fileName}: No date was found to set`, spy);
         expect(fsExtra.existsSync(fileOrigin)).toBe(true);
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(0);
-        expect(result.before.without_date).toEqual(1);
-        expect(result.after.without_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(0);
+        expect(result.before.withoutDate).toEqual(1);
+        expect(result.after.withoutDate).toEqual(1);
         expect(result.after.modified).toEqual(0);
         expect(result.after.copied).toEqual(0);
       });
@@ -526,12 +526,12 @@ describe("setDate", () => {
         expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
         expect(result.before.supported).toEqual(0);
         expect(result.before.unsupported).toEqual(1);
-        expect(result.before.with_date).toEqual(0);
-        expect(result.before.without_date).toEqual(0);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.before.withoutDate).toEqual(0);
         expect(result.after.supported).toEqual(0);
         expect(result.after.unsupported).toEqual(1);
-        expect(result.after.with_date).toEqual(0);
-        expect(result.after.without_date).toEqual(0);
+        expect(result.after.withDate).toEqual(0);
+        expect(result.after.withoutDate).toEqual(0);
         expect(result.after.copied).toEqual(1);
       });
     });
@@ -589,8 +589,8 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
-          expect(result.before.with_date).toEqual(0);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(0);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -620,8 +620,8 @@ describe("setDate", () => {
           dateTimeDigitedExpected: date,
           expectedLog: "from file name",
         });
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.modified).toEqual(1);
         expect(result.before.path).toEqual(result.after.path);
       });
@@ -642,8 +642,8 @@ describe("setDate", () => {
           dateTimeDigitedExpected: date,
           expectedLog: "from file name",
         });
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.modified).toEqual(1);
         expect(result.before.path).toEqual(result.after.path);
       });
@@ -677,8 +677,8 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
-          expect(result.before.with_date).toEqual(0);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(0);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -718,8 +718,8 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
-          expect(result.before.with_date).toEqual(0);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(0);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -806,8 +806,8 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
-          expect(result.before.with_date).toEqual(0);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(0);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -870,8 +870,8 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
-          expect(result.before.with_date).toEqual(0);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(0);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -919,8 +919,8 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
-          expect(result.before.with_date).toEqual(0);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(0);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.modified).toEqual(1);
         });
       });
@@ -976,8 +976,8 @@ describe("setDate", () => {
       const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
       expect(DateTimeOriginal).toBe(undefined);
       expect(DateTimeDigitized).toBe(undefined);
-      expect(result.before.with_date).toEqual(0);
-      expect(result.after.with_date).toEqual(1);
+      expect(result.before.withDate).toEqual(0);
+      expect(result.after.withDate).toEqual(1);
       expect(result.after.modified).toEqual(1);
     });
   });
@@ -994,8 +994,8 @@ describe("setDate", () => {
         dateRegexs: ["prefix(x)suffix"],
       });
       expectLog(`${newFileName}: No date was found to set`, spy);
-      expect(result.before.with_date).toEqual(0);
-      expect(result.after.with_date).toEqual(0);
+      expect(result.before.withDate).toEqual(0);
+      expect(result.after.withDate).toEqual(0);
       expect(result.after.copied).toEqual(0);
       expect(result.after.moved).toEqual(0);
       expect(result.after.modified).toEqual(0);
@@ -1028,8 +1028,8 @@ describe("setDate", () => {
           const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(fileOrigin);
           expect(DateTimeOriginal).toBe(undefined);
           expect(DateTimeDigitized).toBe(undefined);
-          expect(result.before.with_date).toEqual(0);
-          expect(result.after.with_date).toEqual(1);
+          expect(result.before.withDate).toEqual(0);
+          expect(result.after.withDate).toEqual(1);
           expect(result.after.copied).toEqual(0);
           expect(result.after.moved).toEqual(0);
           expect(result.after.modified).toEqual(1);
@@ -1061,8 +1061,8 @@ describe("setDate", () => {
           dateTimeDigitedExpected: date,
           expectedLog: "from date candidate",
         });
-        expect(result.before.with_date).toEqual(0);
-        expect(result.after.with_date).toEqual(1);
+        expect(result.before.withDate).toEqual(0);
+        expect(result.after.withDate).toEqual(1);
         expect(result.after.copied).toEqual(0);
         expect(result.after.moved).toEqual(0);
         expect(result.after.modified).toEqual(1);
