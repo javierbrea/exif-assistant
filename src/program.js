@@ -3,7 +3,7 @@ const inquirer = require("inquirer");
 
 const { setDates } = require("./assistant/setDateMethods");
 const { toAbsolute } = require("./support/files");
-const { setLevel } = require("./support/tracer");
+const { setLevel, Tracer } = require("./support/tracer");
 
 const { version } = require("../package.json");
 
@@ -82,7 +82,9 @@ program
   .option("--dryRun", "Print report only. Do not modify any file")
   .showHelpAfterError()
   .action(async (folderPath, options) => {
+    const tracer = new Tracer("set-dates");
     setLogLevel(options.log);
+    tracer.debug("options", options);
     const inputFolder = toAbsolute(folderPath);
     const outputFolder = options.outputFolder ? toAbsolute(options.outputFolder) : null;
 

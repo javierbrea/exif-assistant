@@ -47,6 +47,7 @@
     "winston": "3.3.3"
   },
   "devDependencies": {
+    "cross-spawn": "7.0.3",
     "eslint": "8.3.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-boundaries": "2.8.0",
@@ -62,7 +63,8 @@
     "lint-staged": "12.1.2",
     "prettier": "2.4.1",
     "sharp": "0.29.3",
-    "sinon": "11.1.2"
+    "sinon": "11.1.2",
+    "tree-kill": "1.2.2"
   },
   "lint-staged": {
     "test/**/*.js": "eslint",
