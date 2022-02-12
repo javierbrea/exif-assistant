@@ -1,4 +1,5 @@
 const { Command, Option } = require("commander");
+const inquirer = require("inquirer");
 
 const { setDates } = require("./assistant/setDateMethods");
 const { toAbsolute } = require("./support/files");
@@ -24,6 +25,23 @@ function setLogLevel(level) {
   }
 }
 
+async function confirmOverwrite(inputFolder, outputFolder) {
+  if (!outputFolder || inputFolder === outputFolder) {
+    const confirmation = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "confirmed",
+        default: false,
+        message: !outputFolder
+          ? "No outputFolder provided. Files will be modified. Are you sure?"
+          : "Input and output folders are equal. Files will be modified. Are you sure?",
+      },
+    ]);
+    return confirmation.confirmed;
+  }
+  return true;
+}
+
 program.name("exif-assistant").description("Set exif data to image files").version(version);
 
 program
@@ -31,7 +49,7 @@ program
   .description("Set exif date to all files in a folder recursively")
   .argument("[folder]", "Folder containing images to set date", ".")
   .addOption(logOption)
-  .option("-o, --outputFolder <outputFolder>", "Output folder", ".")
+  .option("-o, --outputFolder <outputFolder>", "Output folder")
   .option("-d, --date <date>", "Date to set")
   .option(
     "-f, --dateFormat <dateFormats...>",
@@ -63,9 +81,17 @@ program
   .option("-c, --copyAll", "Copy also unsupported and not modified files to outputFolder")
   .option("--dryRun", "Print report only. Do not modify any file")
   .showHelpAfterError()
-  .action((folderPath, options) => {
+  .action(async (folderPath, options) => {
     setLogLevel(options.log);
-    // TODO, prompt for confirmation if input and output are equal
+    const inputFolder = toAbsolute(folderPath);
+    const outputFolder = options.outputFolder ? toAbsolute(options.outputFolder) : null;
+
+    if (!options.dryRun) {
+      if (!(await confirmOverwrite(inputFolder, outputFolder))) {
+        return;
+      }
+    }
+
     return setDates(toAbsolute(folderPath), {
       ...options,
       dateFormats: options.dateFormat, // convert singular option from command line into plural
