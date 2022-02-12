@@ -1,0 +1,77 @@
+{
+  "name": "exif-assistant",
+  "version": "0.0.1-beta.1",
+  "description": "CLI tool for setting EXIF metadata",
+  "keywords": [
+    "exif",
+    "wizard",
+    "cli",
+    "tool",
+    "photo",
+    "image",
+    "organizer",
+    "metadata",
+    "folder",
+    "file name",
+    "assistant"
+  ],
+  "author": "Javier Brea",
+  "license": "MIT",
+  "repository": "https://github.com/javierbrea/exif-assistant",
+  "files": [
+    "bin",
+    "src"
+  ],
+  "main": "index.js",
+  "bin": {
+    "exif-assistant": "./bin/exif-assistant"
+  },
+  "scripts": {
+    "start": "node bin/exif-assistant",
+    "lint": "eslint src *.js test",
+    "lint-staged": "lint-staged",
+    "test:unit": "jest --runInBand --detectOpenHandles",
+    "test:e2e": "jest --config=jest.e2e.config.js --runInBand",
+    "test": "",
+    "prepare": "is-ci || husky install"
+  },
+  "dependencies": {
+    "chalk": "4.0.0",
+    "console-table-printer": "2.10.0",
+    "date-fns": "2.28.0",
+    "deepmerge": "4.2.2",
+    "fs-extra": "10.0.0",
+    "globule": "1.3.3",
+    "inquirer": "8.2.0",
+    "piexifjs": "1.0.6",
+    "winston": "3.3.3"
+  },
+  "devDependencies": {
+    "cross-spawn": "7.0.3",
+    "eslint": "8.3.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-boundaries": "2.8.0",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-jest": "25.3.0",
+    "eslint-plugin-mocha": "10.0.3",
+    "eslint-plugin-no-only-tests": "2.6.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "exif-reader": "1.0.3",
+    "husky": "7.0.4",
+    "is-ci": "3.0.1",
+    "jest": "27.3.1",
+    "lint-staged": "12.1.2",
+    "prettier": "2.4.1",
+    "sharp": "0.29.3",
+    "sinon": "11.1.2",
+    "tree-kill": "1.2.2"
+  },
+  "lint-staged": {
+    "test/**/*.js": "eslint",
+    "src/**/*.js": "eslint",
+    "*.js": "eslint"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}

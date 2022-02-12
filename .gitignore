@@ -1,3 +1,5 @@
+.DS_Store
+
 # Logs
 logs
 *.log
@@ -102,3 +104,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Generated files for testing
+/test-manual
+/test/assets/.tmp
+/.input
+/.output
