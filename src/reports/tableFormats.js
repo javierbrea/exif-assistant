@@ -1,5 +1,8 @@
 const chalk = require("chalk");
 
+const { isUndefined, isNull, isBoolean } = require("../support/utils");
+const { PATH_SEP } = require("../support/files");
+
 const NORMAL_COLOR = "white";
 const ACCENT_COLOR = "whiteBright";
 const POSITIVE_COLOR = "green";
@@ -7,10 +10,9 @@ const NEGATIVE_COLOR = "red";
 const NEUTRAL_COLOR = "yellow";
 
 const DISPLAY_NULL = "-";
-const CURRENT_PATH = ".";
-
-const { isUndefined, isNull, isBoolean } = require("../support/utils");
-const { pathSep } = require("../support/files");
+const CURRENT_PATH = `.`;
+const CURRENT_PATH_PREFIX = `.${PATH_SEP}`;
+const PARENT_PATH_PREFIX = `..${PATH_SEP}`;
 
 function displayBoolean(value) {
   return value === true ? "y" : DISPLAY_NULL;
@@ -26,13 +28,17 @@ function format(value) {
   return value;
 }
 
+function startsByPathIndicator(filePath) {
+  return filePath.startsWith(CURRENT_PATH_PREFIX) || filePath.startsWith(PARENT_PATH_PREFIX);
+}
+
 function shortPath(filePath) {
   if (!filePath.length) {
     return CURRENT_PATH;
   }
-  const filePathWithPrefix = filePath.startsWith(CURRENT_PATH)
+  const filePathWithPrefix = startsByPathIndicator(filePath)
     ? filePath
-    : `${CURRENT_PATH}${pathSep}${filePath}`;
+    : `${CURRENT_PATH_PREFIX}${filePath}`;
   if (filePathWithPrefix.length > 35) {
     return `${filePathWithPrefix.slice(0, 6)}[...]${filePathWithPrefix.slice(-18)}`;
   }

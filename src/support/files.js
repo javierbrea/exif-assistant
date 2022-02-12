@@ -121,7 +121,7 @@ function toRelative(filePath) {
 }
 
 module.exports = {
-  pathSep: path.sep,
+  PATH_SEP: path.sep,
   exists,
   isFolder,
   isFile,
