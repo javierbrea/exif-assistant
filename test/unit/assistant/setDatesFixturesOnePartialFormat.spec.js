@@ -1,3 +1,5 @@
+const path = require("path");
+
 const { setDates } = require("../../../src/assistant/setDateMethods");
 
 const {
@@ -77,7 +79,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           files: 10,
           modified: 6,
           moved: 0,
-          path: "test/assets/.tmp/output",
+          path: path.normalize("test/assets/.tmp/output"),
           supported: 7,
           unsupported: 3,
           withDate: 7,
@@ -88,7 +90,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
           files: 10,
           modified: null,
           moved: null,
-          path: "test/assets/.tmp/one-partial-format",
+          path: path.normalize("test/assets/.tmp/one-partial-format"),
           supported: 7,
           unsupported: 3,
           withDate: 5,
