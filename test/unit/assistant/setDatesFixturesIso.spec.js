@@ -73,7 +73,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     });
 
     it("should return report data", async () => {
-      expect(result).toEqual({
+      expect(result.totals).toEqual({
         before: {
           copied: null,
           files: 10,
@@ -176,7 +176,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     });
 
     it("should return report data", async () => {
-      expect(result).toEqual({
+      expect(result.totals).toEqual({
         after: {
           copied: 8,
           files: 10,
@@ -294,7 +294,7 @@ describe(`setDates executed in ${FIXTURE} fixtures`, () => {
     });
 
     it("should return report data", async () => {
-      expect(result).toEqual({
+      expect(result.totals).toEqual({
         after: {
           copied: 5,
           files: 10,

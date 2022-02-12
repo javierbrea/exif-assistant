@@ -67,7 +67,7 @@ function getParsedBaseDate({
 function TraceSetDate({ fileName, setDigitized }) {
   return function (newValue, valueFrom) {
     const setDigitedMessage = setDigitized ? ` and ${HUMAN_DATE_TIME_DIGITIZED_PROPERTY}` : "";
-    tracer.info(
+    tracer.debug(
       `${fileName}: Setting ${HUMAN_DATE_TIME_ORIGINAL_PROPERTY}${setDigitedMessage} to ${formatForLogsFromExif(
         newValue
       )}, from ${valueFrom}`
@@ -103,7 +103,7 @@ function CopyToOutput({
   const isSameOutputFolder = destFolder === fileFolder;
   return async function () {
     if (!!copyIfNotModified && !isSameOutputFolder) {
-      tracer.info(`${fileName}: Copying to output folder`);
+      tracer.debug(`${fileName}: Copying to output folder`);
       const newFilePath = await copyFileToFolder(filePath, destFolder, dryRun);
       report.copied(newFilePath);
     }
@@ -143,7 +143,7 @@ function HandleUnresolved({
 }) {
   return async function () {
     if (!!moveToIfUnresolved) {
-      tracer.info(`${fileName}: Moving to ${moveToIfUnresolved} subfolder`);
+      tracer.debug(`${fileName}: Moving to ${moveToIfUnresolved} subfolder`);
       const newFilePath = await moveOrCopyFileToSubfolder(
         filePath,
         destFolder,
@@ -162,7 +162,7 @@ function FileIsNotSupported({ filePath }) {
     if (await isSupportedFile(filePath)) {
       return false;
     }
-    tracer.warn(`${filePath}: File type is not supported`);
+    tracer.debug(`${filePath}: File type is not supported`);
     return true;
   };
 }
@@ -331,7 +331,7 @@ async function setDateToFile(
     return setDates(formatDateForExif(dateFallback, dateFormats), "dateFallback option");
   }
 
-  tracer.info(`${fileName}: No date was found to set`);
+  tracer.debug(`${fileName}: No date was found to set`);
   await handleUnresolved();
 }
 

@@ -7,11 +7,12 @@ const {
   normal,
   accent,
   neutral,
-  strongAccent,
   strongNeutral,
+  strongAccent,
   strongConditional,
   formatAll,
   shortPath,
+  ROW_SEPARATOR,
 } = require("./tableFormats");
 
 function addSupportedAmount(reportOrigin, dataDest) {
@@ -145,14 +146,14 @@ class SetDatesReport {
     return setDateReport;
   }
 
-  get data() {
+  get details() {
     return [...this._setDateReports].map((setDateReport) => {
       return setDateReport.data;
     });
   }
 
-  get summary() {
-    const data = this.data;
+  get totals() {
+    const details = this.details;
     const defaultData = {
       files: 0,
       supported: 0,
@@ -173,7 +174,7 @@ class SetDatesReport {
       ...defaultData,
       path: toRelative(this._output),
     };
-    data.forEach((fileReport) => {
+    details.forEach((fileReport) => {
       before.files++;
       addSupportedAmount(fileReport.before, before);
       addWithDateAmount(fileReport.before, before);
@@ -199,12 +200,18 @@ class SetDatesReport {
     };
   }
 
-  getDataAndPrint() {
+  getAndPrint() {
+    const details = this.details;
+    const totals = this.totals;
+    // When input and output folders are equal, the amount of new filePaths doesn't matter
+    const totalNewFilesFormatter = this._input === this._output ? strongAccent : strongConditional;
+    let filesKeptAtSamePath = 0;
+
     const table = new Table({
       columns: [
         { name: "beforeFile", alignment: "left", title: "File path" },
-        { name: "afterFile", alignment: "left", title: "New file path" },
         { name: "supported", alignment: "center", title: "Supported" },
+        { name: "afterFile", alignment: "left", title: "New file path" },
         { name: "beforeDate", alignment: "left", title: "Date before" },
         { name: "afterDate", alignment: "left", title: "Date after" },
         { name: "modified", alignment: "center", title: "Modified" },
@@ -212,16 +219,17 @@ class SetDatesReport {
         { name: "copied", alignment: "center", title: normal("Copied") },
       ],
     });
-    const data = this.data;
 
-    data.forEach((fileReport) => {
+    details.forEach((fileReport) => {
+      const fileIsAtSamePath =
+        !fileReport.after.filePath || fileReport.before.filePath === fileReport.after.filePath;
+      if (fileIsAtSamePath) {
+        filesKeptAtSamePath++;
+      }
       table.addRow(
         formatAll({
           beforeFile: shortPath(toRelative(fileReport.before.filePath)),
-          afterFile:
-            !fileReport.after.filePath || fileReport.before.filePath === fileReport.after.filePath
-              ? null
-              : shortPath(toRelative(fileReport.after.filePath)),
+          afterFile: fileIsAtSamePath ? null : shortPath(toRelative(fileReport.after.filePath)),
           supported: accent(fileReport.before.supported),
           beforeDate: neutral(fileReport.before.exif.DateTimeOriginal),
           afterDate: strongConditional(fileReport.after.exif.DateTimeOriginal),
@@ -232,50 +240,32 @@ class SetDatesReport {
       );
     });
 
-    if (currentLevelPrints(levels.INFO)) {
-      table.printTable();
-    }
-
-    return data;
-  }
-
-  getSummaryAndPrint() {
-    const table = new Table({
-      columns: [
-        { name: "concept", title: " " },
-        { name: "path", alignment: "left", title: "Path" },
-        { name: "files", title: "Files" },
-        { name: "unsupported", title: normal("Unsupported") },
-        { name: "supported", title: "Supported" },
-        { name: "withDate", title: "With Date" },
-        { name: "withoutDate", title: "Without Date" },
-        { name: "modified", title: "Modified" },
-        { name: "moved", title: normal("Moved to subfolder") },
-        { name: "copied", title: normal("Copied") },
-      ],
-    });
-    const summary = this.summary;
-
     table.addRow(
       formatAll({
-        ...summary.before,
-        path: shortPath(summary.before.path),
-        concept: strongAccent("Before"),
-        supported: accent(summary.before.supported),
-        withDate: neutral(summary.before.withDate),
-        withoutDate: neutral(summary.before.withoutDate),
+        beforeFile: ROW_SEPARATOR,
+        afterFile: ROW_SEPARATOR,
+        supported: ROW_SEPARATOR,
+        beforeDate: ROW_SEPARATOR,
+        afterDate: ROW_SEPARATOR,
+        modified: ROW_SEPARATOR,
+        moved: ROW_SEPARATOR,
+        copied: ROW_SEPARATOR,
       })
     );
 
     table.addRow(
       formatAll({
-        ...summary.after,
-        path: shortPath(summary.after.path),
-        concept: strongAccent("After"),
-        supported: accent(summary.after.supported),
-        withDate: strongConditional(summary.after.withDate),
-        withoutDate: strongConditional(summary.after.withoutDate, true),
-        modified: strongNeutral(summary.after.modified),
+        beforeFile: strongAccent(totals.before.files),
+        supported: strongConditional(totals.before.supported, totals.before.files),
+        afterFile: totalNewFilesFormatter(
+          totals.after.files - filesKeptAtSamePath,
+          totals.before.files
+        ),
+        beforeDate: strongConditional(totals.before.withDate, totals.before.supported),
+        afterDate: strongConditional(totals.after.withDate, totals.after.supported),
+        modified: strongNeutral(totals.after.modified),
+        moved: strongAccent(totals.after.moved),
+        copied: strongAccent(totals.after.copied),
       })
     );
 
@@ -283,7 +273,10 @@ class SetDatesReport {
       table.printTable();
     }
 
-    return summary;
+    return {
+      details,
+      totals,
+    };
   }
 }
 

@@ -101,8 +101,7 @@ async function setDates(inputFolder, options = {}) {
   setDatesTracer.debug(`Files found:`, files.length);
   setDatesTracer.silly(`Files found list:`, files);
   await setDateToFiles(files, options, inputFolder, setDatesReport);
-  setDatesReport.getDataAndPrint();
-  return setDatesReport.getSummaryAndPrint();
+  return setDatesReport.getAndPrint();
 }
 
 async function setDate(inputFile, options = {}) {
@@ -114,8 +113,7 @@ async function setDate(inputFile, options = {}) {
       : inputFile,
   });
   await setDateToFile(inputFile, options, setDatesReport.newFile(inputFile));
-  setDatesReport.getDataAndPrint();
-  return setDatesReport.getSummaryAndPrint();
+  return setDatesReport.getAndPrint();
 }
 
 module.exports = {

@@ -8,6 +8,7 @@ const ACCENT_COLOR = "whiteBright";
 const POSITIVE_COLOR = "green";
 const NEGATIVE_COLOR = "red";
 const NEUTRAL_COLOR = "yellow";
+const ROW_SEPARATOR = "_____";
 
 const DISPLAY_NULL = "-";
 const CURRENT_PATH = `.`;
@@ -80,19 +81,22 @@ function strong(text) {
   return bold(text);
 }
 
-function isPositiveValue(value) {
-  return value !== null && value > 0;
+function isNegativeValue(value) {
+  return value === null || value === 0;
 }
 
-function conditionalReverse(amount) {
-  return isPositiveValue(amount) ? negative(amount) : positive(amount);
-}
-
-function conditional(amount, reverse) {
-  if (reverse) {
-    return conditionalReverse(amount);
+function isPositiveValue(value, positiveThreshold) {
+  if (positiveThreshold) {
+    return value >= positiveThreshold;
   }
-  return isPositiveValue(amount) ? positive(amount) : negative(amount);
+  return !isNegativeValue(value);
+}
+
+function conditional(amount, positiveThreshold) {
+  if (isNegativeValue(amount)) {
+    return negative(amount);
+  }
+  return isPositiveValue(amount, positiveThreshold) ? positive(amount) : neutral(amount);
 }
 
 function strongAccent(text) {
@@ -103,8 +107,8 @@ function strongNeutral(amount) {
   return strong(neutral(amount));
 }
 
-function strongConditional(amount, reverse) {
-  return strong(conditional(amount, reverse));
+function strongConditional(amount, positiveThreshold) {
+  return strong(conditional(amount, positiveThreshold));
 }
 
 module.exports = {
@@ -120,4 +124,5 @@ module.exports = {
   strongNeutral,
   strongConditional,
   formatAll,
+  ROW_SEPARATOR,
 };
