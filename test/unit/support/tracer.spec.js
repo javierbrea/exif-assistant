@@ -48,13 +48,13 @@ describe("Tracer", () => {
     testLogLevel("error");
 
     // Check tracer with namespace
-    const namespace = "Foo tracer";
-    testLogLevel("silly", namespace);
-    testLogLevel("debug", namespace);
-    testLogLevel("verbose", namespace);
-    testLogLevel("info", namespace);
-    testLogLevel("warn", namespace);
-    testLogLevel("error", namespace);
+    const namespaceToToCheck = "Foo tracer";
+    testLogLevel("silly", namespaceToToCheck);
+    testLogLevel("debug", namespaceToToCheck);
+    testLogLevel("verbose", namespaceToToCheck);
+    testLogLevel("info", namespaceToToCheck);
+    testLogLevel("warn", namespaceToToCheck);
+    testLogLevel("error", namespaceToToCheck);
   });
 
   describe("setLevel method", () => {
