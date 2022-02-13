@@ -81,6 +81,7 @@ Dates found could be partial depending on the provided `dateFormat` option (for 
 | `--no-fromFileName` | `false` | Do not set dates based on dates found in file names. Implicit when `--date` option is used | `--no-fromFileName` |
 | `--no-fromFolderNames` | `false` | Do not set dates based on dates found in folder names. Implicit when `--date` option is used | `--no-fromFolderNames` |
 | `--no-baseDatefromFolderNames` | `false` | Do not set base dates based on dates found in parent folder names. The program tries to complete partial dates for a file or folder using its parent folder names. This option disables that feature. Implicit when `--baseDate` option is used | `--no-baseDatefromFolderNames` |
+| `-l, --log` | `info` | Log level. Can be one of `silly`, `debug`, `verbose`, `info`, `warn`, `error` or `silent` | `--log debug` |
 
 ## Acknowledgements
 
@@ -98,14 +99,14 @@ Please read the [contributing guidelines](.github/CONTRIBUTING.md) and [code of 
 
 MIT, see [LICENSE](./LICENSE) for details.
 
-[build-image]: https://github.com/javierbrea/exif-assistant/workflows/build/badge.svg?branch=master
-[build-url]: https://github.com/javierbrea/exif-assistant/actions?query=workflow%3Abuild+branch%3Amaster
+[build-image]: https://github.com/javierbrea/exif-assistant/workflows/build/badge.svg?branch=main
+[build-url]: https://github.com/javierbrea/exif-assistant/actions?query=workflow%3Abuild+branch%main
 [coveralls-image]: https://coveralls.io/repos/github/javierbrea/exif-assistant/badge.svg
 [coveralls-url]: https://coveralls.io/github/javierbrea/exif-assistant
 [last-commit-image]: https://img.shields.io/github/last-commit/javierbrea/exif-assistant.svg
 [last-commit-url]: https://github.com/javierbrea/exif-assistant/commits
 [license-image]: https://img.shields.io/npm/l/exif-assistant.svg
-[license-url]: https://github.com/javierbrea/exif-assistant/blob/master/LICENSE
+[license-url]: https://github.com/javierbrea/exif-assistant/blob/main/LICENSE
 [npm-downloads-image]: https://img.shields.io/npm/dm/exif-assistant.svg
 [npm-downloads-url]: https://www.npmjs.com/package/exif-assistant
 [quality-gate-image]: https://sonarcloud.io/api/project_badges/measure?project=javierbrea_exif-assistant&metric=alert_status
