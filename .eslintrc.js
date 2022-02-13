@@ -74,7 +74,7 @@ module.exports = {
         ],
       },
     ],
-    "no-shadow": "error",
+    "no-shadow": [2, { builtinGlobals: true, hoist: "all" }],
     "no-undef": "error",
     "no-unused-vars": ["error", { vars: "all", args: "after-used", ignoreRestSiblings: false }],
     "mocha/no-setup-in-describe": [0],
@@ -89,6 +89,15 @@ module.exports = {
         node: true,
         es6: true,
         "jest/globals": true,
+      },
+    },
+    {
+      files: ["src/**/*.js"],
+      rules: {
+        "no-shadow": [
+          2,
+          { builtinGlobals: true, hoist: "all", allow: ["before", "after", "run"] },
+        ],
       },
     },
   ],

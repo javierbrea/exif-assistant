@@ -1,5 +1,5 @@
 const { setDates } = require("./setDateMethods");
 
 module.exports = {
-  setDates,
+  setDatesInFolder: setDates,
 };

@@ -49,8 +49,22 @@ program
   .description("Set exif date to all files in a folder recursively")
   .argument("[folder]", "Folder containing images to set date", ".")
   .addOption(logOption)
+  .option("--dryRun", "Print report only. Do not modify any file", false)
+  .option("-m, --modify", "Modify existing dates", false)
+  .option("--no-setDigitized", "Do not set DateTimeDigitized exif property")
   .option("-o, --outputFolder <outputFolder>", "Output folder")
-  .option("-d, --date <date>", "Date to set")
+  .option("-c, --copyAll", "Copy also unsupported and not modified files to outputFolder", false)
+  .option(
+    "-u, --moveUnresolvedTo <moveUnresolvedTo>",
+    "If no date is found for a file or it is not supported, create a subfolder with this name and move the file into it"
+  )
+  .option("-d, --date <date>", "When provided, this date is set to all files")
+  .option("-f, --dateFallback <dateFallback>", "Set this date when it is not found anywhere else")
+  .option("-b, --baseDate <baseDate>", "Date used to complete dates when they are partial")
+  .option(
+    "--baseDateFallback <baseDateFallback>",
+    "Use this date as baseDate when it is not found anywhere else"
+  )
   .option(
     "-f, --dateFormat <dateFormats...>",
     "Date format in files, folder names or date options. Supports multiple values"
@@ -60,26 +74,12 @@ program
     "Regex used to get date from file or folder names. Supports multiple values"
   )
   .option(
-    "--baseDateFallback <baseDateFallback>",
-    "Use this date as baseDate when it is not found anywhere else"
-  )
-  .option("-b, --baseDate <baseDate>", "Date used to complete dates when they are partial")
-  .option("-f, --dateFallback <dateFallback>", "Set this date when it is not found anywhere else")
-  .option("-m, --modify", "Modify existent dates", false)
-  .option(
     "--no-fromDigitized",
     "Do not use DateTimeDigitized from file exif to set DateTimeOriginal"
   )
   .option("--no-fromFileName", "Do not use file names to set dates")
-  .option("--no-baseDatefromFolderNames", "Do not use folder names to set base dates")
   .option("--no-fromFolderNames", "Do not use folder names to set dates")
-  .option("--no-setDigitized", "Do not set DateTimeDigitized exif property")
-  .option(
-    "-u, --moveUnresolvedTo <moveUnresolvedTo>",
-    "If no date is found for a file or it is not supported, create a subfolder with this name and move the file into it"
-  )
-  .option("-c, --copyAll", "Copy also unsupported and not modified files to outputFolder")
-  .option("--dryRun", "Print report only. Do not modify any file")
+  .option("--no-baseDatefromFolderNames", "Do not use folder names to set base dates")
   .showHelpAfterError()
   .action(async (folderPath, options) => {
     const tracer = new Tracer("set-dates");
