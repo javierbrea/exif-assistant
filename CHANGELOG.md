@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Breaking changes
 
-## [1.0.0-beta.1]
+## [1.0.0-beta.2]
+### Fixed
+- Add missing `commander` dependency
+
+## [1.0.0-beta.1] - __NOT WORKING__
 ### Added
 - Add `set-dates` command
