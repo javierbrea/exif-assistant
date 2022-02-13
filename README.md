@@ -100,7 +100,7 @@ Please read the [contributing guidelines](.github/CONTRIBUTING.md) and [code of 
 MIT, see [LICENSE](./LICENSE) for details.
 
 [build-image]: https://github.com/javierbrea/exif-assistant/workflows/build/badge.svg?branch=main
-[build-url]: https://github.com/javierbrea/exif-assistant/actions?query=workflow%3Abuild+branch%main
+[build-url]: https://github.com/javierbrea/exif-assistant/actions?query=workflow%3Abuild+branch%3Amain
 [coveralls-image]: https://coveralls.io/repos/github/javierbrea/exif-assistant/badge.svg
 [coveralls-url]: https://coveralls.io/github/javierbrea/exif-assistant
 [last-commit-image]: https://img.shields.io/github/last-commit/javierbrea/exif-assistant.svg
