@@ -11,6 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Breaking changes
 
-## [Unreleased]
+## [1.0.0-beta.1]
 ### Added
-- First pre-release
+- Add `set-dates` command

@@ -1,6 +1,6 @@
 {
   "name": "exif-assistant",
-  "version": "0.0.1-beta.1",
+  "version": "1.0.0-beta.1",
   "description": "CLI tool for setting EXIF metadata",
   "keywords": [
     "exif",
