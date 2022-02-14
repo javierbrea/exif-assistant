@@ -36,7 +36,7 @@
     "prepare": "is-ci || husky install"
   },
   "dependencies": {
-    "chalk": "4.0.0",
+    "chalk": "4.1.2",
     "commander": "9.0.0",
     "console-table-printer": "2.10.0",
     "date-fns": "2.28.0",
