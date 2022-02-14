@@ -684,7 +684,6 @@ describe("setDate", () => {
         const spy = spyTracer("debug");
         const fileName = "gorilla.JPG";
         const newFileName = "2013-10-23.jpg";
-        const date = "2013:10:23 00:00:00";
         await copyAssetToTempPath(fileName, newFileName);
         const fileOrigin = tempPath(newFileName);
 
