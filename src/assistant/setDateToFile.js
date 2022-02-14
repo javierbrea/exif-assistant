@@ -110,7 +110,15 @@ function CopyToOutput({
   };
 }
 
-function SetDates({ fileName, filePath, setDigitized, destFolder, report, dryRun }) {
+function SetDates({
+  fileName,
+  filePath,
+  setDigitized,
+  destFolder,
+  report,
+  dryRun,
+  handleUnresolved,
+}) {
   const traceSetDate = TraceSetDate({ fileName, setDigitized });
   return async function (dateOriginal, from) {
     const datesToSet = {
@@ -124,10 +132,14 @@ function SetDates({ fileName, filePath, setDigitized, destFolder, report, dryRun
     traceSetDate(dateOriginal, from);
     const newFilePath = resolve(destFolder, fileName);
 
-    report.modified(newFilePath, datesToSet, from);
-
     if (!dryRun) {
-      await moveAndUpdateExifDates(filePath, newFilePath, datesToSet);
+      try {
+        await moveAndUpdateExifDates(filePath, newFilePath, datesToSet);
+        report.modified(newFilePath, datesToSet, from);
+      } catch (error) {
+        tracer.error(`${newFilePath}: Error writing Exif`, error.message);
+        await handleUnresolved();
+      }
     }
   };
 }
@@ -194,8 +206,8 @@ function SkipOrGetFileDates({
   });
   return async function () {
     if (await fileIsNotSupported(filePath)) {
-      report.notSupported();
       await handleUnresolved();
+      report.notSupported();
       return;
     }
 
@@ -269,14 +281,6 @@ async function setDateToFile(
     parsedBaseDate,
     dateRegexs,
   });
-  const setDates = SetDates({
-    fileName,
-    filePath,
-    setDigitized,
-    destFolder,
-    report,
-    dryRun,
-  });
   const handleUnresolved = HandleUnresolved({
     fileName,
     copyToOutput,
@@ -285,6 +289,15 @@ async function setDateToFile(
     destFolder,
     report,
     dryRun,
+  });
+  const setDates = SetDates({
+    fileName,
+    filePath,
+    setDigitized,
+    destFolder,
+    report,
+    dryRun,
+    handleUnresolved,
   });
   const skipOrGetFileDates = SkipOrGetFileDates({
     handleUnresolved,

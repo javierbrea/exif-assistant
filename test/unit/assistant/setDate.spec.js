@@ -1,4 +1,5 @@
 const path = require("path");
+const piexif = require("piexifjs");
 const fsExtra = require("fs-extra");
 const sinon = require("sinon");
 
@@ -501,6 +502,38 @@ describe("setDate", () => {
         expect(result.totals.after.withoutDate).toEqual(1);
         expect(result.totals.after.modified).toEqual(0);
         expect(result.totals.after.copied).toEqual(0);
+      });
+    });
+  });
+
+  describe("when there is an error writing exif info", () => {
+    describe("when copyIfNotModified option is true", () => {
+      it("should copy the file if outputFolder is not the same in which the file is", async () => {
+        sandbox.stub(piexif, "insert").throws(new Error("Piexifjs error"));
+        const spy = spyTracer("error");
+        const fileName = "gorilla.JPG";
+        const fileOrigin = tempPath(fileName);
+        const outputFolder = path.resolve(TEMP_PATH, "unsupported");
+
+        await copyAssetToTempPath(fileName);
+        const result = await setDate(fileOrigin, {
+          date: "2022-02-14",
+          outputFolder,
+          copyIfNotModified: true,
+        });
+        expectLog(`Error writing Exif`, spy);
+        expectLog(`Piexifjs error`, spy);
+        expect(fsExtra.existsSync(fileOrigin)).toBe(true);
+        expect(fsExtra.existsSync(path.resolve(outputFolder, fileName))).toBe(true);
+        expect(result.totals.before.supported).toEqual(1);
+        expect(result.totals.before.unsupported).toEqual(0);
+        expect(result.totals.before.withDate).toEqual(0);
+        expect(result.totals.before.withoutDate).toEqual(1);
+        expect(result.totals.after.supported).toEqual(1);
+        expect(result.totals.after.unsupported).toEqual(0);
+        expect(result.totals.after.withDate).toEqual(0);
+        expect(result.totals.after.withoutDate).toEqual(1);
+        expect(result.totals.after.copied).toEqual(1);
       });
     });
   });

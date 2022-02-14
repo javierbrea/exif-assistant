@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Breaking changes
 
+## [1.0.0-beta.3]
+### Fixed
+- fix: Use piexijs dump method to detect if file is really supported
+- fix: Error counting amount of files after modifications
+- fix: Handle errors while writing exif info
+
 ## [1.0.0-beta.2]
 ### Fixed
 - Add missing `commander` dependency

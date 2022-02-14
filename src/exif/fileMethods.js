@@ -28,13 +28,14 @@ async function moveAndWriteExif(filePath, newFilePath, exif) {
   const newImageData = piexif.insert(exifBinary, await getBase64DataFromFile(filePath));
   const fileBuffer = Buffer.from(newImageData, BINARY_FORMAT);
   await ensureDir(dirName(newFilePath));
+  tracer.debug(`Writing exif data to file ${filePath}`);
   return writeFile(newFilePath, fileBuffer);
 }
 
 async function readExifDates(filePath) {
-  tracer.debug(`Reading exif data file ${filePath}`);
+  tracer.debug(`Reading exif data from file ${filePath}`);
   const exif = await readExifFromFile(filePath);
-  tracer.silly(`Exif data`, formatExifToHuman(exif));
+  tracer.silly(`Exif data in ${filePath}`, formatExifToHuman(exif));
   return getDates(exif);
 }
 
@@ -44,9 +45,9 @@ async function moveAndUpdateExifData(filePath, newFilePath, humanPropertiesToMod
     humanPropertiesToModify
   );
   const exif = await readExifFromFile(filePath);
-  tracer.silly(`Exif data from original file`, formatExifToHuman(exif));
+  tracer.silly(`Exif data in original file ${filePath}`, formatExifToHuman(exif));
   const newExif = updateExif(exif, formatHumanToExif(humanPropertiesToModify));
-  tracer.silly(`New exif data`, formatExifToHuman(newExif));
+  tracer.silly(`New exif data for ${newFilePath}`, formatExifToHuman(newExif));
   return moveAndWriteExif(filePath, newFilePath, newExif);
 }
 
@@ -60,7 +61,7 @@ async function moveAndUpdateExifDates(filePath, newFilePath, datesToModify) {
 
 async function isSupportedFile(filePath) {
   try {
-    await readExifFromFile(filePath);
+    piexif.dump(await readExifFromFile(filePath));
     return true;
   } catch (error) {
     return false;
