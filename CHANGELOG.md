@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - fix: Fix report when dryRun option is enabled
+- chore: Add execution permissions to husky precommit file
 
 ## [1.0.0-beta.3]
 ### Fixed
