@@ -221,15 +221,17 @@ class SetDatesReport {
     });
 
     details.forEach((fileReport) => {
-      const fileIsAtSamePath =
-        !fileReport.after.filePath || fileReport.before.filePath === fileReport.after.filePath;
+      const fileIsAtSamePath = fileReport.before.filePath === fileReport.after.filePath;
       if (fileIsAtSamePath) {
         filesKeptAtSamePath++;
       }
       table.addRow(
         formatAll({
           beforeFile: shortPath(toRelative(fileReport.before.filePath)),
-          afterFile: fileIsAtSamePath ? null : shortPath(toRelative(fileReport.after.filePath)),
+          afterFile:
+            !fileReport.after.filePath || fileIsAtSamePath
+              ? null
+              : shortPath(toRelative(fileReport.after.filePath)),
           supported: accent(fileReport.before.supported),
           beforeDate: neutral(fileReport.before.exif.DateTimeOriginal),
           afterDate: strongConditional(fileReport.after.exif.DateTimeOriginal),
