@@ -140,6 +140,8 @@ function SetDates({
         tracer.error(`${newFilePath}: Error writing Exif`, error.message);
         await handleUnresolved();
       }
+    } else {
+      report.modified(newFilePath, datesToSet, from);
     }
   };
 }

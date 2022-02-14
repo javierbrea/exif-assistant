@@ -538,7 +538,7 @@ describe("setDate", () => {
     });
   });
 
-  describe("when is not supported", () => {
+  describe("when it is not supported", () => {
     describe("when copyIfNotModified option is true", () => {
       it("should copy the file if outputFolder is not the same in which the file is", async () => {
         const spy = spyTracer("debug");
@@ -674,6 +674,32 @@ describe("setDate", () => {
         });
         expect(result.totals.before.withDate).toEqual(0);
         expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.modified).toEqual(1);
+        expect(result.totals.before.path).toEqual(result.totals.after.path);
+      });
+    });
+
+    describe("When dryRun option is provided", () => {
+      it("should only report modifications withour modifying original file", async () => {
+        const spy = spyTracer("debug");
+        const fileName = "gorilla.JPG";
+        const newFileName = "2013-10-23.jpg";
+        const date = "2013:10:23 00:00:00";
+        await copyAssetToTempPath(fileName, newFileName);
+        const fileOrigin = tempPath(newFileName);
+
+        const result = await setDate(fileOrigin, {
+          dryRun: true,
+        });
+
+        expectLog(
+          `2013-10-23.jpg: Setting DateTimeOriginal and DateTimeDigitized to 2013-10-23 00:00:00, from file name`,
+          spy
+        );
+        expect(result.totals.before.withDate).toEqual(0);
+        expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.copied).toEqual(0);
+        expect(result.totals.after.moved).toEqual(0);
         expect(result.totals.after.modified).toEqual(1);
         expect(result.totals.before.path).toEqual(result.totals.after.path);
       });

@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Breaking changes
 
+## [Unreleased]
+
+### Fixed
+- fix: Fix report when dryRun option is enabled
+
 ## [1.0.0-beta.3]
 ### Fixed
 - fix: Use piexijs dump method to detect if file is really supported
