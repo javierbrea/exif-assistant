@@ -1,4 +1,16 @@
-const { format, isValid, isMatch, parseISO, parse } = require("date-fns");
+const {
+  format,
+  isValid,
+  isMatch,
+  parseISO,
+  parse,
+  getSeconds,
+  getMinutes,
+  getHours,
+  setSeconds,
+  setHours,
+  setMinutes,
+} = require("date-fns");
 
 const { isArray, isEmpty } = require("./utils");
 
@@ -11,26 +23,34 @@ function findFormatMatchingDateString(stringDateFormats, dateString) {
   });
 }
 
-function dateFromString(string, stringDateFormats, baseDate) {
+function dateFromString(dateString, stringDateFormats, baseDate) {
   const stringDateFormat = isArray(stringDateFormats)
-    ? findFormatMatchingDateString(stringDateFormats, string)
+    ? findFormatMatchingDateString(stringDateFormats, dateString)
     : stringDateFormats;
   if (!stringDateFormat) {
-    return parseISO(string);
+    return parseISO(dateString);
   }
-  return parse(string, stringDateFormat, baseDate || new Date());
+  return parse(dateString, stringDateFormat, baseDate || new Date());
 }
 
 function isValidDate(string, stringDateFormats, baseDate) {
   return isValid(dateFromString(string, stringDateFormats, baseDate));
 }
 
-function formatForExif(string, stringDateFormats, baseDate) {
-  return format(dateFromString(string, stringDateFormats, baseDate), EXIF_DATE_FORMAT);
+function exifStringFromDate(date) {
+  return format(date, EXIF_DATE_FORMAT);
 }
 
-function formatForLogsFromExif(exifDate) {
-  return format(dateFromString(exifDate, EXIF_DATE_FORMAT), LOGS_DATE_FORMAT);
+function dateFromExifString(dateString) {
+  return dateFromString(dateString, EXIF_DATE_FORMAT);
+}
+
+function formatForExif(string, stringDateFormats, baseDate) {
+  return exifStringFromDate(dateFromString(string, stringDateFormats, baseDate));
+}
+
+function formatForLogsFromExif(exifDateString) {
+  return format(dateFromExifString(exifDateString), LOGS_DATE_FORMAT);
 }
 
 function findDateStringUsingRegexs(string, dateRegexs = []) {
@@ -47,10 +67,33 @@ function findDateStringUsingRegexs(string, dateRegexs = []) {
   return firstMatch || string;
 }
 
+function getTimeInfoFromExifDate(dateString) {
+  if (!dateString) {
+    return null;
+  }
+  const date = dateFromExifString(dateString);
+  return {
+    hours: getHours(date),
+    minutes: getMinutes(date),
+    seconds: getSeconds(date),
+  };
+}
+
+function modifyTimeToExifDate(dateString, timeInfo) {
+  return exifStringFromDate(
+    setHours(
+      setMinutes(setSeconds(dateFromExifString(dateString), timeInfo.seconds), timeInfo.minutes),
+      timeInfo.hours
+    )
+  );
+}
+
 module.exports = {
   dateFromString,
   formatForExif,
   formatForLogsFromExif,
   isValidDate,
   findDateStringUsingRegexs,
+  getTimeInfoFromExifDate,
+  modifyTimeToExifDate,
 };
