@@ -1,3 +1,4 @@
+const updateNotifier = require("update-notifier");
 const { Command, Option } = require("commander");
 const inquirer = require("inquirer");
 
@@ -5,7 +6,11 @@ const { setDates } = require("./assistant/setDateMethods");
 const { toAbsolute } = require("./support/files");
 const { setLevel, Tracer } = require("./support/tracer");
 
-const { version } = require("../package.json");
+const pkg = require("../package.json");
+
+updateNotifier({
+  pkg,
+}).notify();
 
 const program = new Command();
 
@@ -42,7 +47,7 @@ async function confirmOverwrite(inputFolder, outputFolder) {
   return true;
 }
 
-program.name("exif-assistant").description("Set exif data to image files").version(version);
+program.name("exif-assistant").description("Set exif data to image files").version(pkg.version);
 
 program
   .command("set-dates")
