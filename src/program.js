@@ -1,3 +1,4 @@
+const updateNotifier = require("update-notifier");
 const { Command, Option } = require("commander");
 const inquirer = require("inquirer");
 
@@ -5,7 +6,11 @@ const { setDates } = require("./assistant/setDateMethods");
 const { toAbsolute } = require("./support/files");
 const { setLevel, Tracer } = require("./support/tracer");
 
-const { version } = require("../package.json");
+const pkg = require("../package.json");
+
+updateNotifier({
+  pkg,
+}).notify();
 
 const program = new Command();
 
@@ -42,7 +47,7 @@ async function confirmOverwrite(inputFolder, outputFolder) {
   return true;
 }
 
-program.name("exif-assistant").description("Set exif data to image files").version(version);
+program.name("exif-assistant").description("Set exif data to image files").version(pkg.version);
 
 program
   .command("set-dates")
@@ -51,6 +56,7 @@ program
   .addOption(logOption)
   .option("--dryRun", "Print report only. Do not modify any file", false)
   .option("-m, --modify", "Modify existing dates", false)
+  .option("--no-modifyTime", "Do not modify time information when present")
   .option("--no-setDigitized", "Do not set DateTimeDigitized exif property")
   .option("-o, --outputFolder <outputFolder>", "Output folder")
   .option("-c, --copyAll", "Copy also unsupported and not modified files to outputFolder", false)
@@ -94,11 +100,14 @@ program
       }
     }
 
-    return setDates(toAbsolute(folderPath), {
+    await setDates(toAbsolute(folderPath), {
       ...options,
       dateFormats: options.dateFormat, // convert singular option from command line into plural
       dateRegexs: options.dateRegex, // convert singular option from command line into plural
     });
+    if (options.dryRun) {
+      tracer.warn("dryRun option was enabled. No modifications were done");
+    }
   });
 
 module.exports = {

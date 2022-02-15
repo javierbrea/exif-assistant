@@ -361,12 +361,12 @@ describe("setDates", () => {
       expect(DateTimeDigitized).toEqual(`2022:02:02 00:00:00`);
     });
 
-    it("should have not modified date of image with DateTimeDigited", async () => {
+    it("should have modified date of image with DateTimeDigitized", async () => {
       const { DateTimeOriginal, DateTimeDigitized } = await readExifDates(
         tempPath(NEW_IMAGE_NO_DATE_ORIGINAL)
       );
-      expect(DateTimeOriginal).toEqual("2021:10:14 10:58:31");
-      expect(DateTimeDigitized).toEqual("2021:10:14 10:58:31");
+      expect(DateTimeOriginal).toEqual("2022:02:01 18:39:45");
+      expect(DateTimeDigitized).toEqual("2022:02:01 18:39:45");
     });
 
     it("should have not modified date of image with date", async () => {
