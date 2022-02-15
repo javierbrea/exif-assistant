@@ -177,6 +177,59 @@ describe("set-dates command", () => {
     });
   });
 
+  describe("when no output folder is provided and dryRun option is enabled", () => {
+    const FIXTURE = "iso-regex";
+    let cli;
+
+    beforeAll(async () => {
+      await resetTempPath();
+      await copyFixturesToTempPath(FIXTURE);
+      cli = new CliRunner("bin/exif-assistant", [
+        "set-dates",
+        tempFixturesFolder(FIXTURE),
+        "--copyAll",
+        "--modify",
+        "--no-fromDigitized",
+        "--dryRun",
+        "--dateRegex",
+        "^date\\-(\\S*)",
+      ]);
+      await cli.hasFinished();
+      console.log(cli.logs);
+    });
+
+    afterAll(async () => {
+      if (!cli.isClosed) {
+        await cli.kill();
+      }
+    });
+
+    it("should not prompt for confirmation", async () => {
+      expect(cli.exitCode).toEqual(0);
+      expect(cli.logs).toEqual(expect.not.stringContaining("Are you sure?"));
+    });
+
+    it("should have not set date from file name to image with date in root folder", async () => {
+      const { DateTimeOriginal } = await readExifDates(
+        tempPath(FIXTURE, "date-2021-09-25T122030.jpg")
+      );
+      expect(DateTimeOriginal).toEqual(`2021:10:14 10:58:31`);
+    });
+
+    it("should have not set date from file name to image with date in subfolder", async () => {
+      const { DateTimeOriginal } = await readExifDates(
+        tempPath(FIXTURE, "subfolder", "date-2021-09.jpeg")
+      );
+      expect(DateTimeOriginal).toEqual(`2021:09:21 10:24:14`);
+    });
+
+    it("should print a warning informing that no modifications were done", async () => {
+      expect(cli.logs).toEqual(
+        expect.stringContaining("dryRun option was enabled. No modifications were done")
+      );
+    });
+  });
+
   describe("when modify option is true, fromDigited is false and formats and regexs are provided", () => {
     const FIXTURE = "formats-regexs";
     let cli;

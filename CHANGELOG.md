@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - feat: Add `--no-modifyTime` option, allowing to modify date but keeping original time information.
+- feat: Add trace when using `--dryRun` option
 
 ### Changed
 - feat: Set `DateTimeOriginal` using `DateTimeDigitized` only when the first one is empty and no other date is found.

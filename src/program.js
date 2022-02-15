@@ -95,11 +95,14 @@ program
       }
     }
 
-    return setDates(toAbsolute(folderPath), {
+    await setDates(toAbsolute(folderPath), {
       ...options,
       dateFormats: options.dateFormat, // convert singular option from command line into plural
       dateRegexs: options.dateRegex, // convert singular option from command line into plural
     });
+    if (options.dryRun) {
+      tracer.warn("dryRun option was enabled. No modifications were done");
+    }
   });
 
 module.exports = {
