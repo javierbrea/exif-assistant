@@ -735,7 +735,7 @@ describe("setDate", () => {
 
       it("should add date to exif, setting time from file name info", async () => {
         const fileName = "caryatids.jpeg";
-        const newFileName = "2012-02-15T15:23:54.jpg";
+        const newFileName = "2012-02-15_15-23-54.jpg";
         const date = "2012:02:15 15:23:54";
         await copyAssetToTempPath(fileName, newFileName);
 
@@ -746,6 +746,7 @@ describe("setDate", () => {
           dateTimeDigitedExpected: date,
           setDateOptions: {
             modify: true,
+            dateFormats: "yyyy-MM-dd_HH-mm-ss",
           },
           expectedLog: "from file name",
         });
