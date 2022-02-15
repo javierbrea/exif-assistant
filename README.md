@@ -45,10 +45,10 @@ exif-assistant set-dates ./photos --dateFormat dd-MM --dateFormat yyyy --dateReg
 The default priority for determining the date to be set into a file is the next one, but it can be modified using the command options:
 
 * Date from the `date` option, if defined.
-* Date in the `DateTimeDigitized` exif info.
 * Date found in the file name.
 * Date found in the parent folder. Searches recursively in parent folders until the input folder.
 * Date from the `dateFallback` option.
+* Date from the `DateTimeDigitized` exif info, only in case `DateTimeOriginal` is empty.
 
 Dates found could be partial depending on the provided `dateFormat` option (for example, a file name could contain info only about a day or a month). If such is the case, then it uses the next priority to determine the date used to complete it:
 
@@ -78,7 +78,7 @@ Dates found could be partial depending on the provided `dateFormat` option (for 
 | `-b, --baseDateFallback`| - | If the base date for a file is not found anywhere else, use this one as base date. Note that the base date for a file is calculated using its parent folder names. Must have [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601), or match with any of the formats provided in the `dateFormat` option | `--baseDateFallback 2022-05` |
 | `-f, --dateFormat` | [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) | Formats used to parse dates from file or folder names or date options. [Multiple values can be provided](https://github.com/tj/commander.js#variadic-option). The dates will be parsed using the first matching format. Check the [`date-fns` docs](https://github.com/date-fns/date-fns) to learn more about defining date formats | `--dateFormat dd-MM-yyyy yyyy` |
 | `-r, --dateRegex` | - | Regex used to extract dates from file or folder names. Regexs with a capturing group must be provided. [Multiple values can be provided](https://github.com/tj/commander.js#variadic-option) | `--dateRegex "^year-(\S*)$"` |
-| `--no-fromDigitized` | `false` | Do not set `DateTimeOriginal` property using the value from the `DateTimeDigitized` property. By default, if the program found the `DateTimeDigitized` property, it uses it to set `DateTimeOriginal`. This option disables that feature. Implicit when `--date` option is used | `--no-fromDigitized` |
+| `--no-fromDigitized` | `false` | Do not set `DateTimeOriginal` property using the value from the `DateTimeDigitized` property. By default, if the program found the `DateTimeDigitized` property and `DateTimeOriginal` is empty, it fills it with the same value. This option disables that feature. Implicit when `--date` option is used | `--no-fromDigitized` |
 | `--no-fromFileName` | `false` | Do not set dates based on dates found in file names. Implicit when `--date` option is used | `--no-fromFileName` |
 | `--no-fromFolderNames` | `false` | Do not set dates based on dates found in folder names. Implicit when `--date` option is used | `--no-fromFolderNames` |
 | `--no-baseDatefromFolderNames` | `false` | Do not set base dates based on dates found in parent folder names. The program tries to complete partial dates for a file or folder using its parent folder names. This option disables that feature. Implicit when `--baseDate` option is used | `--no-baseDatefromFolderNames` |

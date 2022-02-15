@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - feat: Add `--no-modifyTime` option, allowing to modify date but keeping original time information.
 
+### Changed
+- feat: Set `DateTimeOriginal` using `DateTimeDigitized` only when the first one is empty and no other date is found.
+
 ### Fixed
 - fix: Fix report when dryRun option is enabled
 - chore: Add execution permissions to husky precommit file

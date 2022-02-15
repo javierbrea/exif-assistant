@@ -336,15 +336,6 @@ async function setDateToFile(
     return setDates(formatForExif(date), "date option", fileDates);
   }
 
-  // Copy DateTimeDigitized to DateTimeOriginal if present
-  if (fromDigitized && fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY]) {
-    return setDates(
-      fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY],
-      HUMAN_DATE_TIME_DIGITIZED_PROPERTY,
-      fileDates
-    );
-  }
-
   // Set date from file name
   const fileNameWithoutExtension = removeExtension(fileName);
   if (fromFileName && isDate(fileNameWithoutExtension)) {
@@ -363,6 +354,19 @@ async function setDateToFile(
       formatDateForExif(dateFallback, dateFormats),
       "dateFallback option",
       fileDates
+    );
+  }
+
+  // Copy DateTimeDigitized to DateTimeOriginal if it is empty
+  if (
+    fromDigitized &&
+    fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY] &&
+    !fileDates[HUMAN_DATE_TIME_ORIGINAL_PROPERTY]
+  ) {
+    return setDates(
+      fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY],
+      HUMAN_DATE_TIME_DIGITIZED_PROPERTY,
+      {}
     );
   }
 
