@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Breaking changes
 
+## [Unreleased]
+
+### Added
+- feat: Add `--no-modifyTime` option, allowing to modify date but keeping original time information.
+- feat: Add trace when using `--dryRun` option
+- feat: Add `update-notifier`
+
+### Changed
+- feat: Set `DateTimeOriginal` using `DateTimeDigitized` only when the first one is empty and no other date is found.
+
+### Fixed
+- fix: Fix report when dryRun option is enabled
+- chore: Add execution permissions to husky precommit file
+- chore: Add missing test npm command. Execute both unit and e2e tests
+
 ## [1.0.0-beta.3]
 ### Fixed
 - fix: Use piexijs dump method to detect if file is really supported

@@ -12,6 +12,8 @@ const {
   dateFromString,
   formatForLogsFromExif,
   findDateStringUsingRegexs,
+  getTimeInfoFromExifDate,
+  modifyTimeToExifDate,
 } = require("../support/dates");
 const {
   moveOrCopyFileToSubfolder,
@@ -118,18 +120,29 @@ function SetDates({
   report,
   dryRun,
   handleUnresolved,
+  modifyTime,
 }) {
   const traceSetDate = TraceSetDate({ fileName, setDigitized });
-  return async function (dateOriginal, from) {
+  return async function (date, from, datesFromFile) {
+    let dateToSet = date;
+    const timeInfoFromFileDates = getTimeInfoFromExifDate(
+      datesFromFile[HUMAN_DATE_TIME_ORIGINAL_PROPERTY] ||
+        datesFromFile[HUMAN_DATE_TIME_DIGITIZED_PROPERTY]
+    );
+
+    if (!modifyTime && !!timeInfoFromFileDates) {
+      dateToSet = modifyTimeToExifDate(dateToSet, timeInfoFromFileDates);
+    }
+
     const datesToSet = {
-      [HUMAN_DATE_TIME_ORIGINAL_PROPERTY]: dateOriginal,
+      [HUMAN_DATE_TIME_ORIGINAL_PROPERTY]: dateToSet,
     };
     // Set also DateTimeDigitized if setDigited option is enabledx
     if (setDigitized) {
-      datesToSet[HUMAN_DATE_TIME_DIGITIZED_PROPERTY] = dateOriginal;
+      datesToSet[HUMAN_DATE_TIME_DIGITIZED_PROPERTY] = dateToSet;
     }
 
-    traceSetDate(dateOriginal, from);
+    traceSetDate(dateToSet, from);
     const newFilePath = resolve(destFolder, fileName);
 
     if (!dryRun) {
@@ -140,6 +153,8 @@ function SetDates({
         tracer.error(`${newFilePath}: Error writing Exif`, error.message);
         await handleUnresolved();
       }
+    } else {
+      report.modified(newFilePath, datesToSet, from);
     }
   };
 }
@@ -243,6 +258,7 @@ async function setDateToFile(
     baseDateFallback,
     dateFallback,
     modify = false,
+    modifyTime = true,
     fromDigitized = true,
     fromFileName = true,
     fromDateCandidates = true,
@@ -298,6 +314,7 @@ async function setDateToFile(
     report,
     dryRun,
     handleUnresolved,
+    modifyTime,
   });
   const skipOrGetFileDates = SkipOrGetFileDates({
     handleUnresolved,
@@ -316,32 +333,41 @@ async function setDateToFile(
 
   // Set date if date option is present
   if (!!date) {
-    return setDates(formatForExif(date), "date option");
-  }
-
-  // Copy DateTimeDigitized to DateTimeOriginal if present
-  if (fromDigitized && fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY]) {
-    return setDates(
-      fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY],
-      HUMAN_DATE_TIME_DIGITIZED_PROPERTY
-    );
+    return setDates(formatForExif(date), "date option", fileDates);
   }
 
   // Set date from file name
   const fileNameWithoutExtension = removeExtension(fileName);
   if (fromFileName && isDate(fileNameWithoutExtension)) {
-    return setDates(formatForExif(fileNameWithoutExtension), "file name");
+    return setDates(formatForExif(fileNameWithoutExtension), "file name", fileDates);
   }
 
   // Set date from date candidates
   const validDateFromCandidates = findFirstValidDate(dateCandidates);
   if (fromDateCandidates && !!validDateFromCandidates) {
-    return setDates(formatForExif(validDateFromCandidates), "date candidate");
+    return setDates(formatForExif(validDateFromCandidates), "date candidate", fileDates);
   }
 
   // Set date from dateFallback
   if (!!dateFallback) {
-    return setDates(formatDateForExif(dateFallback, dateFormats), "dateFallback option");
+    return setDates(
+      formatDateForExif(dateFallback, dateFormats),
+      "dateFallback option",
+      fileDates
+    );
+  }
+
+  // Copy DateTimeDigitized to DateTimeOriginal if it is empty
+  if (
+    fromDigitized &&
+    fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY] &&
+    !fileDates[HUMAN_DATE_TIME_ORIGINAL_PROPERTY]
+  ) {
+    return setDates(
+      fileDates[HUMAN_DATE_TIME_DIGITIZED_PROPERTY],
+      HUMAN_DATE_TIME_DIGITIZED_PROPERTY,
+      {}
+    );
   }
 
   tracer.debug(`${fileName}: No date was found to set`);

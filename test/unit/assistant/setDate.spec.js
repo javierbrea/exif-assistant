@@ -343,6 +343,22 @@ describe("setDate", () => {
 
   describe("when file has only DateTimeDigitized", () => {
     describe("when no fromDigitized option is provided", () => {
+      it("should not add DateTimeOriginal from DateTimeDigitized if date is found in file", async () => {
+        const fileName = "sphinx-no-date-original.jpg";
+        const newFileName = "2022-02-15.jpg";
+        await copyAssetToTempPath(fileName, newFileName);
+        const result = await expectModifiedDate({
+          inputPath: TEMP_PATH,
+          fileName: newFileName,
+          setDateOptions: {},
+          newDateExpected: "2022:02:15 00:00:00",
+          expectedLog: "from file name",
+        });
+        expect(result.totals.before.withDate).toEqual(0);
+        expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.modified).toEqual(1);
+      });
+
       it("should add DateTimeOriginal from DateTimeDigitized and return report", async () => {
         const fileName = "sphinx-no-date-original.jpg";
         const { metadata } = assetData(fileName);
@@ -410,6 +426,22 @@ describe("setDate", () => {
         expect(result.totals.after.withDate).toEqual(1);
         expect(result.totals.after.modified).toEqual(1);
       });
+    });
+  });
+
+  describe("when file has both DateTimeDigitized and DateTimeOriginal", () => {
+    it("should not add DateTimeOriginal from DateTimeDigitized", async () => {
+      const spy = spyTracer("debug");
+      const fileName = "caryatids.jpeg";
+      await copyAssetToTempPath(fileName);
+      const fileOrigin = tempPath(fileName);
+      const result = await setDate(fileOrigin, {
+        modify: true,
+      });
+      expectLog(`No date was found to set`, spy);
+      expect(result.totals.before.withDate).toEqual(1);
+      expect(result.totals.after.withDate).toEqual(1);
+      expect(result.totals.after.modified).toEqual(0);
     });
   });
 
@@ -538,7 +570,7 @@ describe("setDate", () => {
     });
   });
 
-  describe("when is not supported", () => {
+  describe("when it is not supported", () => {
     describe("when copyIfNotModified option is true", () => {
       it("should copy the file if outputFolder is not the same in which the file is", async () => {
         const spy = spyTracer("debug");
@@ -674,6 +706,100 @@ describe("setDate", () => {
         });
         expect(result.totals.before.withDate).toEqual(0);
         expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.modified).toEqual(1);
+        expect(result.totals.before.path).toEqual(result.totals.after.path);
+      });
+    });
+
+    describe("when modifyTime option is not provided", () => {
+      it("should add date to exif, setting time to first day second if file name has not time info", async () => {
+        const fileName = "caryatids.jpeg";
+        const newFileName = "2012-02-15.jpg";
+        const date = "2012:02:15 00:00:00";
+        await copyAssetToTempPath(fileName, newFileName);
+
+        const result = await expectModifiedDate({
+          inputPath: TEMP_PATH,
+          fileName: newFileName,
+          newDateExpected: date,
+          dateTimeDigitedExpected: date,
+          setDateOptions: {
+            modify: true,
+          },
+          expectedLog: "from file name",
+        });
+        expect(result.totals.before.withDate).toEqual(1);
+        expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.modified).toEqual(1);
+      });
+
+      it("should add date to exif, setting time from file name info", async () => {
+        const fileName = "caryatids.jpeg";
+        const newFileName = "2012-02-15_15-23-54.jpg";
+        const date = "2012:02:15 15:23:54";
+        await copyAssetToTempPath(fileName, newFileName);
+
+        const result = await expectModifiedDate({
+          inputPath: TEMP_PATH,
+          fileName: newFileName,
+          newDateExpected: date,
+          dateTimeDigitedExpected: date,
+          setDateOptions: {
+            modify: true,
+            dateFormats: "yyyy-MM-dd_HH-mm-ss",
+          },
+          expectedLog: "from file name",
+        });
+        expect(result.totals.before.withDate).toEqual(1);
+        expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.modified).toEqual(1);
+      });
+    });
+
+    describe("when modifyTime option is false", () => {
+      it("should add date to exif, but keeping old time", async () => {
+        const fileName = "caryatids.jpeg";
+        const newFileName = "2012-02-15.jpg";
+        const date = "2012:02:15 10:24:14";
+        await copyAssetToTempPath(fileName, newFileName);
+
+        const result = await expectModifiedDate({
+          inputPath: TEMP_PATH,
+          fileName: newFileName,
+          newDateExpected: date,
+          dateTimeDigitedExpected: date,
+          setDateOptions: {
+            modify: true,
+            modifyTime: false,
+          },
+          expectedLog: "from file name",
+        });
+        expect(result.totals.before.withDate).toEqual(1);
+        expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.modified).toEqual(1);
+      });
+    });
+
+    describe("When dryRun option is provided", () => {
+      it("should only report modifications withour modifying original file", async () => {
+        const spy = spyTracer("debug");
+        const fileName = "gorilla.JPG";
+        const newFileName = "2013-10-23.jpg";
+        await copyAssetToTempPath(fileName, newFileName);
+        const fileOrigin = tempPath(newFileName);
+
+        const result = await setDate(fileOrigin, {
+          dryRun: true,
+        });
+
+        expectLog(
+          `2013-10-23.jpg: Setting DateTimeOriginal and DateTimeDigitized to 2013-10-23 00:00:00, from file name`,
+          spy
+        );
+        expect(result.totals.before.withDate).toEqual(0);
+        expect(result.totals.after.withDate).toEqual(1);
+        expect(result.totals.after.copied).toEqual(0);
+        expect(result.totals.after.moved).toEqual(0);
         expect(result.totals.after.modified).toEqual(1);
         expect(result.totals.before.path).toEqual(result.totals.after.path);
       });
