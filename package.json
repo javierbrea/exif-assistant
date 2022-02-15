@@ -63,7 +63,7 @@
     "jest": "27.5.1",
     "lint-staged": "12.1.2",
     "prettier": "2.5.1",
-    "sharp": "0.29.3",
+    "sharp": "0.30.1",
     "sinon": "11.1.2",
     "tree-kill": "1.2.2"
   },
