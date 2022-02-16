@@ -46,7 +46,7 @@
     "inquirer": "8.2.0",
     "piexifjs": "1.0.6",
     "update-notifier": "5.1.0",
-    "winston": "3.3.3"
+    "winston": "3.6.0"
   },
   "devDependencies": {
     "cross-spawn": "7.0.3",
