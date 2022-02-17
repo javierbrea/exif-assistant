@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Breaking changes
 
+## [1.0.0]
+
+### Added
+- feat: Add `--no-modifyDay` option, allowing to modify date but keeping original day
+
+### Changed
+- chore(deps): Update dependencies
+
 ## [1.0.0-beta.4]
 
 ### Added

@@ -68,6 +68,7 @@ Dates found could be partial depending on the provided `dateFormat` option (for 
 | `--dryRun` | `false` | Print report only. Do not modify any file | `--dryRun` |
 | `-m, --modify` | `false` | Modify existing dates. By default, the program don't modify files already having `DateTimeOriginal` | `--modify` |
 | `--no-modifyTime` | `false` | Modify dates but keep original time information when present. It has no effect if `modify` is `false` | `--no-modifyTime` |
+| `--no-modifyDay` | `false` | Modify dates but keep original day when present. It has no effect if `modify` is `false` | `--no-modifyDay` |
 | `--no-setDigitized` | `false` | Do not set also `DateTimeDigitized` property. By default the program fills both `DateTimeOriginal` and `DateTimeDigitized` properties. This option disables that feature | `--no-setDigitized` |
 | `-o, --outputFolder` | - | Write modified images to this folder instead of modifying original ones. The original folder tree is recreated | `--outputFolder ./modified-photos` |
 | `-c, --copyAll` | `false` | Copy all files `outputFolder`, not only those being modified | `--copyAll` |

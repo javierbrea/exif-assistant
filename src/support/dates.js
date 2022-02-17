@@ -10,6 +10,8 @@ const {
   setSeconds,
   setHours,
   setMinutes,
+  setDate,
+  getDate,
 } = require("date-fns");
 
 const { isArray, isEmpty } = require("./utils");
@@ -67,7 +69,7 @@ function findDateStringUsingRegexs(string, dateRegexs = []) {
   return firstMatch || string;
 }
 
-function getTimeInfoFromExifDate(dateString) {
+function getDateInfoFromExifDate(dateString) {
   if (!dateString) {
     return null;
   }
@@ -76,16 +78,21 @@ function getTimeInfoFromExifDate(dateString) {
     hours: getHours(date),
     minutes: getMinutes(date),
     seconds: getSeconds(date),
+    day: getDate(date),
   };
 }
 
-function modifyTimeToExifDate(dateString, timeInfo) {
+function modifyTimeToExifDate(dateString, dateInfo) {
   return exifStringFromDate(
     setHours(
-      setMinutes(setSeconds(dateFromExifString(dateString), timeInfo.seconds), timeInfo.minutes),
-      timeInfo.hours
+      setMinutes(setSeconds(dateFromExifString(dateString), dateInfo.seconds), dateInfo.minutes),
+      dateInfo.hours
     )
   );
+}
+
+function modifyDayToExifDate(dateString, dateInfo) {
+  return exifStringFromDate(setDate(dateFromExifString(dateString), dateInfo.day));
 }
 
 module.exports = {
@@ -94,6 +101,7 @@ module.exports = {
   formatForLogsFromExif,
   isValidDate,
   findDateStringUsingRegexs,
-  getTimeInfoFromExifDate,
+  getDateInfoFromExifDate,
   modifyTimeToExifDate,
+  modifyDayToExifDate,
 };

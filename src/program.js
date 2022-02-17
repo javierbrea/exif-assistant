@@ -57,6 +57,7 @@ program
   .option("--dryRun", "Print report only. Do not modify any file", false)
   .option("-m, --modify", "Modify existing dates", false)
   .option("--no-modifyTime", "Do not modify time information when present")
+  .option("--no-modifyDay", "Do not modify day information when present")
   .option("--no-setDigitized", "Do not set DateTimeDigitized exif property")
   .option("-o, --outputFolder <outputFolder>", "Output folder")
   .option("-c, --copyAll", "Copy also unsupported and not modified files to outputFolder", false)

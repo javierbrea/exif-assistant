@@ -779,30 +779,79 @@ describe("setDate", () => {
         expect(result.totals.after.modified).toEqual(1);
       });
     });
+  });
 
-    describe("When dryRun option is provided", () => {
-      it("should only report modifications withour modifying original file", async () => {
-        const spy = spyTracer("debug");
-        const fileName = "gorilla.JPG";
-        const newFileName = "2013-10-23.jpg";
-        await copyAssetToTempPath(fileName, newFileName);
-        const fileOrigin = tempPath(newFileName);
+  describe("when modifyDay option is false", () => {
+    it("should add date to exif, but keeping old day and time", async () => {
+      const fileName = "caryatids.jpeg";
+      const newFileName = "2012-02-15.jpg";
+      // date in file: 2021:09:21 10:24:14
+      const date = "2012:02:21 00:00:00";
+      await copyAssetToTempPath(fileName, newFileName);
 
-        const result = await setDate(fileOrigin, {
-          dryRun: true,
-        });
-
-        expectLog(
-          `2013-10-23.jpg: Setting DateTimeOriginal and DateTimeDigitized to 2013-10-23 00:00:00, from file name`,
-          spy
-        );
-        expect(result.totals.before.withDate).toEqual(0);
-        expect(result.totals.after.withDate).toEqual(1);
-        expect(result.totals.after.copied).toEqual(0);
-        expect(result.totals.after.moved).toEqual(0);
-        expect(result.totals.after.modified).toEqual(1);
-        expect(result.totals.before.path).toEqual(result.totals.after.path);
+      const result = await expectModifiedDate({
+        inputPath: TEMP_PATH,
+        fileName: newFileName,
+        newDateExpected: date,
+        dateTimeDigitedExpected: date,
+        setDateOptions: {
+          modify: true,
+          modifyDay: false,
+        },
+        expectedLog: "from file name",
       });
+      expect(result.totals.before.withDate).toEqual(1);
+      expect(result.totals.after.withDate).toEqual(1);
+      expect(result.totals.after.modified).toEqual(1);
+    });
+
+    it("and modifyTime is false, should add date to exif, but keeping old day and time", async () => {
+      const fileName = "caryatids.jpeg";
+      const newFileName = "2012-02-15.jpg";
+      // date in file: 2021:09:21 10:24:14
+      const date = "2012:02:21 10:24:14";
+      await copyAssetToTempPath(fileName, newFileName);
+
+      const result = await expectModifiedDate({
+        inputPath: TEMP_PATH,
+        fileName: newFileName,
+        newDateExpected: date,
+        dateTimeDigitedExpected: date,
+        setDateOptions: {
+          modify: true,
+          modifyTime: false,
+          modifyDay: false,
+        },
+        expectedLog: "from file name",
+      });
+      expect(result.totals.before.withDate).toEqual(1);
+      expect(result.totals.after.withDate).toEqual(1);
+      expect(result.totals.after.modified).toEqual(1);
+    });
+  });
+
+  describe("When dryRun option is provided", () => {
+    it("should only report modifications withour modifying original file", async () => {
+      const spy = spyTracer("debug");
+      const fileName = "gorilla.JPG";
+      const newFileName = "2013-10-23.jpg";
+      await copyAssetToTempPath(fileName, newFileName);
+      const fileOrigin = tempPath(newFileName);
+
+      const result = await setDate(fileOrigin, {
+        dryRun: true,
+      });
+
+      expectLog(
+        `2013-10-23.jpg: Setting DateTimeOriginal and DateTimeDigitized to 2013-10-23 00:00:00, from file name`,
+        spy
+      );
+      expect(result.totals.before.withDate).toEqual(0);
+      expect(result.totals.after.withDate).toEqual(1);
+      expect(result.totals.after.copied).toEqual(0);
+      expect(result.totals.after.moved).toEqual(0);
+      expect(result.totals.after.modified).toEqual(1);
+      expect(result.totals.before.path).toEqual(result.totals.after.path);
     });
   });
 
