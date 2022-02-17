@@ -12,8 +12,9 @@ const {
   dateFromString,
   formatForLogsFromExif,
   findDateStringUsingRegexs,
-  getTimeInfoFromExifDate,
+  getDateInfoFromExifDate,
   modifyTimeToExifDate,
+  modifyDayToExifDate,
 } = require("../support/dates");
 const {
   moveOrCopyFileToSubfolder,
@@ -121,17 +122,24 @@ function SetDates({
   dryRun,
   handleUnresolved,
   modifyTime,
+  modifyDay,
 }) {
   const traceSetDate = TraceSetDate({ fileName, setDigitized });
   return async function (date, from, datesFromFile) {
     let dateToSet = date;
-    const timeInfoFromFileDates = getTimeInfoFromExifDate(
+    const dateInfoFromFileDates = getDateInfoFromExifDate(
       datesFromFile[HUMAN_DATE_TIME_ORIGINAL_PROPERTY] ||
         datesFromFile[HUMAN_DATE_TIME_DIGITIZED_PROPERTY]
     );
 
-    if (!modifyTime && !!timeInfoFromFileDates) {
-      dateToSet = modifyTimeToExifDate(dateToSet, timeInfoFromFileDates);
+    if (!!dateInfoFromFileDates) {
+      if (!modifyTime) {
+        dateToSet = modifyTimeToExifDate(dateToSet, dateInfoFromFileDates);
+      }
+
+      if (!modifyDay) {
+        dateToSet = modifyDayToExifDate(dateToSet, dateInfoFromFileDates);
+      }
     }
 
     const datesToSet = {
@@ -259,6 +267,7 @@ async function setDateToFile(
     dateFallback,
     modify = false,
     modifyTime = true,
+    modifyDay = true,
     fromDigitized = true,
     fromFileName = true,
     fromDateCandidates = true,
@@ -315,6 +324,7 @@ async function setDateToFile(
     dryRun,
     handleUnresolved,
     modifyTime,
+    modifyDay,
   });
   const skipOrGetFileDates = SkipOrGetFileDates({
     handleUnresolved,
