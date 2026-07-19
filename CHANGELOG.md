@@ -4,12 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-### Added
-### Changed
-### Fixed
-### Removed
-### Breaking changes
+> [!WARNING]
+> **Project discontinued**
+>
+> This project is no longer maintained and has been archived.
+> It will not receive new features, bug fixes, or security updates.
 
 ## [1.0.0]
 

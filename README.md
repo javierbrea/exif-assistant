@@ -92,11 +92,6 @@ This package depends on next packages for some important internal core features:
 * [`piexifjs`](https://github.com/hMatoba/piexifjs) - Used internally to read and write Exif data from/to image files.
 * [`date-fns`](https://github.com/date-fns/date-fns) - Used internally to convert, calculate and parse dates.
 
-## Contributing
-
-Contributors are welcome.
-Please read the [contributing guidelines](.github/CONTRIBUTING.md) and [code of conduct](.github/CODE_OF_CONDUCT.md).
-
 ## License
 
 MIT, see [LICENSE](./LICENSE) for details.

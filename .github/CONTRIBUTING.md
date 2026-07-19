@@ -1,3 +1,9 @@
+> [!WARNING]
+> **Project discontinued**
+>
+> This project is no longer maintained and has been archived.
+> It will not receive new features, bug fixes, or security updates.
+
 # Contributing
 
 First off, thanks for taking the time to contribute!
